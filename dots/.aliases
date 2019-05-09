@@ -1,0 +1,68 @@
+alias c='clear'
+alias .='pwd'
+alias ..='cd ..'
+alias ...='cd ../../'
+alias ....='cd ../../../'
+alias path='echo $PATH | tr -s ":" "\n"'
+
+alias aliases="alias | sed 's/=.*//'"
+alias functions="declare -f | grep '^[a-z].* ()' | sed 's/{$//'"
+
+
+alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
+alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
+
+alias rmds="find . -type f -name '*.DS_Store' -ls -delete"
+
+alias flushdns='sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder;echo "✌️ DNS flushed"'
+alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
+alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
+
+alias cat='bat'
+
+alias shrug='echo '\''¯\_(ツ)_/¯'\'' | pbcopy'
+
+alias week='date +%V'
+
+
+
+# Kill all the tabs in Chrome to free up memory
+# [C] explained: http://www.commandlinefu.com/commands/view/402/exclude-grep-from-your-grepped-output-of-ps-alias-included-in-description
+alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v extension-process | tr -s ' ' | cut -d ' ' -f2 | xargs kill"
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload="exec ${SHELL} -l"
+
+# Print each PATH entry on a separate line
+alias path='echo -e ${PATH//:/\\n}'
+
+alias st='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl --new-window $@'
+
+alias vagrant-fix="sudo /Library/Application\ Support/VirtualBox/LaunchDaemons/VirtualBoxStartup.sh restart"
+
+#alias bastion='ssh -f -N bastion'
+
+alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
+
+alias drush8='~/drush8/vendor/bin/drush'
+alias drush9='~/drush9/vendor/bin/drush'
+
+
+
+
+alias recent-branches="!git for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
+
+#git config --global alias.recent-branches "! git for-each-ref --sort=-committerdate --count=15 --format='%(authorname),%(color:bold yellow)%(refname:short)%(color:reset) (%(color:bold magenta)%(committerdate:relative)%(color:reset)) %(color:cyan)%(objectname:short)%(color:reset) - %(color:dim white)%(contents:subject)%(color:reset)' refs/heads/ | grep ^Travis | cut -d, -f2-"
+
+
+alias d8upgrade='composer update drupal/core webflo/drupal-core-require-dev "symfony/*" --with-dependencies'
+
+# Quick-Drupal install
+# By default this function installs the demo_umami profile but you can pass any
+# core profile you like as an arguement
+# Example: quickdrupal standard
+function quickdrupal() {
+  PROFILE=${1:-demo_umami}
+  mkdir quickdrupal && cd quickdrupal && curl -sSL https://www.drupal.org/download-latest/tar.gz | tar -xz --strip-components=1
+  php core/scripts/drupal quick-start $PROFILE
+}
