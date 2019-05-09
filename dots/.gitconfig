@@ -1,0 +1,244 @@
+[user]
+	name = Lindsey Catlett
+	email = lindsey.catlett@gmail.com
+[github]
+  # https://github.com/blog/180-local-github-config
+  user = lcatlett
+[color]
+# ui = true is a superset of all the more specific color options
+#  as documented at http://book.git-scm.com/5_customizing_git.html
+# When set to always, always use colors in all git commands which are capable of colored output.
+# When false, never. When set to true or auto, use colors only when the output is to the terminal.
+# When more specific variables of color.* are set, they always take precedence over this setting.
+# Defaults to false.
+  ui = auto
+  # diff = auto
+  # status = auto
+  # branch = auto
+
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+[color "status"]
+  added = yellow
+  changed = green
+  untracked = cyan
+
+[advice]
+  statusHints = false
+
+[gui]
+  fontdiff = -family Monaco -size 10 -weight normal -slant roman -underline 0 -overstrike 0
+
+[core]
+	excludesfile = /Users/lindsey.catlett/.gitignore
+  quotepath = false
+  # line endings
+  # force LF during add
+  autocrlf = input
+  # autocrlf = true # for windows to convert to CRLF on checkout and LF on add
+  # warn but allow line ending conversion to proceed
+  safecrlf = warn
+  # prevent crlf (then you will have to deal with the problem -- dos2unix, etc)
+  #safecrlf = true
+  editor = vim
+  #editor = subl -w
+
+[alias]
+  # most commonly used
+  co = checkout
+  d = diff --color-words
+  cam = commit -a -m
+  upm = !git fetch upstream && git merge upstream/master
+
+  # least used
+  br = branch -a
+  s = status -s -u
+
+  dh = diff HEAD
+  dc = diff --staged
+  dw = diff --word-diff
+  dcw = diff --color-words
+
+  who = shortlog -s --
+  st = status
+  l = log --stat -C
+  servehere = daemon --verbose --informative-errors --reuseaddr --export-all --base-path=. --enable=receive-pack
+  nuke = !git clean -fd && git reset --hard
+  ri = rebase --interactive --autosquash
+  lol = log --pretty=oneline --graph --abbrev-commit --all
+  listunstaged = diff --name-status
+  liststaged = diff --name-status --staged
+  listhistory = log --name-status
+  logn = log --oneline --name-only
+  busypeople = shortlog -6
+  busythisweek = shortlog --since=one.week.ago
+
+
+
+    whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+    whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+    # whereis = "git log | git name-rev --stdin"
+
+    human = name-rev --name-only --refs=refs/heads/*
+    snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+
+     # List branches according to you most recent checkouts.
+    recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
+
+    publish = !BRANCH=$(git branch | grep \\* | awk '{print $2}') && git push -u origin $BRANCH
+
+    # blame
+    wtf = blame
+
+    # other
+    undo = reset --soft HEAD^
+    prune = !git fetch -p && git remote prune origin
+
+    # config
+    conf = config
+    lconf = config --local
+
+    # clean git repo
+    current = !set -x && git pull && git fetch -p && git remote prune origin && git dm
+    latest = !set -x && git pull && git fetch -p && git fetch --tags && git remote prune origin && git dm
+
+    # map typos
+    remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
+
+    # list tags version sorted
+    tags = "!f() { git tag | sort --version-sort; }; f"
+
+    # Switch to a branch, creating it if necessary
+    go = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
+
+    # Find branches containing commit
+    fb = "!f() { git branch -a --contains $1; }; f"
+
+    # Find tags containing commit
+    ft = "!f() { git describe --always --contains $1; }; f"
+
+    # Find commits by source code
+    fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+
+    # Find commits by commit message
+    fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+
+    # Remove branches that have already been merged with master
+    # a.k.a. ‘delete merged’
+    dm = "!git branch --merged | grep -v '\\*\\|master\\|develop' | xargs -n 1 git branch -d"
+
+    # View the current working tree status using the short format
+    s = status -s
+
+    # Show the diff between the latest commit and the current state
+    d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+
+    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+    di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+
+    # Pull in remote changes for the current repository and all its submodules
+    p = !"git pull; git submodule foreach git pull origin master"
+
+    # Clone a repository including all submodules
+    c = clone --recursive
+
+    # Temp ignore
+    temp-ignore = update-index --assume-unchanged
+    ti = update-index --assume-unchanged
+
+    # Temp ignore
+    unignore = update-index --no-assume-unchanged
+    uti = update-index --no-assume-unchanged
+
+    whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+    whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+    # whereis = "git log | git name-rev --stdin"
+
+    human = name-rev --name-only --refs=refs/heads/*
+    snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+
+
+
+        # Show unpushed/ahead changes
+    ahead = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline
+    # Show the diff of upushed/ahead changes
+    ahead-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH
+
+    # Show unpulled/behind
+    behind = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH --oneline
+
+    # Show diff of unpulled/behind changes
+    behind-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH
+
+        # Show the diff between the latest commit and the current state
+    d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+
+    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+    di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+
+    # Pull in remote changes for the current repository and all its submodules
+
+
+[format]
+    pretty = format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
+
+[diff]
+    # Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject
+    # instead of a/b/c/d as prefixes for patches
+    mnemonicprefix = true
+
+[help]
+    autocorrect = 0
+
+
+  #Update your local and replay your commits on upstream HEAD
+  pl = pull --rebase
+
+  # List aliases
+ aliases = config --get-regexp alias
+
+#Status
+  s = status
+
+#Undo your last commit
+  undo-commit = reset --soft HEAD~1
+
+#View a pretty formatted git log
+  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+
+#View a pretty extended format git log
+  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+
+#View the diff of the last commit
+  dlc = diff --cached HEAD^
+
+#Find a file path in codebase
+  f = "!git ls-files | grep -i"
+
+#List your available git config aliases
+  la = "!git config -l | grep alias | cut -c 7-"
+
+#Resolve merge conflict with file in the current working branch
+  ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+
+#Resolve merge conflict with file in the upstream repo
+ theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+
+
+recent-branches="for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
+
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[commit]
+	template = /Users/lindsey.catlett/.stCommitMsg

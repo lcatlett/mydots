@@ -1,0 +1,44 @@
+export EDITOR=vi
+
+
+# Add `~/bin` to the `$PATH`
+export PATH="$HOME/bin:$PATH";
+
+export NVM_DIR="$HOME/.nvm"
+
+
+
+LOCAL_BIN_EXPORT="$HOME/.local/bin"
+YARN_BIN_EXPORT="$HOME/.config/yarn/global/node_modules/.bin"
+COMPOSER_BIN_EXPORT="$HOME/.composer/vendor/bin"
+AHT_EXPORT="$HOME/Support-Tools/bin"
+SUPPORT_EXPORT="$HOME/support-cli"
+
+
+# Base PATH
+PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin
+
+# Conditional PATH additions
+for path_candidate in /opt/local/sbin \
+  $DOTFILES_EXPORT \
+  $YARN_BIN_EXPORT \
+  $LOCAL_BIN_EXPORT \
+  $LOCAL_SBIN_EXPORT \
+  $AHT_EXPORT \
+  $COMPOSER_BIN_EXPORT \
+  $YARN_BIN_EXPORT \
+  /opt/local/bin \
+  /usr/local/share/npm/bin \
+  /Users/lindsey.catlett/.cargo/bin \
+  ~/bin
+do
+  if [ -d ${path_candidate} ]; then
+    export PATH=${PATH}:${path_candidate}
+  fi
+done
+
+
+
+
+PATH="./vendor/bin:$PATH";
+export PATH="/usr/local/opt/curl/bin:$PATH"

@@ -1,0 +1,294 @@
+tap "azure/draft"
+tap "blackfireio/blackfire"
+tap "caskroom/cask"
+tap "caskroom/fonts"
+tap "caskroom/versions"
+tap "cjbassi/gotop"
+tap "crisidev/chunkwm"
+tap "drud/ddev"
+tap "homebrew/bundle"
+tap "homebrew/cask"
+tap "homebrew/cask-fonts"
+tap "homebrew/core"
+tap "homebrew/services"
+tap "humbug/box"
+tap "kabel/php-ext"
+tap "koekeishiya/formulae"
+tap "minio/stable"
+tap "phinze/cask"
+tap "talal/tap"
+# GNU internationalization (i18n) and localization (l10n) library
+brew "gettext"
+# SSL/TLS cryptography library
+brew "openssl"
+# Library for command-line editing
+brew "readline"
+# Command-line interface for SQLite
+brew "sqlite"
+# CSS parsing and manipulation toolkit for GNOME
+brew "libcroco"
+# Icons for the GNOME project
+brew "adwaita-icon-theme"
+# Unix utility for tracking down wasted disk space
+brew "agedu"
+# YAML Parser
+brew "libyaml"
+# Automate deployment, configuration, and upgrading
+brew "ansible"
+# Automatic configure script builder
+brew "autoconf"
+# Tool for generating GNU Standards-compliant Makefiles
+brew "automake"
+# Official Amazon AWS command-line interface
+brew "awscli"
+# GSettings schemas for desktop components
+brew "gsettings-desktop-schemas"
+# Toolkit for creating graphical user interfaces
+brew "gtk+3"
+# Gnome disk usage analyzer
+brew "baobab"
+# Programmable completion for Bash 3.2
+brew "bash-completion"
+# Clone of cat(1) with syntax highlighting and Git integration
+brew "bat"
+# High performance key/value database
+brew "berkeley-db"
+# Switch Apache / Valet / CLI configs between PHP versions
+brew "brew-php-switcher"
+# Alternative general-purpose HTTP/2 web server
+brew "caddy"
+# CD/DVD/Blu-ray premastering and recording software
+brew "cdrtools"
+# Cross-platform make
+brew "cmake"
+# Dependency Manager for PHP
+brew "composer", link: false
+# GNU File, Shell, and Text utilities
+brew "coreutils"
+# Configurable talking characters in ASCII art
+brew "cowsay"
+# Get, unpack, build, and install modules from CPAN
+brew "cpanminus"
+# Get a file from an HTTP, HTTPS or FTP server
+brew "curl"
+# Open source suite of directory software
+brew "openldap"
+# Minimal, fast alternative to 'du -sh'
+brew "diskus"
+# Tool for managing dock items
+brew "dockutil"
+# Convert text between DOS, UNIX, and Mac formats
+brew "dos2unix"
+# Multi-platform library for OpenGL applications
+brew "glfw"
+# Suite of tools for inspecting disk usage
+brew "duc"
+# Modern replacement for 'ls'
+brew "exa"
+# Simple, fast and user-friendly alternative to find
+brew "fd"
+# Identify or delete duplicate files
+brew "fdupes"
+# Libraries to talk to Microsoft SQL Server and Sybase databases
+brew "freetds"
+# Platform built on V8 to build network applications
+brew "node"
+# Command-line JSON processing tool
+brew "fx"
+# GNU awk utility
+brew "gawk"
+# Distributed revision control system
+brew "git"
+# Simple and efficient way to access statistics in git
+brew "git-quick-stats"
+# The official GitLab CI runner written in Go
+brew "gitlab-runner"
+# GNU version of the tar archiving utility
+brew "gnu-tar"
+# Open source programming language to build simple/reliable/efficient software
+brew "go"
+# GitHub Markdown previewer
+brew "grip"
+# GUI toolkit
+brew "gtk+"
+# GUI for rsync
+brew "grsync"
+# Convert source code to formatted text with syntax highlighting
+brew "highlight"
+# Apache HTTP server
+brew "httpd"
+# Add GitHub support to git on the command-line
+brew "hub"
+# Configurable static site generator
+brew "hugo"
+# Toolkit for embedding hypervisor capabilities in your application
+brew "hyperkit", link: false
+# Tools and libraries to manipulate images in many formats
+brew "imagemagick"
+# Lightweight and flexible command-line JSON processor
+brew "jq"
+# Like awk, but for JSON, using JavaScript objects and arrays
+brew "jsawk"
+# Kubernetes command-line interface
+brew "kubernetes-cli"
+# ELF object file access library
+brew "libelf"
+# RAD tool to help build GTK+ interfaces
+brew "libglade"
+# Conversion library
+brew "libiconv"
+# International domain name library (IDNA2008, Punycode and TR46)
+brew "libidn2"
+# X.509 and CMS library
+brew "libksba"
+# Implementation of the file(1) command
+brew "libmagic"
+# C XSLT library for GNOME
+brew "libxslt"
+# Package manager for the Lua programming language
+brew "luarocks"
+# Keep your Mac's application settings in sync
+brew "mackup"
+# Mac App Store command-line interface
+brew "mas"
+# Open source relational database management system
+brew "mysql@5.6", restart_service: true, link: true
+# NCurses Disk Usage
+brew "ncdu"
+# Port scanning utility for large networks
+brew "nmap"
+# Tiny, lightning fast, feature-packed file manager
+brew "nnn"
+# Tools and libraries for smart cards
+brew "opensc"
+# netcat on steroids
+brew "socat"
+# OpenShift command-line interface tools
+brew "openshift-cli"
+# Cryptography and SSL/TLS Toolkit
+brew "openssl@1.1"
+# ISO-C API and CLI for generating UUIDs
+brew "ossp-uuid"
+# Shell command parallelization utility
+brew "parallel"
+# Efficient rsh-like utility, for using hosts in parallel
+brew "pdsh"
+# General-purpose scripting language
+brew "php", link: false
+# General-purpose scripting language
+brew "php@7.1"
+# General-purpose scripting language
+brew "php@7.2", restart_service: true, link: true
+# Manage compile and link flags for libraries
+brew "pkg-config"
+# Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
+brew "prettier"
+# Interpreted, interactive, object-oriented programming language
+brew "python@2"
+# Parallel versions of OpenSSH and related tools
+brew "pssh"
+# Monitor data's progress through a pipe
+brew "pv"
+# Find duplicate files based on content (NOT file names)
+brew "rdfind"
+# Extremely fast tool to remove dupes and other lint from your filesystem
+brew "rmlint"
+# Zstandard is a real-time compression algorithm
+brew "zstd"
+# Standard unix software packaging tool
+brew "rpm"
+# Tool to convert RPM package to CPIO archive
+brew "rpm2cpio"
+# Utility that provides fast incremental file transfer
+brew "rsync"
+# Safe, concurrent, practical language
+brew "rust"
+# Substitute for classic 'make' tool with autoconf/automake functionality
+brew "scons"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Add a public key to a remote machine's authorized_keys file
+brew "ssh-copy-id"
+# File system client based on SSH File Transfer Protocol
+brew "sshfs"
+# Manipulate and query tags on Mavericks files
+brew "tag"
+# Programatically correct mistyped console commands
+brew "thefuck"
+# Framework for scalable cross-language services development
+brew "thrift"
+# Anonymizing overlay network for TCP
+brew "tor"
+# Display directories as trees (with optional color/HTML output)
+brew "tree"
+# File synchronization tool for OSX
+brew "unison"
+# Executes a program periodically, showing output fullscreen
+brew "watch"
+# Internet file retriever
+brew "wget"
+# VNC server for real X displays
+brew "x11vnc"
+# Lightweight macOS virtualization solution based on FreeBSD's bhyve
+brew "xhyve", args: ["HEAD"]
+# Tool for managing your YubiKey configuration
+brew "ykman"
+# UNIX shell (command interpreter)
+brew "zsh"
+# Additional completion definitions for zsh
+brew "zsh-completions"
+brew "blackfireio/blackfire/blackfire-agent"
+brew "blackfireio/blackfire/blackfire-php71"
+# ddev: a local development environment management system
+brew "drud/ddev/ddev"
+# 📦🚀 Fast, zero config application bundler with PHARs.
+brew "humbug/box/box"
+# ls, cp, mkdir, diff and rsync for filesystems and object storage
+brew "minio/stable/mc"
+# A fast and minimal prompt for Bash and Zsh
+brew "talal/tap/mimir"
+cask "font-hack-nerd-font"
+cask "font-source-code-pro"
+cask "phinze/cask/1password"
+cask "phinze/cask/aerial"
+cask "phinze/cask/calibre"
+cask "phinze/cask/discord"
+cask "phinze/cask/google-backup-and-sync"
+cask "phinze/cask/minishift"
+cask "phinze/cask/osxfuse"
+cask "phinze/cask/qlcolorcode"
+cask "phinze/cask/qlmarkdown"
+cask "phinze/cask/qlstephen"
+cask "phinze/cask/qlvideo"
+cask "phinze/cask/quicklook-json"
+cask "phinze/cask/quicklookase"
+cask "phinze/cask/suspicious-package"
+cask "phinze/cask/upterm"
+cask "phinze/cask/webpquicklook"
+cask "phinze/cask/xquartz"
+mas "73UVK6498D", id: 852692251
+mas "at.eggerapps.tabletool", id: 1122008420
+mas "com.alfredapp.Alfred", id: 405843582
+mas "com.autreplanete.OpenInTerminal", id: 452968973
+mas "com.cf.cartg", id: 905264208
+mas "com.codinnstudio.sshcopy", id: 823961613
+mas "com.evernote.Evernote", id: 406056744
+mas "com.fiplab.diskaid", id: 1007358832
+mas "com.fiplab.diskmap", id: 715464874
+mas "com.fiplab.drivemanager", id: 952741486
+mas "com.irradiatedsoftware.Cinch", id: 412529613
+mas "com.LespaceVision.RapidList", id: 1069704725
+mas "com.moonapps.alarm", id: 1091149644
+mas "com.moonapps.diskzilla", id: 1183281977
+mas "com.naarak.DiskXray", id: 943405146
+mas "com.panic.transmit.mas", id: 1436522307
+mas "com.pcvark.Disk-Cleaner", id: 1001955632
+mas "com.rockysandstudio.Memory-Diag", id: 748212890
+mas "com.systweak.Disk-Analyzer-Pro", id: 951695736
+mas "com.tinyspeck.slackmacgap", id: 803453959
+mas "Keynote", id: 409183694
+mas "net.xmind.Puff-macOS", id: 1447226117
+mas "Network Kit X", id: 979299240
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
+mas "sFTP Client", id: 1201717048
