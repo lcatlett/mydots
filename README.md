@@ -7,14 +7,13 @@ Contains:
   1. [System defaults](https://github.com/lcatlett/mydots/blob/master/macos/defaults.sh) and [Dock icons setup](https://github.com/lcatlett/mydots/blob/master/macos/dock.sh)
   2. [Git config with aliases](https://github.com/lcatlett/mydots/blob/master/dots/.gitconfig), [Git global ignore](https://github.com/lcatlett/mydots/blob/master/dots/.gitignore_global)
   3. [Global aliases](https://github.com/lcatlett/mydots/blob/master/dots/.aliases)
-  4. [Functions](https://github.com/lcatlett/mydots/blob/master/dots/.functions), colored `man` page, `mk` for making folder and entering it, `extract` to extract any compressed file, `e` to read .env file variables in `pwd`, `sphp` to switch php versions using brew-php-switcher with skip for apache
-  5. Custom [/etc/hosts](https://github.com/lcatlett/mydots/blob/master/etc/hosts) file with blocked Ads, Trackers & 🔥 stuff on internet
-  6. `Hack` font used in iTerm2
-  7. iTerm2 profile
-  8. `ssh-manager` command to manage ssh config hosts and keys, including copy public keys to clipboard, transfer to server and more with autocomplete
-  9. Packages / CLI (brew, brew cask, dockutil, htop, iftop, openssl, composer, nmap, php70, php71, php72, brew-php-switcher, git, nvm with node/npm (node 6.2 with latest working npm, LTS node with latest working npm), python3, thefuck, wget, yarn, zsh, zsh-completions)
-  10. Applications (alfred, google-chrome, slack, spotify, sublime-text, vlc, phpstorm, sequel-pro, postman, iterm2, dashlane)
-  11. `dotfiles` binary to manage dotfiles functions with autocomplete
+  4. [Functions](https://github.com/lcatlett/mydots/blob/master/dots/.functions), `extract` extracts any compressed file,  `trash` moves a file to the MacOS trash, `my_ps` lists processes owned by a user, `loc` counts lines of code in the current directory, taking file extension as argument, `ram` to get the total ram consumed by an application, `quickdrupal` create and install a drupal 8 site of the latest stable release using the demo_umami profile.
+  5. `Hack` font used in iTerm2
+  6. iTerm2 profile
+  7. `ssh-manager` command to manage ssh config hosts and keys, including copy public keys to clipboard, transfer to server and more with autocomplete
+  8. Packages / CLI (brew, brew cask, dockutil, htop, iftop, openssl, composer, nmap, php70, php71, php72, brew-php-switcher, git, nvm with node/npm (node 6.2 with latest working npm, LTS node with latest working npm), python3, thefuck, wget, yarn, zsh, zsh-completions)
+  9.  Applications (alfred, google-chrome, slack, spotify, sublime-text, vscode, sequel-pro, postman, iterm2, dashlane)
+  10. `dotfiles` binary to manage dotfiles functions with autocomplete
 
 ## Install on a Fresh macOS Setup
 
