@@ -1,7 +1,7 @@
 # Dotfiles
 Dotfiles I use with MacOS Xenial mostly for PHP Web Development.
 
-![iTerm2.app](https://raw.github.com/lcatlett/mydots/master/screenshot.png)
+![iTerm2.app](https://raw.githubusercontent.com/lcatlett/mydots/master/screenshot.png)
 
 Contains:
   1. [System defaults](https://github.com/lcatlett/mydots/blob/master/macos/defaults.sh) and [Dock icons setup](https://github.com/lcatlett/mydots/blob/master/macos/dock.sh)
