@@ -1,0 +1,219 @@
+#!/bin/sh
+# Show disk usage in specified or current folder
+# Usage: dusage -args -folder
+# Static variables
+RED='\033[0;31m'
+NC='\033[0m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+# Functions:
+
+sprint(){
+	echo ""
+	echo "It is ${YELLOW}highly recommended${NC} to you to use this program as ${CYAN}\"sudo\" or SuperUser${NC} in order to list and see all files in your folders. Anyway, this program perfectly runs without admin permissions"
+	echo ""
+}
+
+terms_of_service(){
+	echo "dusage  Copyright (C) 2017  Javinator_9889"
+	echo "   This program comes with ABSOLUTELY NO WARRANTY; for details click link below"
+    echo "This is free software, and you are welcome to redistribute it"
+    echo "under certain conditions."
+    echo "${CYAN}For more information, please click link below: ${NC}"
+    echo https://goo.gl/nAjgpH
+}
+
+help(){
+	echo "Usage: \"dusage [OPTIONAL](-r | --reverse; -d | --directory + PATH; -f | --file; -h | --help; -tos | --Terms)\""
+	echo "${RED}-r \t| --reverse: \t${NC}${YELLOW}show files in decreasing order"
+	echo "${RED}-d \t| --directory: \t${NC}${YELLOW}show used space in specified directory"
+	echo "${RED}-f \t| --file: \t${NC}${YELLOW}show used space by files, not only parent folder"
+	echo "${RED}-h \t| --help: \t${NC}${YELLOW}show help${NC}"
+	echo "${RED}-tos \t| --Terms: \t${NC}${YELLOW}show Terms of Service${NC}"
+}
+
+standard(){
+	sprint
+	echo "${CYAN}Showing space usage in: $PWD${NC}"
+	echo ""
+	echo "+------+-----------+"
+	echo "| Size | Directory |"
+	echo "+------+-----------+"
+	du -s -h -x * | sort -h
+}
+
+reverse(){
+		sprint
+        echo "${CYAN}Showing space usage in: $PWD${NC}"
+        echo ""
+        echo "+------+-----------+"
+        echo "| Size | Directory |"
+        echo "+------+-----------+"
+        if $is_file; then
+        	find . -type f  -exec du -s -h -x {} + | sort -hr
+        else
+        	du -s -h -x * | sort -hr
+        fi
+}
+
+directory(){
+		sprint
+        echo "${CYAN}Showing space usage in: $cdirectory${NC}"
+        echo ""
+        echo "+------+-----------+"
+        echo "| Size | Directory |"
+        echo "+------+-----------+"
+        if $is_file && $is_rev; then
+        	find "$cdirectory"* -type f  -exec du -s -h -x {} + | sort -hr
+        elif  $is_file; then
+        	find "$cdirectory"* -type f  -exec du -s -h -x {} + | sort -h
+        elif $is_rev; then
+        	du -s -h "$cdirectory"* | sort -hr
+        else
+        	du -s -h "$cdirectory"* | sort -h
+        fi
+}
+
+files(){
+		sprint
+		echo "${CYAN}Showing space usage in: $PWD${NC}"
+        echo ""
+        echo "+------+-----------+"
+        echo "| Size | Directory |"
+        echo "+------+-----------+"
+        if $is_rev; then
+        	find . -type f  -exec du -s -h -x {} + | sort -hr
+        else
+        	find . -type f  -exec du -s -h -x {} + | sort -h
+        fi
+}
+
+# Main
+cdirectory=
+is_rev=false
+is_file=false
+is_dir=false
+case "$1" in
+  -d | --directory)	shift
+					cdirectory=$1
+					shift
+					case "$1" in
+					  -r | --reverse)	shift
+										is_rev=true
+										case "$1" in
+										  -f | --file)	shift
+														is_file=true
+														directory
+														;;
+										  "")			directory
+														;;
+										  *)			echo "${RED}NON-ADMITTED OPTION${NC}"
+														;;
+										esac
+										;;
+					  -f | --file)	shift
+									is_file=true
+									case "$1" in
+									  -r | --reverse)	shift
+														is_rev=true
+														directory
+														;;
+									  "")				directory
+														;;
+									  *)				echo "${RED}NON-ADMITTED OPTION${NC}"
+														;;
+									esac
+									;;
+					  "")			directory
+									;;
+					  *)			echo "${RED}NON-ADMITTED OPTION${NC}"
+									;;
+					esac
+					;;
+  -r | --reverse)	shift
+					is_rev=true
+					case "$1" in
+					  -d | --directory)	shift
+										is_dir=true
+										cdirectory=$1
+										shift
+										case "$1" in
+										  -f | --file)	shift
+														is_file=true
+														directory
+														;;
+										  "")			directory
+														;;
+										  *)			echo "${RED}NON-ADMITTED OPTION${NC}"
+														;;
+										esac
+										;;
+					  -f | --file)	shift
+									is_file=true
+									case "$1" in
+									  -d | --directory)	shift
+														is_dir=true
+														cdirectory=$1
+														directory
+														;;
+									  "")				reverse
+														;;
+									  *)				echo "${RED}NON-ADMITTED OPTION${NC}"
+														;;
+									esac
+									;;
+					  "")			reverse
+									;;
+					  *)			echo "${RED}NON-ADMITTED OPTION${NC}"
+									;;
+					esac
+					;;
+  -f | --files)		shift
+					is_file=true
+					case "$1" in
+					  -r | --reverse)	shift
+										is_rev=true
+										case "$1" in
+										  -d | --directory)	shift
+															is_dir=true
+															cdirectory=$1
+															directory
+															;;
+										  "")				files
+															;;
+										  *)				echo "${RED}NON-ADMITTED OPTION${NC}"
+															;;
+										esac
+										;;
+					  -d | --directory)	shift
+										is_dir=true
+										cdirectory=$1
+										shift
+										case "$1" in
+										  -r | --reverse)	shift
+															is_rev=true
+															directory
+															;;
+										  "")				directory
+															;;
+										  *)				echo "${RED}NON-ADMITTED OPTION${NC}"
+															;;
+										esac
+										;;
+					  "")				files
+										;;
+					  *)				echo "${RED}NON-ADMITTED OPTION${NC}"
+										;;
+					esac
+					;;
+  -h | --help)		shift
+					help
+					;;
+  -tos | --Terms)	terms_of_service
+					;;
+  "")				standard
+					;;
+  *)				echo "Type ${CYAN} \"dusage -h\"${NC} in order to get help and see how this program works"
+					;;
+esac

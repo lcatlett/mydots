@@ -1,136 +1,33 @@
-# Ignore configuration files that may contain sensitive information.
-local.settings.php
-local.drush.yml
-local.site.yml
-local.services.yml
-tests/behat/local.yml
-box/local.config.yml
-*.local
-local.blt.yml
+# To ignore OS temporary files use global .gitignore
+# https://help.github.com/articles/ignoring-files/#create-a-global-gitignore
 
-# Ignore drupal core.
-docroot/core
+# Ignore Drupal docroot, but preserve custom modules, themes and settings.
+docroot/*
+!docroot/sites/
+docroot/sites/*
+!docroot/modules/
+docroot/modules/*
+!docroot/modules/custom/
+!docroot/themes/
+docroot/themes/*
+!docroot/themes/custom/
+!docroot/profiles/
+docroot/profiles/*
+!docroot/profiles/custom/
+!docroot/sites/default/
+docroot/sites/default/*
+!docroot/sites/default/settings.php
+!docroot/sites/default/services.yml
 
-# Ignore paths that contain user-generated content.
-docroot/sites/*/files
-/files-private
-docroot/sites/*/private
 
-# Ignore contrib modules. These should be created during build process.
-docroot/modules/contrib
-docroot/themes/contrib
-docroot/profiles/contrib
-docroot/libraries
-drush/Commands
+# Ignore dependencies cache files.
+vendor
+node_modules
 
-# Ignore custom theme build artifacts
-docroot/themes/custom/*/node_modules
-docroot/themes/custom/*/css
-docroot/themes/custom/*/styleguide
+# Assets.
+docroot/themes/**/build
+screenshots
+.data
 
-# Ignore build artifacts
-deployment_identifier
-/deploy
-bin/*
-tmp
-reports
-
-# OS X
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Thumbnails
-._*
-
-# Files that might appear on external disk
-.Spotlight-V100
-.Trashes
-
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Eclipse
-*.pydevproject
-.project
-.metadata
-tmp/**
-tmp/**/*
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.classpath
-.settings/
-.loadpath
-
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpathk
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# User-specific stuff:
-.idea/
-
-#XHProf
-xhprof_*
-
-#Composer vendor
-vendor/
-vendor/.git
-
-#Sass
-.sass-cache
-*.css.map
-
-#Netbeans IDE
-nbproject
-nbproject/*
-
-# DrupalVM
-.vagrant/
-
-# DevDesktop
-*.dd
-
-#Exports
-*.gz
-*.sql
-*.zip
-
-# PHPStorm
-atlassian-ide-plugin.xml
-
-#NPM
-npm-debug.log
-
-# Drush 9 Checksums
-drush/sites/.checksums
-
-# Deprecation detector rules
-.rules
+.env.local
+docker-compose.override.yml
