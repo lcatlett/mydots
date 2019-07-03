@@ -1,5 +1,5 @@
 # Dotfiles
-Dotfiles I use with MacOS Xenial mostly for PHP Web Development.
+Dotfiles I use with MacOS Catalina mostly for PHP Web Development.
 
 ![iTerm2.app](https://raw.githubusercontent.com/lcatlett/mydots/master/screenshot.png)
 
