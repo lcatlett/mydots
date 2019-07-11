@@ -234,12 +234,6 @@ function blt() {
 }
 
 
-transfer() {
-    wget -t 1 -qO - --method=PUT --body-file="$1" --header="Content-Type: $(file -b --mime-type $1)" https://transfer.sh/$(basename $1);
-}
-
-alias transfer=transfer
-
 free-port() { kill "$(lsof -t -i :$1)"; }
 kill-port() { kill -kill "$(lsof -t -i :$1)"; }
 
