@@ -1,6 +1,6 @@
 [user]
 	name = Lindsey Catlett
-	email = lindsey.catlett@gmail.com
+	email = at62865@gmail.com
 [github]
   # https://github.com/blog/180-local-github-config
   user = lcatlett
@@ -37,7 +37,7 @@
   fontdiff = -family Monaco -size 10 -weight normal -slant roman -underline 0 -overstrike 0
 
 [core]
-	excludesfile = /Users/lindsey.catlett/.gitignore
+	excludesfile = /Users/at62865/.gitignore
   quotepath = false
   # line endings
   # force LF during add
@@ -241,4 +241,4 @@ recent-branches="for-each-ref --sort=-committerdate --count=10 --format='%(refna
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
 [commit]
-	template = /Users/lindsey.catlett/.stCommitMsg
+	template = /Users/at62865/.stCommitMsg

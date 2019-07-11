@@ -44,8 +44,6 @@ alias vagrant-fix="sudo /Library/Application\ Support/VirtualBox/LaunchDaemons/V
 
 alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
 
-alias drush8='~/drush8/vendor/bin/drush'
-alias drush9='~/drush9/vendor/bin/drush'
 
 
 

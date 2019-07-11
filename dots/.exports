@@ -11,8 +11,6 @@ export NVM_DIR="$HOME/.nvm"
 LOCAL_BIN_EXPORT="$HOME/.local/bin"
 YARN_BIN_EXPORT="$HOME/.config/yarn/global/node_modules/.bin"
 COMPOSER_BIN_EXPORT="$HOME/.composer/vendor/bin"
-AHT_EXPORT="$HOME/Support-Tools/bin"
-SUPPORT_EXPORT="$HOME/support-cli"
 
 
 # Base PATH
@@ -24,20 +22,16 @@ for path_candidate in /opt/local/sbin \
   $YARN_BIN_EXPORT \
   $LOCAL_BIN_EXPORT \
   $LOCAL_SBIN_EXPORT \
-  $AHT_EXPORT \
   $COMPOSER_BIN_EXPORT \
   $YARN_BIN_EXPORT \
   /opt/local/bin \
   /usr/local/share/npm/bin \
-  /Users/lindsey.catlett/.cargo/bin \
   ~/bin
 do
   if [ -d ${path_candidate} ]; then
     export PATH=${PATH}:${path_candidate}
   fi
 done
-
-
 
 
 PATH="./vendor/bin:$PATH";

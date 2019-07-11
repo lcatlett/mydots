@@ -10,7 +10,7 @@ done;
 unset file;
 
 # Path to your oh-my-zsh installation.
-export ZSH="/Users/lindsey.catlett/.oh-my-zsh"
+export ZSH="/Users/at62865/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -73,11 +73,6 @@ ZSH_THEME="punctual"
 
 plugins=(
 
-  osx
-  iterm2
-  alias-tips
-  robo
-  git-open
   zsh-syntax-highlighting
 
 )
@@ -119,7 +114,7 @@ setopt share_history
 #PUNCTUAL_SHOW_HOSTNAME=false;
 #PUNCTUAL_PROMPT="${PUNCTUAL_PROMPT:-❯}";
 autoload -U promptinit; promptinit
-prompt purer
+prompt purity
 #PURE_PROMPT_SYMBOL='%f%F{red}#%f %F{magenta}❯'
 
 
