@@ -1,9 +1,4 @@
-export AH_SSH_CONFIG="${HOME}/.ssh/ah_config"
 
-# include AH profile
-if [ -f ~/.ah_profile ]; then
-  . ~/.ah_profile
-fi
 
 
 if [ -f ~/.bashrc ]; then
@@ -15,11 +10,11 @@ fi
 # unset file;
 
 # Include Drush bash customizations.
-if [ -f "/Users/lindsey.catlett/.drush/drush.bashrc" ] ; then
+if [ -f "~/.drush/drush.bashrc" ] ; then
   source /Users/lindsey.catlett/.drush/drush.bashrc
 fi
 
 # Include Drush prompt customizations.
-if [ -f "/Users/lindsey.catlett/.drush/drush.prompt.sh" ] ; then
-  source /Users/lindsey.catlett/.drush/drush.prompt.sh
+if [ -f "~/.drush/drush.prompt.sh" ] ; then
+  source ~/.drush/drush.prompt.sh
 fi
