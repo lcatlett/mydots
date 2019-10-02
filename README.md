@@ -1,5 +1,5 @@
 # Dotfiles
-Dotfiles I use with MacOS Catalina mostly for PHP Web Development.
+Dotfiles I use with MacOS mostly for PHP Web Development.
 
 ![iTerm2.app](https://raw.githubusercontent.com/lcatlett/mydots/master/screenshot.png)
 
@@ -42,7 +42,6 @@ On fresh installation of MacOS:
 Clone and install dotfiles:
 
     git clone https://github.com/lcatlett/mydots.git ~/dotfiles
-    cd ~/dotfiles
     cd ~/dotfiles/install
     chmod +wx install.sh
     chmod -R +wx ~/dotfiles/bin
