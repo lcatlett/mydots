@@ -61,16 +61,6 @@ function xterm_title_preexec () {
     print -n "${(q)1}\a"
 }
 
-function load_yubikey ()
-{
- ssh-add -s /usr/local/lib/opensc-pkcs11.so
-}
-
-function reload_yubikey ()
-{
- ssh-add -e /usr/local/lib/opensc-pkcs11.so
- ssh-add -s /usr/local/lib/opensc-pkcs11.so
-}
 
 # my_ps: Function to list processes owned by an user
 my_ps() { ps "$@" -u "$USER" -o pid,%cpu,%mem,start,time,bsdtime,command; }
@@ -246,4 +236,26 @@ function quickdrupal() {
   PROFILE=${1:-demo_umami}
   mkdir quickdrupal && cd quickdrupal && curl -sSL https://www.drupal.org/download-latest/tar.gz | tar -xz --strip-components=1
   php core/scripts/drupal quick-start $PROFILE
+
+}
+
+
+function code {
+    if [[ $# = 0 ]]
+    then
+        open -a "Visual Studio Code"
+    else
+        local argPath="$1"
+        [[ $1 = /* ]] && argPath="$1" || argPath="$PWD/${1#./}"
+        open -a "Visual Studio Code" "$argPath"
+    fi
+}
+
+function killPort() {
+  if [ "$1" != "" ]
+  then
+    kill -9 $(lsof -ni tcp:"$1" | awk 'FNR==2{print $2}')
+  else
+    echo "Missing argument! Usage: killPort $PORT"
+  fi
 }
