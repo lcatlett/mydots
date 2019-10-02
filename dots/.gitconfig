@@ -1,6 +1,6 @@
 [user]
 	name = Lindsey Catlett
-	email = at62865@gmail.com
+	email = lindsey.catlett@gmail.com
 [github]
   # https://github.com/blog/180-local-github-config
   user = lcatlett
@@ -105,9 +105,7 @@
     conf = config
     lconf = config --local
 
-    # clean git repo
-    current = !set -x && git pull && git fetch -p && git remote prune origin && git dm
-    latest = !set -x && git pull && git fetch -p && git fetch --tags && git remote prune origin && git dm
+
 
     # map typos
     remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
@@ -130,32 +128,13 @@
     # Find commits by commit message
     fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
 
-    # Remove branches that have already been merged with master
-    # a.k.a. ‘delete merged’
-    dm = "!git branch --merged | grep -v '\\*\\|master\\|develop' | xargs -n 1 git branch -d"
-
     # View the current working tree status using the short format
     s = status -s
 
     # Show the diff between the latest commit and the current state
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
-    di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
 
-    # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull origin master"
-
-    # Clone a repository including all submodules
-    c = clone --recursive
-
-    # Temp ignore
-    temp-ignore = update-index --assume-unchanged
-    ti = update-index --assume-unchanged
-
-    # Temp ignore
-    unignore = update-index --no-assume-unchanged
-    uti = update-index --no-assume-unchanged
 
     whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
     whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
@@ -180,8 +159,15 @@
         # Show the diff between the latest commit and the current state
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
-    di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+  #Resolve merge conflict with file in the current working branch
+  ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+
+#Resolve merge conflict with file in the upstream repo
+ theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+
+ #List your available git config aliases
+  la = "!git config -l | grep alias | cut -c 7-"
 
     # Pull in remote changes for the current repository and all its submodules
 
@@ -201,8 +187,6 @@
   #Update your local and replay your commits on upstream HEAD
   pl = pull --rebase
 
-  # List aliases
- aliases = config --get-regexp alias
 
 #Status
   s = status
@@ -222,17 +206,9 @@
 #Find a file path in codebase
   f = "!git ls-files | grep -i"
 
-#List your available git config aliases
-  la = "!git config -l | grep alias | cut -c 7-"
-
-#Resolve merge conflict with file in the current working branch
-  ours = "!f() { git checkout --ours $@ && git add $@; }; f"
-
-#Resolve merge conflict with file in the upstream repo
- theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
 
-recent-branches="for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
+
 
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
@@ -242,3 +218,5 @@ recent-branches="for-each-ref --sort=-committerdate --count=10 --format='%(refna
 	trustExitCode = true
 [commit]
 	template = /Users/at62865/.stCommitMsg
+[branch]
+	autosetuprebase = always
