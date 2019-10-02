@@ -18,7 +18,6 @@ alias flushdns='sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder;ech
 alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
 alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
-alias cat='bat'
 
 alias shrug='echo '\''¯\_(ツ)_/¯'\'' | pbcopy'
 
@@ -40,8 +39,6 @@ alias st='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl --new-
 
 alias vagrant-fix="sudo /Library/Application\ Support/VirtualBox/LaunchDaemons/VirtualBoxStartup.sh restart"
 
-#alias bastion='ssh -f -N bastion'
-
 alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
 
 
@@ -50,17 +47,11 @@ alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s
 
 alias recent-branches="!git for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
 
-#git config --global alias.recent-branches "! git for-each-ref --sort=-committerdate --count=15 --format='%(authorname),%(color:bold yellow)%(refname:short)%(color:reset) (%(color:bold magenta)%(committerdate:relative)%(color:reset)) %(color:cyan)%(objectname:short)%(color:reset) - %(color:dim white)%(contents:subject)%(color:reset)' refs/heads/ | grep ^Travis | cut -d, -f2-"
-
 
 alias d8upgrade='composer update drupal/core webflo/drupal-core-require-dev "symfony/*" --with-dependencies'
 
-# Quick-Drupal install
-# By default this function installs the demo_umami profile but you can pass any
-# core profile you like as an arguement
-# Example: quickdrupal standard
-function quickdrupal() {
-  PROFILE=${1:-demo_umami}
-  mkdir quickdrupal && cd quickdrupal && curl -sSL https://www.drupal.org/download-latest/tar.gz | tar -xz --strip-components=1
-  php core/scripts/drupal quick-start $PROFILE
-}
+alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
+
+alias test-jenkinsfile='docker run -v $(pwd):/workspace   \
+    -v /var/run/docker.sock:/var/run/docker.sock   \
+    -v $(which docker):$(which docker) marcellodesales/jenkinsfile-runner'

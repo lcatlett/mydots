@@ -1,6 +1,5 @@
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
-export AH_SSH_CONFIG="${HOME}/.ssh/ah_config"
 #/usr/local/bin/keychain $HOME/.ssh/id_rsa
 
 for file in ~/.{exports,aliases,functions,extra}; do
@@ -16,7 +15,7 @@ export ZSH="/Users/at62865/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="punctual"
+ZSH_THEME=""
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -73,8 +72,6 @@ ZSH_THEME="punctual"
 
 plugins=(
 
-  zsh-syntax-highlighting
-
 )
 source $ZSH/oh-my-zsh.sh
 
@@ -111,11 +108,9 @@ setopt inc_append_history
 # Reloads the history whenever you use it
 setopt share_history
 
-#PUNCTUAL_SHOW_HOSTNAME=false;
-#PUNCTUAL_PROMPT="${PUNCTUAL_PROMPT:-❯}";
 autoload -U promptinit; promptinit
-prompt purity
-#PURE_PROMPT_SYMBOL='%f%F{red}#%f %F{magenta}❯'
+prompt pure
+
 
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
@@ -142,6 +137,3 @@ function blt() {
     return 1
   fi
 }
-export PATH="/usr/local/opt/php@7.1/sbin:$PATH"
-
-#source /etc/bash_completion.d/climate_completion
