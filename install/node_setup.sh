@@ -10,3 +10,4 @@ nvm install --lts --latest-npm
 npm install --global pure-prompt;
 
 brew install yarn --without-node
+npm install gulp-cli -g
