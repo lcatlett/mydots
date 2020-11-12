@@ -56,8 +56,6 @@ brew "fd"
 brew "fdupes"
 # Platform built on V8 to build network applications
 brew "node"
-# Command-line JSON processing tool
-brew "fx"
 # GNU awk utility
 brew "gawk"
 # Distributed revision control system
@@ -74,8 +72,6 @@ brew "httpd"
 brew "imagemagick"
 # Lightweight and flexible command-line JSON processor
 brew "jq"
-# Like awk, but for JSON, using JavaScript objects and arrays
-brew "jsawk"
 # International domain name library (IDNA2008, Punycode and TR46)
 brew "libidn2"
 # X.509 and CMS library
@@ -96,10 +92,6 @@ brew "openssl@1.1"
 brew "ossp-uuid"
 # General-purpose scripting language
 brew "php"
-# General-purpose scripting language
-brew "php@7.1"
-# General-purpose scripting language
-brew "php@7.2", restart_service: true, link: true
 # Manage compile and link flags for libraries
 brew "pkg-config"
 # Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML

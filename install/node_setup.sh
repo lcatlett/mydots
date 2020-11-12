@@ -4,7 +4,7 @@ export NVM_DIR="$HOME/.nvm" && (
   git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" origin`
 ) && \. "$NVM_DIR/nvm.sh"
 
-nvm install 6.12 --latest-npm
+nvm install 10.18 --latest-npm
 nvm install --lts --latest-npm
 
 npm install --global pure-prompt;
