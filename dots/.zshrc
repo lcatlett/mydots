@@ -106,12 +106,17 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 # Appends every command to the history file once it is executed
+
+
 setopt inc_append_history
 # Reloads the history whenever you use it
 setopt share_history
 
 autoload -U promptinit; promptinit
 prompt pure
+
+# better shell history search
+eval "$(mcfly init zsh)"
 
 
 
@@ -139,3 +144,58 @@ function blt() {
     return 1
   fi
 }
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+[ -s "REDACTED-HOME/google-cloud-sdk/path.zsh.inc" ]
+
+[ -s "REDACTED-HOME/google-cloud-sdk/completion.zsh.inc" ]
+
+
+    source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+    source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+
+# The next line updates PATH for the Google Cloud SDK.
+#if [ -f "REDACTED-HOME/google-cloud-sdk/path.zsh.inc" ]; then . "REDACTED-HOME/google-cloud-sdk/path.zsh.inc"; fi
+
+# The next line enables shell command completion for gcloud.
+#if [ -f "REDACTED-HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "REDACTED-HOME/google-cloud-sdk/completion.zsh.inc"; fi
+
+eval "$(rbenv init -)"
+export PANTHEON_CERT="REDACTED-HOME/certs/REDACTED@example.com.pem"
+export PATH="/usr/local/opt/curl/bin:$PATH"
+export PATH="/usr/local/opt/curl/bin:$PATH"
+export PANTHEON_CERT="REDACTED-HOME/certs/REDACTED@example.com.pem"
+
+export GOPATH="$HOME/go"; export GOROOT="$HOME/.go"; export PATH="$GOPATH/bin:$PATH"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
+alias ggovm="$GOPATH/bin/g"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
+
+
+# We only want to run gpg-agent on our local workstation. We accomplish that by trying to
+# detect if this shell was spawned from ssh or not. If the SSH_CLIENT env var is set, then
+# this is probably a remote login and we don't want to run gpg-agent.
+
+eval $(ssh-agent)
+if [ ! -n "$SSH_CLIENT" ]; then
+  gpgconf --launch gpg-agent
+
+  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+      export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+  fi
+
+  GPG_TTY=$(tty)
+  export GPG_TTY
+  # only necessary if using pinentry in the tty (instead of GUI)
+  echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
+fi
+export PATH="/usr/local/opt/openssl@3/bin:$PATH"
+
+unalias egrep
+unalias fgrep
+unalias grep
+    unset GREP_OPTIONS EXC_FOLDERS
+
+ source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
