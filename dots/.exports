@@ -39,3 +39,9 @@ export PATH="/usr/local/opt/curl/bin:$PATH"
 
 export COMPOSER_MEMORY_LIMIT=-1
 export COMPOSER_EXIT_ON_PATCH_FAILURE=0
+export HOMEBREW_GITHUB_API_TOKEN=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
+
+# Allow for using go get path@version - this will be deprecated in go 1.17
+export GO111MODULE=on
+
+
