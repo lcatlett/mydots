@@ -18,3 +18,5 @@ fi
 if [ -f "~/.drush/drush.prompt.sh" ] ; then
   source ~/.drush/drush.prompt.sh
 fi
+ssh-add -A 2>/dev/null
+. "$HOME/.cargo/env"

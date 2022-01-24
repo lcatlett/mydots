@@ -1,8 +1,4 @@
 .DS_Store
 .DB_Store
-/vendor
-/node_modules
-/brew_components
-.idea
 
 !.gitkeep
