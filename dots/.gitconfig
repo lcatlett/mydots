@@ -11,7 +11,7 @@
 # When false, never. When set to true or auto, use colors only when the output is to the terminal.
 # When more specific variables of color.* are set, they always take precedence over this setting.
 # Defaults to false.
-  ui = auto
+	ui = true
   # diff = auto
   # status = auto
   # branch = auto
@@ -21,10 +21,13 @@
   local = yellow
   remote = green
 [color "diff"]
-  meta = yellow bold
-  frag = magenta bold
-  old = red bold
-  new = green bold
+	meta = 11
+	frag = magenta bold
+	old = red bold
+	new = green bold
+	func = 146 bold
+	commit = yellow bold
+	whitespace = red reverse
 [color "status"]
   added = yellow
   changed = green
@@ -37,7 +40,7 @@
   fontdiff = -family Monaco -size 10 -weight normal -slant roman -underline 0 -overstrike 0
 
 [core]
-	excludesfile = /Users/at62865/.gitignore
+	excludesfile = REDACTED-HOME/.gitignore
   quotepath = false
   # line endings
   # force LF during add
@@ -48,128 +51,115 @@
   # prevent crlf (then you will have to deal with the problem -- dos2unix, etc)
   #safecrlf = true
   editor = vim
+	pager = diff-so-fancy | less --tabs=4 -RFX
   #editor = subl -w
+[rebase]
+  autosquash = true
 
 [alias]
   # most commonly used
   co = checkout
-  d = diff --color-words
-  cam = commit -a -m
-  upm = !git fetch upstream && git merge upstream/master
-
-  # least used
   br = branch -a
   s = status -s -u
 
-  dh = diff HEAD
-  dc = diff --staged
-  dw = diff --word-diff
-  dcw = diff --color-words
 
   who = shortlog -s --
-  st = status
-  l = log --stat -C
-  servehere = daemon --verbose --informative-errors --reuseaddr --export-all --base-path=. --enable=receive-pack
+
+
   nuke = !git clean -fd && git reset --hard
   ri = rebase --interactive --autosquash
-  lol = log --pretty=oneline --graph --abbrev-commit --all
   listunstaged = diff --name-status
   liststaged = diff --name-status --staged
   listhistory = log --name-status
-  logn = log --oneline --name-only
+
   busypeople = shortlog -6
   busythisweek = shortlog --since=one.week.ago
+  undo = reset --soft HEAD^
 
 
-
-    whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
-    whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
-    # whereis = "git log | git name-rev --stdin"
-
-    human = name-rev --name-only --refs=refs/heads/*
-    snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
-
-     # List branches according to you most recent checkouts.
-    recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
-
-    publish = !BRANCH=$(git branch | grep \\* | awk '{print $2}') && git push -u origin $BRANCH
-
-    # blame
-    wtf = blame
-
-    # other
-    undo = reset --soft HEAD^
-    prune = !git fetch -p && git remote prune origin
-
-    # config
-    conf = config
-    lconf = config --local
+#get author of last commit
+  whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
 
 
+  snapstash = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+  save-wip = !git add -A && git commit -m 'wip: savepoint'
 
-    # map typos
-    remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
+# List branches according to you most recent checkouts.
+  recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
+
+
+  # map typos
+  remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
 
     # list tags version sorted
-    tags = "!f() { git tag | sort --version-sort; }; f"
+  tags = "!f() { git tag | sort --version-sort; }; f"
 
-    # Switch to a branch, creating it if necessary
-    go = "!f() { git checkout -b \"$1\" 2> /dev/null || git checkout \"$1\"; }; f"
+  # Find commits by source code
+  fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
 
-    # Find branches containing commit
-    fb = "!f() { git branch -a --contains $1; }; f"
-
-    # Find tags containing commit
-    ft = "!f() { git describe --always --contains $1; }; f"
-
-    # Find commits by source code
-    fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
-
-    # Find commits by commit message
-    fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
-
-    # View the current working tree status using the short format
-    s = status -s
 
     # Show the diff between the latest commit and the current state
-    d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+  d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
 
 
-    whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
-    whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
-    # whereis = "git log | git name-rev --stdin"
-
-    human = name-rev --name-only --refs=refs/heads/*
-    snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+#View the diff of the last commit
+  dlc = diff --cached HEAD^
 
 
 
-        # Show unpushed/ahead changes
-    ahead = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline
+
+  # Show unpushed/ahead changes
+  ahead = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline
     # Show the diff of upushed/ahead changes
-    ahead-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH
+  ahead-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH
 
     # Show unpulled/behind
-    behind = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH --oneline
+  behind = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH --oneline
 
     # Show diff of unpulled/behind changes
-    behind-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH
+  behind-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH
 
-        # Show the diff between the latest commit and the current state
-    d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+  alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
   #Resolve merge conflict with file in the current working branch
   ours = "!f() { git checkout --ours $@ && git add $@; }; f"
 
-#Resolve merge conflict with file in the upstream repo
- theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+  #Resolve merge conflict with file in the upstream repo
+  theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+
+all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
+all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
+
+# Delete branch
+  del = branch -D
+
+#Update your local and replay your commits on upstream HEAD
+  pl = pull --rebase
+
+#Undo your last commit
+  undo-commit = reset --soft HEAD~1
+
+#View a pretty formatted git log summary
+  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+
+#View a pretty extended format git log
+  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+
+#View a pretty formatted git log and graph of all branches
+  lol = log --pretty=oneline --graph --abbrev-commit --all
+
+  fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
+
+
+
+
+
+#Find a file path in codebase
+  f = "!git ls-files | grep -i"
 
  #List your available git config aliases
   la = "!git config -l | grep alias | cut -c 7-"
-
-    # Pull in remote changes for the current repository and all its submodules
 
 
 [format]
@@ -184,39 +174,21 @@
     autocorrect = 0
 
 
-  #Update your local and replay your commits on upstream HEAD
-  pl = pull --rebase
 
 
-#Status
-  s = status
-
-#Undo your last commit
-  undo-commit = reset --soft HEAD~1
-
-#View a pretty formatted git log
-  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
-
-#View a pretty extended format git log
-  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-
-#View the diff of the last commit
-  dlc = diff --cached HEAD^
-
-#Find a file path in codebase
-  f = "!git ls-files | grep -i"
-
-
-
-
-
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
-[mergetool "sourcetree"]
-	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
-[commit]
-	template = /Users/at62865/.stCommitMsg
 [branch]
 	autosetuprebase = always
+[credential]
+	helper =
+	helper = /usr/local/share/gcm-core/git-credential-manager-core
+[credential "https://dev.azure.com"]
+	useHttpPath = true
+[commit]
+	verbose = false
+[interactive]
+	diffFilter = diff-so-fancy --patch
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22

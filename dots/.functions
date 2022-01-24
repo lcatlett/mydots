@@ -259,3 +259,27 @@ function killPort() {
     echo "Missing argument! Usage: killPort $PORT"
   fi
 }
+
+#gcloud commands
+
+function unset-impersonate() {
+    gcloud config unset auth/impersonate_service_account
+}
+
+# Make switching versions easy
+function phpv() {
+    brew unlink php
+    brew link --overwrite --force "php@$1"
+    php -v
+}
+
+function gde() {
+    : '
+        git diff exclude files or folders
+        usage:
+        gde fileOrFolderNameToExclude
+    '
+
+    git diff --cached HEAD^ -- ':!/\$1/'
+}
+

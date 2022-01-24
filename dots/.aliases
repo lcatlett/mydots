@@ -35,11 +35,11 @@ alias reload="exec ${SHELL} -l"
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 
-alias st='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl --new-window $@'
-
-alias vagrant-fix="sudo /Library/Application\ Support/VirtualBox/LaunchDaemons/VirtualBoxStartup.sh restart"
 
 alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
+
+
+
 
 
 
@@ -48,10 +48,11 @@ alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s
 alias recent-branches="!git for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
 
 
-alias d8upgrade='composer update drupal/core webflo/drupal-core-require-dev "symfony/*" --with-dependencies'
 
 alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
 
-alias test-jenkinsfile='docker run -v $(pwd):/workspace   \
-    -v /var/run/docker.sock:/var/run/docker.sock   \
-    -v $(which docker):$(which docker) marcellodesales/jenkinsfile-runner'
+
+
+eval $(thefuck --alias)
+
+
