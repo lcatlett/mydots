@@ -1,7 +1,9 @@
-tap "caskroom/cask"
-tap "caskroom/fonts"
-tap "caskroom/versions"
+tap "buildpacks/tap"
+tap "cantino/mcfly"
 tap "drud/ddev"
+tap "fastly/tap"
+tap "go-task/tap"
+tap "hashicorp/tap"
 tap "homebrew/bundle"
 tap "homebrew/cask"
 tap "homebrew/cask-fonts"
@@ -9,142 +11,152 @@ tap "homebrew/core"
 tap "homebrew/services"
 tap "kabel/php-ext"
 tap "koekeishiya/formulae"
+tap "microsoft/git"
 tap "minio/stable"
-tap "phinze/cask"
+tap "pantheon-systems/external"
+tap "pantheon-systems/internal", "git@github.com:pantheon-systems/homebrew-internal.git"
+tap "shivammathur/extensions"
+tap "shivammathur/php"
 tap "talal/tap"
-# GNU internationalization (i18n) and localization (l10n) library
-brew "gettext"
-# SSL/TLS cryptography library
-brew "openssl"
-# Library for command-line editing
-brew "readline"
-# Command-line interface for SQLite
-brew "sqlite"
-# YAML Parser
-brew "libyaml"
-# Automate deployment, configuration, and upgrading
-brew "ansible"
-# Automatic configure script builder
-brew "autoconf"
-# Tool for generating GNU Standards-compliant Makefiles
-brew "automake"
-# Programmable completion for Bash 3.2
-brew "bash-completion"
-# Clone of cat(1) with syntax highlighting and Git integration
-brew "bat"
-# Switch Apache / Valet / CLI configs between PHP versions
-brew "brew-php-switcher"
-# Cross-platform make
-brew "cmake"
-# Dependency Manager for PHP
+brew "berglas"
+brew "php", link: false
 brew "composer"
-# GNU File, Shell, and Text utilities
 brew "coreutils"
-# Get a file from an HTTP, HTTPS or FTP server
-brew "curl"
-# Open source suite of directory software
-brew "openldap"
-# Minimal, fast alternative to 'du -sh'
-brew "diskus"
-# Convert text between DOS, UNIX, and Mac formats
-brew "dos2unix"
-# Suite of tools for inspecting disk usage
-brew "duc"
-# Simple, fast and user-friendly alternative to find
-brew "fd"
-# Identify or delete duplicate files
-brew "fdupes"
-# Platform built on V8 to build network applications
-brew "node"
-# GNU awk utility
-brew "gawk"
-# Distributed revision control system
+brew "diff-so-fancy"
+brew "fzf"
+brew "gh"
 brew "git"
-# Simple and efficient way to access statistics in git
-brew "git-quick-stats"
-# GNU version of the tar archiving utility
-brew "gnu-tar"
-# Convert source code to formatted text with syntax highlighting
-brew "highlight"
-# Apache HTTP server
-brew "httpd"
-# Tools and libraries to manipulate images in many formats
-brew "imagemagick"
-# Lightweight and flexible command-line JSON processor
+brew "guile"
+brew "unbound"
+brew "gnutls"
+brew "libgcrypt"
+brew "gnupg"
+brew "go"
+brew "nghttp2"
+brew "node"
+brew "grunt-cli"
+brew "hadolint"
+brew "hopenpgp-tools"
+brew "httpd", restart_service: true
+brew "jid"
 brew "jq"
-# International domain name library (IDNA2008, Punycode and TR46)
-brew "libidn2"
-# X.509 and CMS library
-brew "libksba"
-# Implementation of the file(1) command
-brew "libmagic"
-# C XSLT library for GNOME
-brew "libxslt"
-# Mac App Store command-line interface
-brew "mas"
-# Open source relational database management system
-brew "mysql@5.6", restart_service: true, link: true
-# Port scanning utility for large networks
-brew "nmap"
-# Cryptography and SSL/TLS Toolkit
-brew "openssl@1.1"
-# ISO-C API and CLI for generating UUIDs
-brew "ossp-uuid"
-# General-purpose scripting language
-brew "php"
-# Manage compile and link flags for libraries
-brew "pkg-config"
-# Code formatter for JavaScript, CSS, JSON, GraphQL, Markdown, YAML
-brew "prettier"
-# Interpreted, interactive, object-oriented programming language
-brew "python@2"
-# Monitor data's progress through a pipe
-brew "pv"
-# Extremely fast tool to remove dupes and other lint from your filesystem
-brew "rmlint"
-# Zstandard is a real-time compression algorithm
-brew "zstd"
-# Utility that provides fast incremental file transfer
-brew "rsync"
-# Static analysis and lint tool, for (ba)sh scripts
+brew "kind"
+brew "python@3.10"
+brew "mackup"
+brew "markdownlint-cli"
+brew "openssl@3"
+brew "pinentry-mac"
+brew "pre-commit"
+brew "python@3.9"
+brew "ruby-build"
+brew "rbenv"
+brew "redis"
 brew "shellcheck"
-# Add a public key to a remote machine's authorized_keys file
-brew "ssh-copy-id"
-# File system client based on SSH File Transfer Protocol
-brew "sshfs"
-# Programatically correct mistyped console commands
+brew "tflint"
 brew "thefuck"
-# Display directories as trees (with optional color/HTML output)
 brew "tree"
-# Executes a program periodically, showing output fullscreen
-brew "watch"
-# Internet file retriever
 brew "wget"
-# UNIX shell (command interpreter)
-brew "zsh"
-# Additional completion definitions for zsh
-brew "zsh-completions"
-# ddev: a local development environment management system
+brew "yamllint"
+brew "yarn"
+brew "ykman"
+brew "ykneomgr"
+brew "yq"
+brew "zsh-syntax-highlighting"
+brew "buildpacks/tap/pack"
+brew "cantino/mcfly/mcfly"
 brew "drud/ddev/ddev"
-# A fast and minimal prompt for Bash and Zsh
-brew "talal/tap/mimir"
-cask "font-hack-nerd-font"
-cask "font-source-code-pro"
-cask "phinze/cask/aerial"
-cask "phinze/cask/qlcolorcode"
-cask "phinze/cask/qlmarkdown"
-cask "phinze/cask/qlstephen"
-cask "phinze/cask/qlvideo"
-cask "phinze/cask/quicklook-json"
-cask "phinze/cask/quicklookase"
-cask "phinze/cask/suspicious-package"
-cask "phinze/cask/webpquicklook"
-cask "phinze/cask/xquartz"
-mas "73UVK6498D", id: 852692251
-mas "at.eggerapps.tabletool", id: 1122008420
-mas "com.autreplanete.OpenInTerminal", id: 452968973
-mas "com.evernote.Evernote", id: 406056744
-mas "com.LespaceVision.RapidList", id: 1069704725
-mas "com.moonapps.diskzilla", id: 1183281977
-mas "com.panic.transmit.mas", id: 1436522307
-mas "com.tinyspeck.slackmacgap", id: 803453959
+brew "fastly/tap/fastly"
+brew "go-task/tap/go-task"
+brew "hashicorp/tap/terraform"
+brew "pantheon-systems/external/terminus"
+brew "pantheon-systems/internal/pants"
+brew "pantheon-systems/internal/pvault"
+brew "shivammathur/extensions/pcov@7.4"
+brew "shivammathur/php/php@7.3"
+brew "shivammathur/php/php@7.4"
+cask "altair-graphql-client"
+cask "evernote"
+cask "git-credential-manager-core"
+cask "google-cloud-sdk"
+cask "gpg-suite"
+tap "buildpacks/tap"
+tap "cantino/mcfly"
+tap "drud/ddev"
+tap "fastly/tap"
+tap "go-task/tap"
+tap "hashicorp/tap"
+tap "homebrew/bundle"
+tap "homebrew/cask"
+tap "homebrew/cask-fonts"
+tap "homebrew/core"
+tap "homebrew/services"
+tap "kabel/php-ext"
+tap "koekeishiya/formulae"
+tap "microsoft/git"
+tap "minio/stable"
+tap "pantheon-systems/external"
+tap "pantheon-systems/internal", "git@github.com:pantheon-systems/homebrew-internal.git"
+tap "shivammathur/extensions"
+tap "shivammathur/php"
+tap "talal/tap"
+brew "berglas"
+brew "php", link: false
+brew "composer"
+brew "coreutils"
+brew "diff-so-fancy"
+brew "fzf"
+brew "gh"
+brew "git"
+brew "guile"
+brew "unbound"
+brew "gnutls"
+brew "libgcrypt"
+brew "gnupg"
+brew "go"
+brew "nghttp2"
+brew "node"
+brew "grunt-cli"
+brew "hadolint"
+brew "hopenpgp-tools"
+brew "httpd", restart_service: true
+brew "jid"
+brew "jq"
+brew "kind"
+brew "python@3.10"
+brew "mackup"
+brew "markdownlint-cli"
+brew "openssl@3"
+brew "pinentry-mac"
+brew "pre-commit"
+brew "python@3.9"
+brew "ruby-build"
+brew "rbenv"
+brew "redis"
+brew "shellcheck"
+brew "tflint"
+brew "thefuck"
+brew "tree"
+brew "wget"
+brew "yamllint"
+brew "yarn"
+brew "ykman"
+brew "ykneomgr"
+brew "yq"
+brew "zsh-syntax-highlighting"
+brew "buildpacks/tap/pack"
+brew "cantino/mcfly/mcfly"
+brew "drud/ddev/ddev"
+brew "fastly/tap/fastly"
+brew "go-task/tap/go-task"
+brew "hashicorp/tap/terraform"
+brew "pantheon-systems/external/terminus"
+brew "pantheon-systems/internal/pants"
+brew "pantheon-systems/internal/pvault"
+brew "shivammathur/extensions/pcov@7.4"
+brew "shivammathur/php/php@7.3"
+brew "shivammathur/php/php@7.4"
+cask "altair-graphql-client"
+cask "evernote"
+cask "git-credential-manager-core"
+cask "google-cloud-sdk"
+cask "gpg-suite"
