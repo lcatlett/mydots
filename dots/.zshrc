@@ -112,11 +112,12 @@ setopt inc_append_history
 # Reloads the history whenever you use it
 setopt share_history
 
+fpath+=$HOME/.zsh/pure
 autoload -U promptinit; promptinit
 prompt pure
 
 # better shell history search
-eval "$(mcfly init zsh)"
+#eval "$(mcfly init zsh)"
 
 
 
@@ -154,8 +155,8 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "REDACTED-HOME/google-cloud-sdk/completion.zsh.inc" ]
 
 
-    source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
-    source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
+   # source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc"
+   # source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc"
 
 # The next line updates PATH for the Google Cloud SDK.
 #if [ -f "REDACTED-HOME/google-cloud-sdk/path.zsh.inc" ]; then . "REDACTED-HOME/google-cloud-sdk/path.zsh.inc"; fi
@@ -163,7 +164,7 @@ export NVM_DIR="$HOME/.nvm"
 # The next line enables shell command completion for gcloud.
 #if [ -f "REDACTED-HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "REDACTED-HOME/google-cloud-sdk/completion.zsh.inc"; fi
 
-eval "$(rbenv init -)"
+#eval "$(rbenv init -)"
 export PANTHEON_CERT="REDACTED-HOME/certs/REDACTED@example.com.pem"
 export PATH="/usr/local/opt/curl/bin:$PATH"
 export PATH="/usr/local/opt/curl/bin:$PATH"
@@ -177,18 +178,18 @@ alias ggovm="$GOPATH/bin/g"; # g-install: do NOT edit, see https://github.com/st
 # detect if this shell was spawned from ssh or not. If the SSH_CLIENT env var is set, then
 # this is probably a remote login and we don't want to run gpg-agent.
 
-eval $(ssh-agent)
+
 if [ ! -n "$SSH_CLIENT" ]; then
-  gpgconf --launch gpg-agent
+	gpgconf --launch gpg-agent
 
-  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
-      export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-  fi
+	if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+		export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+	fi
 
-  GPG_TTY=$(tty)
-  export GPG_TTY
-  # only necessary if using pinentry in the tty (instead of GUI)
-  echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
+	GPG_TTY=$(tty)
+	export GPG_TTY
+	# only necessary if using pinentry in the tty (instead of GUI)
+	echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
 fi
 export PATH="/usr/local/opt/openssl@3/bin:$PATH"
 
@@ -197,5 +198,8 @@ unalias fgrep
 unalias grep
     unset GREP_OPTIONS EXC_FOLDERS
 
- source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+ #source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+
+export PATH=/opt/homebrew/bin:$PATH
 
