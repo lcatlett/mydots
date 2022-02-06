@@ -53,6 +53,5 @@ alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker 
 
 
 
-eval $(thefuck --alias)
 
 

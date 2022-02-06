@@ -18,6 +18,12 @@ tap "pantheon-systems/internal", "git@github.com:pantheon-systems/homebrew-inter
 tap "shivammathur/extensions"
 tap "shivammathur/php"
 tap "talal/tap"
+cask 'google-chrome'
+cask 'alfred'
+cask 'evernote'
+cask 'virtualbox'
+cask 'slack'
+cask 'iterm2'
 brew "berglas"
 brew "php", link: false
 brew "composer"
