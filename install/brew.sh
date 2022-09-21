@@ -9,7 +9,7 @@ fi
 if ( brew cask --version; ) < /dev/null > /dev/null 2>&1; then
     echo 'Caskroom tapped already'
 else
-    brew tap caskroom/cask;
+    brew tap homebrew/cask;
 fi
 
 if ( brew bundle check; ) < /dev/null > /dev/null 2>&1; then

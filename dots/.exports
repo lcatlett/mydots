@@ -13,6 +13,7 @@ YARN_BIN_EXPORT="$HOME/.config/yarn/global/node_modules/.bin"
 COMPOSER_BIN_EXPORT="$HOME/.composer/vendor/bin"
 
 
+
 # Base PATH
 PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin
 
@@ -32,9 +33,11 @@ do
     export PATH=${PATH}:${path_candidate}
   fi
 done
+#export PATH=$HOME/.composer/vendor/bin:$PATH
 
+export PATH="$PATH:$HOME/.composer/vendor/bin"
 
-PATH="./vendor/bin:$PATH";
+#PATH="$(composer config -g home)/vendor/bin:$PATH"
 export PATH="/usr/local/opt/curl/bin:$PATH"
 
 export COMPOSER_MEMORY_LIMIT=-1
@@ -43,5 +46,10 @@ export HOMEBREW_GITHUB_API_TOKEN=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
 
 # Allow for using go get path@version - this will be deprecated in go 1.17
 export GO111MODULE=on
+
+export COMPOSER_MEMORY_LIMIT=-1
+
+export DOCKER_CLIENT_TIMEOUT=2000
+export COMPOSE_HTTP_TIMEOUT=2000
 
 
