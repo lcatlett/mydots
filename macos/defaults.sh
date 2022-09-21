@@ -1,4 +1,4 @@
-COMPUTER_NAME="REDACTED-HOSTNAME"
+COMPUTER_NAME="REDACTED-USERNAME"
 
 osascript -e 'tell application "System Preferences" to quit'
 

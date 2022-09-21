@@ -228,17 +228,6 @@ free-port() { kill "$(lsof -t -i :$1)"; }
 kill-port() { kill -kill "$(lsof -t -i :$1)"; }
 
 
-# Quick-Drupal install
-# By default this function installs the demo_umami profile but you can pass any
-# core profile you like as an arguement
-# Example: quickdrupal standard
-function quickdrupal() {
-  PROFILE=${1:-demo_umami}
-  mkdir quickdrupal && cd quickdrupal && curl -sSL https://www.drupal.org/download-latest/tar.gz | tar -xz --strip-components=1
-  php core/scripts/drupal quick-start $PROFILE
-
-}
-
 
 function code {
     if [[ $# = 0 ]]
@@ -281,5 +270,162 @@ function gde() {
     '
 
     git diff --cached HEAD^ -- ':!/\$1/'
+}
+
+function workspace () {
+  dir=${PWD##*/}
+
+cat >> $dir.code-workspace << EOF
+  {
+    "folders": [
+      {
+      "path": "."
+      }
+    ],
+    "settings": {}
+  }
+EOF
+
+  code $dir.code-workspace
+
+}
+
+
+function db-tuner-full() {
+
+  SITE=$1
+
+  TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
+
+  DB_FIELDS=($(echo $TERM_DATA))
+
+  mysqltuner \
+    --forcemem=32000 \
+    --host=${DB_FIELDS[1]} \
+    --user=${DB_FIELDS[2]} \
+    --pass=${DB_FIELDS[3]} \
+    --port=${DB_FIELDS[4]} \
+    --dbstat \
+    --tbstat \
+    --colstat \
+    --idxstat \
+    --sysstat \
+    --pfstat \
+    --buffers \
+    --outputfile $SITE-db-tuner.txt
+}
+
+
+function db-tuner-summary() {
+
+  SITE=$1
+
+  TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
+
+  DB_FIELDS=($(echo $TERM_DATA))
+
+  mysqltuner \
+    --forcemem=32000 \
+    --host=${DB_FIELDS[1]} \
+    --user=${DB_FIELDS[2]} \
+    --pass=${DB_FIELDS[3]} \
+    --port=${DB_FIELDS[4]} \
+    --dbstat \
+    --sysstat \
+    --pfstat \
+    --buffers \
+    --outputfile $SITE-db-tuner-summary.txt
+}
+
+function pat-mysql-summary() {
+
+  SITE=$1
+
+  TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
+
+  DB_FIELDS=($(echo $TERM_DATA))
+
+  pt-mysql-summary \
+    --host ${DB_FIELDS[1]} \
+    --user ${DB_FIELDS[2]} \
+    --password ${DB_FIELDS[3]} \
+    --port=${DB_FIELDS[4]} \
+    --databases pantheon
+}
+
+function setup-pt() {
+SITE=$1
+
+echo -e "Setting required configuration values for $SITE"
+
+TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
+
+DB_FIELDS=($(echo $TERM_DATA))
+
+#if [ -z "${DB_FIELDS[0]}" ]; then
+ # error "Error generating configuration values for $SITE. Are you authenticated to terminus?"
+  #exit 1
+#fi
+
+export SQL_HOST=${DB_FIELDS[1]}
+export SQL_USER=${DB_FIELDS[2]}
+export SQL_PASS=${DB_FIELDS[3]}
+export SQL_DB="pantheon"
+export SQL_PORT=${DB_FIELDS[4]}
+
+#export MYSQL_PWD=$SQL_PASS
+
+#MYSQL_COMMAND_PARAMS="-u $SQL_USER -h $SQL_HOST -P $SQL_PORT $SQL_DB "
+#export MYSQL_COMMAND="mysql $MYSQL_COMMAND_PARAMS"
+
+echo -e "value of SQL_HOST is $SQL_HOST, value of SQL_USER is $SQL_USER, value of MYSQL_PWD is $SQL_PASS, value of SQL_DB is $SQL_DB, value of SQL_PORT is $SQL_PORT"
+
+}
+
+function yubinudge() {
+    pkill gpg-agent;
+    pkill ssh-agent;
+    pkill pinentry;
+    gpg-connect-agent updatestartuptty /bye
+    gpg --card-status
+    ssh-add -L
+}
+
+function yubikill() {
+  SCDAEMON_CONF="disable-ccid\nreader-port \"$(pcsctest <<< 01 | grep 'Reader 01' | awk -F ': ' '{print $2}' | head -n1)\""
+  echo $SCDAEMON_CONF;
+  echo $SCDAEMON_CONF > ~/.gnupg/scdaemon.conf
+  gpgconf --kill all
+
+}
+
+
+
+function yubitransport() {
+  echo "[!] Remove Yubikey from device port."
+  if read -q "REPLY?[?] Yubikey is unplugged? [Y/y]: "; then
+    pkill gpg-agent;
+    pkill ssh-agent;
+    pkill pinentry;
+    echo -e "\nKilled gpg-agent, ssh-agent, and pinentry"
+  else
+    eval $(gpg-agent --daemon --enable-ssh-support)
+  fi
+
+  echo -e "\n[!] Reinsert Yubikey to device port."
+  if read -q "REPLY?[?] Yubikey is attached? [Y/y]: "; then
+    gpg-connect-agent updatestartuptty /bye
+    gpg --card-status
+    ssh-add -L
+  else
+    echo "Not launching GPG-agent"
+  fi
+}
+
+
+
+function terminus-token() {
+  TOKEN=$(grep -o '"token":"[^"]*' ~/.terminus/cache/tokens/REDACTED@example.com | grep -o '[^"]*$')
+  echo $TOKEN
 }
 

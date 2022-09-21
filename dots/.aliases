@@ -39,17 +39,16 @@ alias path='echo -e ${PATH//:/\\n}'
 alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
 
 
-
-
-
-
-
-
 alias recent-branches="!git for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
 
 
-
 alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
+
+alias resetyubi='killall gpg-agent | gpg-connect-agent reloadagent /bye'
+
+
+
+#alias python2.7=REDACTED-HOME/.pyenv/shims/python2
 
 
 

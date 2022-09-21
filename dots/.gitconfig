@@ -52,19 +52,16 @@
   #safecrlf = true
   editor = vim
 	pager = diff-so-fancy | less --tabs=4 -RFX
-  #editor = subl -w
+
 [rebase]
   autosquash = true
 
 [alias]
+
   # most commonly used
   co = checkout
   br = branch -a
   s = status -s -u
-
-
-  who = shortlog -s --
-
 
   nuke = !git clean -fd && git reset --hard
   ri = rebase --interactive --autosquash
@@ -87,7 +84,6 @@
 # List branches according to you most recent checkouts.
   recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
 
-
   # map typos
   remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
 
@@ -97,39 +93,27 @@
   # Find commits by source code
   fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
 
-
     # Show the diff between the latest commit and the current state
   d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-
-
 #View the diff of the last commit
   dlc = diff --cached HEAD^
-
-
-
 
   # Show unpushed/ahead changes
   ahead = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline
     # Show the diff of upushed/ahead changes
   ahead-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH
 
-    # Show unpulled/behind
-  behind = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH --oneline
-
-    # Show diff of unpulled/behind changes
-  behind-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff $GIT_CURRENT_BRANCH..origin/$GIT_CURRENT_BRANCH
-
-
   alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
-  #Resolve merge conflict with file in the current working branch
+
+  # Resolve merge conflict with file in the current working branch
   ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+  all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
 
-  #Resolve merge conflict with file in the upstream repo
+  # Resolve merge conflict with file in the upstream repo
   theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+  all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
 
-all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
-all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
 
 # Delete branch
   del = branch -D
@@ -140,13 +124,13 @@ all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"
 #Undo your last commit
   undo-commit = reset --soft HEAD~1
 
-#View a pretty formatted git log summary
+# View a pretty formatted git log summary
   ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
 
-#View a pretty extended format git log
+# View a pretty extended format git log
   ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
 
-#View a pretty formatted git log and graph of all branches
+#V iew a pretty formatted git log and graph of all branches
   lol = log --pretty=oneline --graph --abbrev-commit --all
 
   fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
@@ -160,6 +144,8 @@ all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"
 
  #List your available git config aliases
   la = "!git config -l | grep alias | cut -c 7-"
+	cane = commit --amend --no-edit
+	mc = merge --continue
 
 
 [format]
@@ -172,10 +158,6 @@ all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"
 
 [help]
     autocorrect = 0
-
-
-
-
 [branch]
 	autosetuprebase = always
 [credential]
@@ -185,6 +167,7 @@ all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"
 	useHttpPath = true
 [commit]
 	verbose = false
+	template = REDACTED-HOME/.stCommitMsg
 [interactive]
 	diffFilter = diff-so-fancy --patch
 [color "diff-highlight"]
@@ -192,3 +175,9 @@ all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"
 	oldHighlight = red bold 52
 	newNormal = green bold
 	newHighlight = green bold 22
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path =
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
