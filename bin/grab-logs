@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# This is for Pantheon sites.
+
+# The Site UUID comes from the Dashboard URL, eg 12345678-1234-1234-abcd-0123456789ab
+
+if [ -z "$1" ]
+  then
+  echo "Please provide a Site UUID."
+  exit
+fi
+
+if [ -z "$2" ]
+  then
+  echo "Please provide the environment (dev, test, live)."
+  exit
+fi
+
+SITE_UUID=$1
+ENV=$2
+
+#438108bb-37d2-42cc-8132-2e8e3a0551bc
+#ENV=dev
+
+echo "For Site $1.$2."
+
+for app_server in $(dig +short -4 appserver.$ENV.$SITE_UUID.drush.in);
+do
+    rsync -rlvz --size-only --ipv4 --progress -e "ssh -p 2222" "$ENV.$SITE_UUID@$app_server:logs" "app_server_$app_server"
+done
+
+# Include MySQL logs
+#db_server=`dig dbserver.$ENV.$SITE_UUID.drush.in +short`
+rsync -rlvz --size-only --ipv4 --progress -e 'ssh -p 2222' $ENV.$SITE_UUID@dbserver.$ENV.$SITE_UUID.drush.in:logs db_server_$db_server
+
+# Include MySQL logs
+for db_server in $(dig +short -4 dbserver.$ENV.$SITE_UUID.drush.in);
+do
+    rsync -rlvz --size-only --ipv4 --progress -e "ssh -p 2222" "$ENV.$SITE_UUID@$db_server:logs" "db_server_$db_server"
+done
+else
+echo 'skipping the collection of logs..'
+fi

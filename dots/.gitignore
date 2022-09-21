@@ -12,6 +12,9 @@
 ehthumbs.db
 Thumbs.db
 .DB_Store
+.vscode
+
+*.code-workspace
 
 # Packages #
 ############

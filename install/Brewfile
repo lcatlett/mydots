@@ -13,16 +13,11 @@ tap "kabel/php-ext"
 tap "koekeishiya/formulae"
 tap "microsoft/git"
 tap "minio/stable"
-tap "pantheon-systems/external"
-tap "pantheon-systems/internal", "git@github.com:pantheon-systems/homebrew-internal.git"
 tap "shivammathur/extensions"
 tap "shivammathur/php"
 tap "talal/tap"
-cask 'google-chrome'
 cask 'alfred'
 cask 'evernote'
-cask 'virtualbox'
-cask 'slack'
 cask 'iterm2'
 brew "berglas"
 brew "php", link: false
@@ -101,7 +96,6 @@ tap "koekeishiya/formulae"
 tap "microsoft/git"
 tap "minio/stable"
 tap "pantheon-systems/external"
-tap "pantheon-systems/internal", "git@github.com:pantheon-systems/homebrew-internal.git"
 tap "shivammathur/extensions"
 tap "shivammathur/php"
 tap "talal/tap"

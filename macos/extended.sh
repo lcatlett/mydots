@@ -61,6 +61,7 @@ defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true;
 running "Expand print panel by default"
 defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
 defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true;
+cccccbcftuhciuvliltvlrblrkjhjbtfididrlghjfub
 
 running "Automatically quit printer app once the print jobs complete"
 defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true;
@@ -192,7 +193,9 @@ running "Remove the spring loading delay for directories"
 defaults write NSGlobalDomain com.apple.springing.delay -float 0;
 
 running "Avoid creating .DS_Store files on network volumes"
-defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true;
+
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
 running "Disable disk image verification"
 defaults write com.apple.frameworks.diskimages skip-verify -bool true
@@ -208,6 +211,10 @@ defaults write com.apple.finder EmptyTrashSecurely -bool true;
 
 running "Enable AirDrop over Ethernet and on unsupported Macs running Lion"
 defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true;
+
+
+# Fix vscode fonts in terminal
+defaults write com.microsoft.VSCode.helper.NP CGFontRenderingFontSmoothingDisabled -bool false
 
 running "Expand the following File Info panes: “General”, “Open with”, and “Sharing & Permissions”"
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
