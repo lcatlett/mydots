@@ -112,9 +112,9 @@ setopt inc_append_history
 # Reloads the history whenever you use it
 setopt share_history
 
-fpath+=$HOME/.zsh/pure
-autoload -U promptinit; promptinit
-prompt pure
+#fpath+=$HOME/.zsh/pure
+#autoload -U promptinit; promptinit
+#prompt pure
 
 # better shell history search
 #eval "$(mcfly init zsh)"
@@ -167,11 +167,14 @@ export NVM_DIR="$HOME/.nvm"
 #eval "$(rbenv init -)"
 export PANTHEON_CERT="REDACTED-HOME/certs/REDACTED@example.com.pem"
 export PATH="/usr/local/opt/curl/bin:$PATH"
-export PATH="/usr/local/opt/curl/bin:$PATH"
 export PANTHEON_CERT="REDACTED-HOME/certs/REDACTED@example.com.pem"
 
-export GOPATH="$HOME/go"; export GOROOT="$HOME/.go"; export PATH="$GOPATH/bin:$PATH"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
-alias ggovm="$GOPATH/bin/g"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
+
+
+
+
+#export GOPATH="$HOME/go"; export GOROOT="$HOME/.go"; export PATH="$GOPATH/bin:$PATH"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
+#alias ggovm="$GOPATH/bin/g"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
 
 
 # We only want to run gpg-agent on our local workstation. We accomplish that by trying to
@@ -179,19 +182,7 @@ alias ggovm="$GOPATH/bin/g"; # g-install: do NOT edit, see https://github.com/st
 # this is probably a remote login and we don't want to run gpg-agent.
 
 
-if [ ! -n "$SSH_CLIENT" ]; then
-	gpgconf --launch gpg-agent
 
-	if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
-		export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-	fi
-
-	GPG_TTY=$(tty)
-	export GPG_TTY
-	# only necessary if using pinentry in the tty (instead of GUI)
-	echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
-fi
-export PATH="/usr/local/opt/openssl@3/bin:$PATH"
 
 unalias egrep
 unalias fgrep
@@ -202,4 +193,110 @@ unalias grep
 
 
 export PATH=/opt/homebrew/bin:$PATH
+
+export PATH=$HOME/bin:$PATH
+
+export PATH="/usr/local/opt/openssl@3/bin:$PATH"
+
+fpath+=/opt/homebrew/share/zsh/site-functions
+
+autoload -U promptinit; promptinit
+prompt pure
+
+
+# eval $(ssh-agent)
+# if [ ! -n "$SSH_CLIENT" ]; then
+#   gpgconf --launch gpg-agent
+
+#   if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+#       export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+#   fi
+
+#   GPG_TTY=$(tty)
+#   export GPG_TTY
+#   # only necessary if using pinentry in the tty (instead of GUI)
+#   echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
+# fi
+
+
+#export GOROOT=/opt/homebrew/opt/go/libexec
+#export GOPATH=$HOME/.go
+#export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+#$export GOPATH=$HOME/go
+#$export GOROOT="$(brew --prefix golang)/libexec"
+#export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
+
+
+export GOPATH=$HOME/go
+export GOROOT="$(brew --prefix golang)/libexec"
+export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
+
+eval "$(mcfly init zsh)"
+
+
+
+
+
+eval $(ssh-agent)
+ssh-add --apple-use-keychain ~/.ssh/id_rsa
+
+ssh-add --apple-use-keychain ~/.ssh/id_rsa
+
+ssh-add  --apple-load-keychain
+
+eval $(ssh-agent)
+
+if [ ! -n "$SSH_CLIENT" ]; then
+  gpgconf --launch gpg-agent
+
+  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+      export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+  fi
+
+  GPG_TTY=$(tty)
+  export GPG_TTY
+  # only necessary if using pinentry in the tty (instead of GUI)
+  echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
+fi
+
+
+export COMPOSER_MEMORY_LIMIT=-1
+
+# The next line updates PATH for the Google Cloud SDK.
+# if [ -f 'REDACTED-HOME/google-cloud-sdk/path.zsh.inc' ]; then . 'REDACTED-HOME/google-cloud-sdk/path.zsh.inc'; fi
+
+# # The next line enables shell command completion for gcloud.
+# if [ -f 'REDACTED-HOME/google-cloud-sdk/completion.zsh.inc' ]; then . 'REDACTED-HOME/google-cloud-sdk/completion.zsh.inc'; fi
+
+
+ export GOOGLE_APPLICATION_CREDENTIALS="$HOME/certs/voya/REDACTED-GCP-PROJECT.json"
+
+ export PATH=$HOME/sites/pantheon-toolkit:$PATH
+ #export PATH="$PATH:$HOME/sites/pantheon-tools"
+
+ ssh-add --apple-load-keychain
+
+ # We only want to run gpg-agent on our local workstation. We accomplish that by trying to
+# detect if this shell was spawned from ssh or not. If the SSH_CLIENT env var is set, then
+# this is probably a remote login and we don't want to run gpg-agent.
+
+eval $(ssh-agent)
+if [ ! -n "$SSH_CLIENT" ]; then
+  gpgconf --launch gpg-agent
+
+  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+      export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+  fi
+
+  GPG_TTY=$(tty)
+  export GPG_TTY
+  # only necessary if using pinentry in the tty (instead of GUI)
+  echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
+fi
+export PATH=$(pyenv root)/shims:$PATH
+eval "$(pyenv init -)"
+
+
+# export SSH_AUTH_SOCK=REDACTED-HOME/Library/Containers/org.hejki.osx.sshce.agent/Data/socket.ssh
 
