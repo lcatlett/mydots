@@ -124,28 +124,6 @@ setopt share_history
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 
-function blt() {
-  if [[ ! -z ${AH_SITE_ENVIRONMENT} ]]; then
-    PROJECT_ROOT="/var/www/html/${AH_SITE_GROUP}.${AH_SITE_ENVIRONMENT}"
-  elif [ "`git rev-parse --show-cdup 2> /dev/null`" != "" ]; then
-    PROJECT_ROOT=$(git rev-parse --show-cdup)
-  else
-    PROJECT_ROOT="."
-  fi
-
-  if [ -f "$PROJECT_ROOT/vendor/bin/blt" ]; then
-    $PROJECT_ROOT/vendor/bin/blt "$@"
-
-  # Check for local BLT.
-  elif [ -f "./vendor/bin/blt" ]; then
-    ./vendor/bin/blt "$@"
-
-  else
-    echo "You must run this command from within a BLT-generated project."
-    return 1
-  fi
-}
-
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -172,24 +150,13 @@ export PANTHEON_CERT="REDACTED-HOME/certs/REDACTED@example.com.pem"
 
 
 
-
-#export GOPATH="$HOME/go"; export GOROOT="$HOME/.go"; export PATH="$GOPATH/bin:$PATH"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
-#alias ggovm="$GOPATH/bin/g"; # g-install: do NOT edit, see https://github.com/stefanmaric/g
-
-
-# We only want to run gpg-agent on our local workstation. We accomplish that by trying to
-# detect if this shell was spawned from ssh or not. If the SSH_CLIENT env var is set, then
-# this is probably a remote login and we don't want to run gpg-agent.
-
-
-
+# aliases to unset
 
 unalias egrep
 unalias fgrep
 unalias grep
-    unset GREP_OPTIONS EXC_FOLDERS
+unset GREP_OPTIONS EXC_FOLDERS
 
- #source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 
 export PATH=/opt/homebrew/bin:$PATH
@@ -204,99 +171,65 @@ autoload -U promptinit; promptinit
 prompt pure
 
 
-# eval $(ssh-agent)
-# if [ ! -n "$SSH_CLIENT" ]; then
-#   gpgconf --launch gpg-agent
-
-#   if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
-#       export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-#   fi
-
-#   GPG_TTY=$(tty)
-#   export GPG_TTY
-#   # only necessary if using pinentry in the tty (instead of GUI)
-#   echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
-# fi
-
-
-#export GOROOT=/opt/homebrew/opt/go/libexec
-#export GOPATH=$HOME/.go
-#export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-
-#$export GOPATH=$HOME/go
-#$export GOROOT="$(brew --prefix golang)/libexec"
-#export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
-
-
 export GOPATH=$HOME/go
 export GOROOT="$(brew --prefix golang)/libexec"
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
 
+
+
 eval "$(mcfly init zsh)"
 
 
-
-
-
 eval $(ssh-agent)
-ssh-add --apple-use-keychain ~/.ssh/id_rsa
 
-ssh-add --apple-use-keychain ~/.ssh/id_rsa
 
 ssh-add  --apple-load-keychain
 
-eval $(ssh-agent)
-
-if [ ! -n "$SSH_CLIENT" ]; then
-  gpgconf --launch gpg-agent
-
-  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
-      export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-  fi
-
-  GPG_TTY=$(tty)
-  export GPG_TTY
-  # only necessary if using pinentry in the tty (instead of GUI)
-  echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
-fi
-
 
 export COMPOSER_MEMORY_LIMIT=-1
-
-# The next line updates PATH for the Google Cloud SDK.
-# if [ -f 'REDACTED-HOME/google-cloud-sdk/path.zsh.inc' ]; then . 'REDACTED-HOME/google-cloud-sdk/path.zsh.inc'; fi
-
-# # The next line enables shell command completion for gcloud.
-# if [ -f 'REDACTED-HOME/google-cloud-sdk/completion.zsh.inc' ]; then . 'REDACTED-HOME/google-cloud-sdk/completion.zsh.inc'; fi
-
-
- export GOOGLE_APPLICATION_CREDENTIALS="$HOME/certs/voya/REDACTED-GCP-PROJECT.json"
-
- export PATH=$HOME/sites/pantheon-toolkit:$PATH
- #export PATH="$PATH:$HOME/sites/pantheon-tools"
-
- ssh-add --apple-load-keychain
 
  # We only want to run gpg-agent on our local workstation. We accomplish that by trying to
 # detect if this shell was spawned from ssh or not. If the SSH_CLIENT env var is set, then
 # this is probably a remote login and we don't want to run gpg-agent.
 
-eval $(ssh-agent)
+ssh-add -L
+
 if [ ! -n "$SSH_CLIENT" ]; then
-  gpgconf --launch gpg-agent
-
-  if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
-      export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-  fi
-
-  GPG_TTY=$(tty)
-  export GPG_TTY
-  # only necessary if using pinentry in the tty (instead of GUI)
-  echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
+ gpgconf --launch gpg-agent
+ if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+   export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+ fi
+ GPG_TTY=$(tty)
+ export GPG_TTY
+ # only necessary if using pinentry in the tty (instead of GUI)
+ echo UPDATESTARTUPTTY | gpg-connect-agent > /dev/null 2>&1
 fi
+
+ssh-add --apple-use-keychain ~/.ssh/id_rsa_icivics
+
 export PATH=$(pyenv root)/shims:$PATH
 eval "$(pyenv init -)"
 
+export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/bin/pkgconfig"
 
-# export SSH_AUTH_SOCK=REDACTED-HOME/Library/Containers/org.hejki.osx.sshce.agent/Data/socket.ssh
 
+
+#export MYSQL_CONFIG="$HOMEBREW_PREFIX/bin/mysql_config"
+
+# export PERCONA_TOOLKIT_BRANCH=${HOME}/scripts/mariadb-tools
+# export PERL5LIB=${HOME}/scripts/mariadb-tools/lib
+# export PERCONA_TOOLKIT_SANDBOX=`which mysql`
+
+
+export PATH="/opt/homebrew/sbin:$PATH"
+
+export PATH="/opt/homebrew/opt/mysql@5.7/bin:$PATH"
+
+export LDFLAGS="-L/opt/homebrew/opt/mysql@5.7/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/mysql@5.7/include"
+export PATH="/opt/homebrew/opt/php@8.0/bin:$PATH"
+export PATH="/opt/homebrew/opt/php@8.0/sbin:$PATH"
+
+
+export PATH="/opt/homebrew/opt/php@8.1/bin:$PATH"
+export PATH="/opt/homebrew/opt/php@8.1/sbin:$PATH"
