@@ -46,6 +46,10 @@ alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker 
 
 alias resetyubi='killall gpg-agent | gpg-connect-agent reloadagent /bye'
 
+alias bfg='java -jar ~/bin/bfg.jar'
+
+
+
 
 
 #alias python2.7=REDACTED-HOME/.pyenv/shims/python2
