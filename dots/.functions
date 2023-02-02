@@ -79,7 +79,7 @@ ii() {
     echo -e "\\n${RED}Current network location :$NC "
     scselect
     echo -e "\\n${RED}Public facing IP Address :$NC "
-    myip
+    ip
     echo -e "\\n${RED}DNS Configuration:$NC "
     scutil --dns
     echo
@@ -227,7 +227,9 @@ function blt() {
 free-port() { kill "$(lsof -t -i :$1)"; }
 kill-port() { kill -kill "$(lsof -t -i :$1)"; }
 
-
+killmysql() {
+  kill $(pgrep mysql)
+}
 
 function code {
     if [[ $# = 0 ]]
@@ -240,7 +242,7 @@ function code {
     fi
 }
 
-function killPort() {
+function killport() {
   if [ "$1" != "" ]
   then
     kill -9 $(lsof -ni tcp:"$1" | awk 'FNR==2{print $2}')
@@ -248,6 +250,7 @@ function killPort() {
     echo "Missing argument! Usage: killPort $PORT"
   fi
 }
+
 
 #gcloud commands
 
@@ -305,18 +308,14 @@ function db-tuner-full() {
     --user=${DB_FIELDS[2]} \
     --pass=${DB_FIELDS[3]} \
     --port=${DB_FIELDS[4]} \
-    --dbstat \
-    --tbstat \
-    --colstat \
-    --idxstat \
-    --sysstat \
-    --pfstat \
-    --buffers \
+    --verbose \
     --outputfile $SITE-db-tuner.txt
 }
 
 
 function db-tuner-summary() {
+
+  set -x
 
   SITE=$1
 
@@ -324,17 +323,30 @@ function db-tuner-summary() {
 
   DB_FIELDS=($(echo $TERM_DATA))
 
-  mysqltuner \
-    --forcemem=32000 \
-    --host=${DB_FIELDS[1]} \
-    --user=${DB_FIELDS[2]} \
-    --pass=${DB_FIELDS[3]} \
-    --port=${DB_FIELDS[4]} \
+
+  export SQL_HOST=${DB_FIELDS[1]}
+export SQL_USER=${DB_FIELDS[2]}
+export SQL_PASS=${DB_FIELDS[3]}
+export SQL_DB="pantheon"
+export SQL_PORT=${DB_FIELDS[4]}
+
+
+  echo -e "value of SQL_HOST is $SQL_HOST, value of SQL_USER is $SQL_USER, value of MYSQL_PWD is $SQL_PASS, value of SQL_DB is $SQL_DB, value of SQL_PORT is $SQL_PORT"
+
+ #mysqltuner --host 127.0.0.1 --port 3306 --user root --noask
+
+  /opt/homebrew/bin/mysqltuner \
+    --forcemem 32000 \
+    --host ${DB_FIELDS[1]} \
+    --user ${DB_FIELDS[2]} \
+    --pass \'"$SQL_PASS"\' \
+    --port ${DB_FIELDS[4]} \
     --dbstat \
     --sysstat \
     --pfstat \
     --buffers \
-    --outputfile $SITE-db-tuner-summary.txt
+    --outputfile $SITE-db-tuner-summary.txt \
+    --debug
 }
 
 function pat-mysql-summary() {
@@ -344,6 +356,7 @@ function pat-mysql-summary() {
   TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
 
   DB_FIELDS=($(echo $TERM_DATA))
+
 
   pt-mysql-summary \
     --host ${DB_FIELDS[1]} \
@@ -382,15 +395,6 @@ echo -e "value of SQL_HOST is $SQL_HOST, value of SQL_USER is $SQL_USER, value o
 
 }
 
-function yubinudge() {
-    pkill gpg-agent;
-    pkill ssh-agent;
-    pkill pinentry;
-    gpg-connect-agent updatestartuptty /bye
-    gpg --card-status
-    ssh-add -L
-}
-
 function yubikill() {
   SCDAEMON_CONF="disable-ccid\nreader-port \"$(pcsctest <<< 01 | grep 'Reader 01' | awk -F ': ' '{print $2}' | head -n1)\""
   echo $SCDAEMON_CONF;
@@ -399,9 +403,16 @@ function yubikill() {
 
 }
 
+yubinudge() {
+    pkill gpg-agent;
+    pkill ssh-agent;
+    pkill pinentry;
+    gpg-connect-agent updatestartuptty /bye
+    gpg --card-status
+    ssh-add -L
+}
 
-
-function yubitransport() {
+yubitransport() {
   echo "[!] Remove Yubikey from device port."
   if read -q "REPLY?[?] Yubikey is unplugged? [Y/y]: "; then
     pkill gpg-agent;

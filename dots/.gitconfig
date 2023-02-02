@@ -12,9 +12,6 @@
 # When more specific variables of color.* are set, they always take precedence over this setting.
 # Defaults to false.
 	ui = true
-  # diff = auto
-  # status = auto
-  # branch = auto
 
 [color "branch"]
   current = yellow reverse
@@ -57,63 +54,55 @@
   autosquash = true
 
 [alias]
-
-  # most commonly used
-  co = checkout
-  br = branch -a
   s = status -s -u
 
+  # force clean of current working directory
   nuke = !git clean -fd && git reset --hard
-  ri = rebase --interactive --autosquash
-  listunstaged = diff --name-status
-  liststaged = diff --name-status --staged
-  listhistory = log --name-status
 
-  busypeople = shortlog -6
-  busythisweek = shortlog --since=one.week.ago
-  undo = reset --soft HEAD^
-
-
-#get author of last commit
+# get author of last commit
   whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
 
-
-  snapstash = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
-  save-wip = !git add -A && git commit -m 'wip: savepoint'
+# quick save of current repo wip state
+  wip = !git add -A && git commit -m 'wip: savepoint'
 
 # List branches according to you most recent checkouts.
   recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
 
-  # map typos
+# map typos
   remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
 
-    # list tags version sorted
+# list tags version sorted
   tags = "!f() { git tag | sort --version-sort; }; f"
 
-  # Find commits by source code
+# Find commits by source code
   fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
 
-    # Show the diff between the latest commit and the current state
+# Show the diff between the latest commit and the current state
   d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-#View the diff of the last commit
+# View the diff of the last commit
   dlc = diff --cached HEAD^
 
-  # Show unpushed/ahead changes
+# Show unpushed/ahead changes
   ahead = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline
-    # Show the diff of upushed/ahead changes
+
+# Show the diff of upushed/ahead changes
   ahead-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH
 
+# list git aliases
   alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
 
-  # Resolve merge conflict with file in the current working branch
+# Resolve ncoming merge conflict in favor of the current working branch
   ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+
+# Resolve all incoming merge conflicts in favor of the current working branch
   all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
 
-  # Resolve merge conflict with file in the upstream repo
+# Resolve incoming merge conflict in favor of the upstream repo
   theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
-  all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
 
+# Resolve all incoming merge conflicts in favor of the upstream repo
+  all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
 
 # Delete branch
   del = branch -D
@@ -121,8 +110,8 @@
 #Update your local and replay your commits on upstream HEAD
   pl = pull --rebase
 
-#Undo your last commit
-  undo-commit = reset --soft HEAD~1
+#Undo last commit
+  undo = reset --soft HEAD~1
 
 # View a pretty formatted git log summary
   ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
@@ -133,20 +122,20 @@
 #V iew a pretty formatted git log and graph of all branches
   lol = log --pretty=oneline --graph --abbrev-commit --all
 
-  fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
-
-
-
-
-
 #Find a file path in codebase
   f = "!git ls-files | grep -i"
 
- #List your available git config aliases
+ # List available git config aliases
   la = "!git config -l | grep alias | cut -c 7-"
-	cane = commit --amend --no-edit
-	mc = merge --continue
 
+# amend last commit without changing commit message
+  amend = commit --amend --no-edit
+  cane = commit --amend --no-edit
+
+# helpful merge and rebase aliases
+	mc = merge --continue
+  ri = rebase --interactive
+  squash = "!f(){ git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
 
 [format]
     pretty = format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
@@ -181,3 +170,4 @@
 [mergetool "sourcetree"]
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
+
