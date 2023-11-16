@@ -302,20 +302,18 @@ function db-tuner-full() {
 
   DB_FIELDS=($(echo $TERM_DATA))
 
-  mysqltuner \
-    --forcemem=32000 \
-    --host=${DB_FIELDS[1]} \
-    --user=${DB_FIELDS[2]} \
-    --pass=${DB_FIELDS[3]} \
-    --port=${DB_FIELDS[4]} \
+    /opt/homebrew/bin/mysqltuner \
+    --forcemem 32000 \
+    --host ${DB_FIELDS[1]} \
+    --user ${DB_FIELDS[2]} \
+    --pass ${DB_FIELDS[3]} \
+    --port ${DB_FIELDS[4]} \
     --verbose \
-    --outputfile $SITE-db-tuner.txt
+    --outputfile $SITE-db-tuner-$(date +"%Y-%m-%d-%H-%M-%S").txt
 }
 
 
 function db-tuner-summary() {
-
-  set -x
 
   SITE=$1
 
@@ -323,30 +321,17 @@ function db-tuner-summary() {
 
   DB_FIELDS=($(echo $TERM_DATA))
 
-
-  export SQL_HOST=${DB_FIELDS[1]}
-export SQL_USER=${DB_FIELDS[2]}
-export SQL_PASS=${DB_FIELDS[3]}
-export SQL_DB="pantheon"
-export SQL_PORT=${DB_FIELDS[4]}
-
-
-  echo -e "value of SQL_HOST is $SQL_HOST, value of SQL_USER is $SQL_USER, value of MYSQL_PWD is $SQL_PASS, value of SQL_DB is $SQL_DB, value of SQL_PORT is $SQL_PORT"
-
- #mysqltuner --host 127.0.0.1 --port 3306 --user root --noask
-
-  /opt/homebrew/bin/mysqltuner \
+    /opt/homebrew/bin/mysqltuner \
     --forcemem 32000 \
     --host ${DB_FIELDS[1]} \
     --user ${DB_FIELDS[2]} \
-    --pass \'"$SQL_PASS"\' \
+    --pass ${DB_FIELDS[3]} \
     --port ${DB_FIELDS[4]} \
     --dbstat \
     --sysstat \
     --pfstat \
     --buffers \
-    --outputfile $SITE-db-tuner-summary.txt \
-    --debug
+    --outputfile $SITE-db-tuner-summary-$(date +"%Y-%m-%d-%H-%M-%S").txt
 }
 
 function pat-mysql-summary() {
@@ -357,43 +342,86 @@ function pat-mysql-summary() {
 
   DB_FIELDS=($(echo $TERM_DATA))
 
-
   pt-mysql-summary \
     --host ${DB_FIELDS[1]} \
     --user ${DB_FIELDS[2]} \
     --password ${DB_FIELDS[3]} \
-    --port=${DB_FIELDS[4]} \
+    --port ${DB_FIELDS[4]} \
     --databases pantheon
 }
 
-function setup-pt() {
-SITE=$1
+function pat-variable-advisor() {
 
-echo -e "Setting required configuration values for $SITE"
+  SITE=$1
 
-TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
+  TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
 
-DB_FIELDS=($(echo $TERM_DATA))
+  DB_FIELDS=($(echo $TERM_DATA))
 
-#if [ -z "${DB_FIELDS[0]}" ]; then
- # error "Error generating configuration values for $SITE. Are you authenticated to terminus?"
-  #exit 1
-#fi
-
-export SQL_HOST=${DB_FIELDS[1]}
-export SQL_USER=${DB_FIELDS[2]}
-export SQL_PASS=${DB_FIELDS[3]}
-export SQL_DB="pantheon"
-export SQL_PORT=${DB_FIELDS[4]}
-
-#export MYSQL_PWD=$SQL_PASS
-
-#MYSQL_COMMAND_PARAMS="-u $SQL_USER -h $SQL_HOST -P $SQL_PORT $SQL_DB "
-#export MYSQL_COMMAND="mysql $MYSQL_COMMAND_PARAMS"
-
-echo -e "value of SQL_HOST is $SQL_HOST, value of SQL_USER is $SQL_USER, value of MYSQL_PWD is $SQL_PASS, value of SQL_DB is $SQL_DB, value of SQL_PORT is $SQL_PORT"
+  pt-variable-advisor \
+    --source-of-variables=mysql \
+    --host ${DB_FIELDS[1]} \
+    --user ${DB_FIELDS[2]} \
+    --password ${DB_FIELDS[3]} \
+    --port ${DB_FIELDS[4]}
 
 }
+
+
+
+
+function  pat-index-usage() {
+
+   SITE=$1
+
+  TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
+
+  DB_FIELDS=($(echo $TERM_DATA))
+
+  pt-index-usage \
+    pt-index-usage \
+    --host ${DB_FIELDS[1]} \
+    --user ${DB_FIELDS[2]} \
+    --password ${DB_FIELDS[3]} \
+    --port ${DB_FIELDS[4]} \
+    --databases pantheon
+
+ # pt-index-usage mysqld-slow-query.log --host localhost --user root
+
+}
+
+
+
+function db-tuner-idx() {
+
+  SITE=$1
+
+  TERM_DATA=$(terminus connection:info $SITE --format=string --fields=mysql_host,mysql_username,mysql_password,mysql_port)
+
+  DB_FIELDS=($(echo $TERM_DATA))
+
+
+   /opt/homebrew/bin/mysqltuner \
+    --forcemem 32000 \
+    --host ${DB_FIELDS[1]} \
+    --user ${DB_FIELDS[2]} \
+    --pass ${DB_FIELDS[3]} \
+    --port ${DB_FIELDS[4]} \
+    --buffers --dbstat --idxstat --sysstat --pfstat \
+    --outputfile $SITE-db-tuner-idx-$(date +"%Y-%m-%d-%H-%M-%S").txt
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 function yubikill() {
   SCDAEMON_CONF="disable-ccid\nreader-port \"$(pcsctest <<< 01 | grep 'Reader 01' | awk -F ': ' '{print $2}' | head -n1)\""

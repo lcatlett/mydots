@@ -49,6 +49,15 @@
   #safecrlf = true
   editor = vim
 	pager = diff-so-fancy | less --tabs=4 -RFX
+	compression = 0
+  packedGitLimit = 1028m
+  packedGitWindowSize = 512m
+	compression = 9
+
+[pack]
+deltaCacheSize = 2047m
+packSizeLimit = 2047m
+windowMemory = 2047m
 
 [rebase]
   autosquash = true
@@ -93,16 +102,23 @@
   alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
 
 # Resolve ncoming merge conflict in favor of the current working branch
-  ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
 
-# Resolve all incoming merge conflicts in favor of the current working branch
-  all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
+  # Resolve all incoming merge conflicts in favor of the current working branch
+    all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
 
-# Resolve incoming merge conflict in favor of the upstream repo
-  theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+  # Resolve incoming merge conflict in favor of the upstream repo
+    theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
-# Resolve all incoming merge conflicts in favor of the upstream repo
-  all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
+  # Resolve all incoming merge conflicts in favor of the upstream repo
+    all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
+	test-all-theirs = "!f() { [ -z \"$@\" ] && \"set - .\"; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
+	test-all-ours = "!\"f() { [ -z \\\"$@\\\" ] && set - .; git checkout --ours -- \\\"$@\\\"; git add -u -- \\\"$@\\\"; }; f\""
+  # Resolve all incoming merge conflicts in favor of the upstream repo, continue rebase
+  #all-next = "git all-theirs && git rebase --continue"
+
+# Git rebase --continue
+  rc = rebase --continue
 
 # Delete branch
   del = branch -D
@@ -137,6 +153,13 @@
   ri = rebase --interactive
   squash = "!f(){ git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
 
+  rcc = "-c core.editor=true rebase --continue"
+	mergetest = "!f(){ git mergediff $@ | sed -ne \"/^+<<</,/^+>>>/ p\" ; };f "
+	mergediff = "!f(){ branch=\"$1\" ; into=\"$2\" ; git merge-tree $(git merge-base \"$branch\" \"$into\") \"$into\" \"$branch\" ; };f "
+
+	conflicts = !git ls-files -u | cut -f 2 | sort -u
+
+
 [format]
     pretty = format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
 
@@ -147,8 +170,6 @@
 
 [help]
     autocorrect = 0
-[branch]
-	autosetuprebase = always
 [credential]
 	helper =
 	helper = /usr/local/share/gcm-core/git-credential-manager-core
@@ -171,3 +192,11 @@
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
 
+
+[merge "conflicts"]
+	driver = true
+[rerere]
+	enabled = false
+	autoupdate = false
+[http]
+	postBuffer = 52428800
