@@ -1,0 +1,26 @@
+#!/bin/bash
+
+SITE=$1
+ENV=$2
+
+echo "Setting required configuration values for $SITE"
+
+if [ "$ENV" == "all" ]; then
+    ENVLIST="$(terminus env:list $SITE --format=list --fields=id)"
+    IFS=$'\n' paths=($ENVLIST)
+
+else
+    ENVLIST=$ENV
+    IFS=, paths=($ENVLIST)
+fi
+
+for (( i=0; i<${#paths[@]}; i++ ))
+do
+    ENVI=${paths[$i]}
+    echo "Collecting logs for $ENVI"
+
+    for ENV_SITE in $ENVI; do
+
+    terminus logs:get  $SITE.$ENV_SITE --all
+    done
+done
