@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+
+URL=""
+RESOLVE=""
+i=1
+var=""
+while [ $i -le $# ]
+  do
+    var="${1@Q}"
+    case "${var:1:-1}" in
+      "--agcdn" | "--acdn" | "-agcdn" | "-acdn")
+        [ -z "$RESOLVE" ] && RESOLVE="$IP_AGCDN"
+        i=$(($i-1))
+      ;;
+      "--agcdn2" | "--acdn2" | "-agcdn2" | "-acdn2")
+        [ -z "$RESOLVE" ] && RESOLVE="$IP_AGCDN2"
+        i=$(($i-1))
+      ;;
+      "--fe1" | "-fe1")
+        [ -z "$RESOLVE" ] && RESOLVE="$IP_FE1"
+        i=$(($i-1))
+      ;;
+      "--fe2" | "-fe2")
+        [ -z "$RESOLVE" ] && RESOLVE="$IP_FE2"
+        i=$(($i-1))
+      ;;
+      "--fe3" | "-fe3")
+        [ -z "$RESOLVE" ] && RESOLVE="$IP_FE3"
+        i=$(($i-1))
+      ;;
+      "--fe4" | "-fe4")
+        [ -z "$RESOLVE" ] && RESOLVE="$IP_FE4"
+        i=$(($i-1))
+      ;;
+      "--fe253" | "-fe253")
+        [ -z "$RESOLVE" ] && RESOLVE="$IP_FE253"
+        i=$(($i-1))
+      ;;
+        "--io" | "-io")
+        set -- "$@"  -H  "accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+        i=$(($i+1))
+      ;;
+        "--debug" | "-debug")
+        set -- "$@"  -H  "pantheon-debug: 1"
+        i=$(($i+1))
+        set -- "$@"  -w  "     time_namelookup:  %{time_namelookup}s\n        time_connect:  %{time_connect}s\n     time_appconnect:  %{time_appconnect}s\n    time_pretransfer:  %{time_pretransfer}s\n       time_redirect:  %{time_redirect}s\n  time_starttransfer:  %{time_starttransfer}s\n                     ----------\n          time_total:  %{time_total}s\n"
+        i=$(($i+1))
+      ;;
+        "--fastly-debug" | "-fastly-debug" | "--fdebug" | "-fdebug")
+        set -- "$@"  -H "fastly-debug: 1"
+        i=$(($i+1))
+      ;;
+      *)
+        if [ -z "$URL" ] && [[ ${var:1:-1} != -* ]] && [[ "${*: -1}" != "--help" ]]
+        then
+          eval $(echo "${var:1:-1}" | jq -R -r -j 'capture("(?<URL>(?<PROTO>.+://)?(?<DOMAIN>[^/\\?]+).*)") | to_entries[] | "\(.key)=\"\(.value // "")\";"')
+          if [ ! -z "$DOMAIN" ]; then
+            set -- "$@" "$([ -z "$PROTO" ] && echo "https://" || echo "" )${URL}"
+          fi
+        else
+          set -- "$@" "${var:1:-1}"
+        fi
+      ;;
+    esac
+
+    shift
+    i=$(($i+1))
+done
+
+if [ -z "$*" ]
+then
+cat >&2 <<EOF
+Usage: hurl [options...] <url>
+     --debug         Send -H "pantheon-debug: 1", alias -debug
+     --fdebug        Send -H "fastly-debug: 1", alias -fdebug
+     --agcdn         Resolve host to $IP_AGCDN (Legacy AGCDN), aliases -agcdn, --acdn, -acdn
+     --agcdn2        Resolve host to $IP_AGCDN2 (Custom Cert AGCDN), aliases -agcdn2, --acdn2, -acdn2
+     --fe1           Resolve host to $IP_FE1 (fe1), alias -fe1
+     --fe2           Resolve host to $IP_FE2 (fe2), alias -fe2
+     --fe3           Resolve host to $IP_FE3 (fe3), alias -fe3
+     --fe4           Resolve host to $IP_FE4 (fe4), alias -fe4
+     --fe253         Resolve host to $IP_FE253 (fe253/canary), alias -fe253
+     --io            Send -H "accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.", Enables auto-WebP if supported ,alias -io
+ -h, --help          Show curl --help
+EOF
+exit 1
+fi
+
+if [ ! -z "$DOMAIN" ]
+then
+  if [ ! -z "$RESOLVE" ]
+  then
+    set -- "$@" "--resolve" "$DOMAIN:443:$RESOLVE"
+  fi
+
+  eval "curl ${*@Q} -s -D - -o /dev/null"
+  err=$?
+  echo "host: $DOMAIN"
+  echo "a-record: $(curl "https://dns.google/resolve?name=${DOMAIN}&type=A" -s | jq -r '(.Answer // [])[] | select(.type == 1) | .data' | xargs echo)"
+  if [ ! -z "$RESOLVE" ]
+  then
+    echo "dns-spoof: $RESOLVE"
+  fi
+
+  echo curl "${*@Q}" -s -D - -o /dev/null
+  exit $err
+fi
+
+eval "curl ${*@Q}"

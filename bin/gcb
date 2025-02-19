@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+a=${1:?'a branch is required'}
+b=${2:-$(git rev-parse --abbrev-ref HEAD)}
+
+git log \
+  --graph \
+  --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' \
+  --abbrev-commit \
+  --date=relative \
+  "$a".."$b"
+

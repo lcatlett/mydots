@@ -2,17 +2,17 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-man() {
-	env \
-		LESS_TERMCAP_mb=$(printf "\e[1;31m") \
-		LESS_TERMCAP_md=$(printf "\e[1;31m") \
-		LESS_TERMCAP_me=$(printf "\e[0m") \
-		LESS_TERMCAP_se=$(printf "\e[0m") \
-		LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
-		LESS_TERMCAP_ue=$(printf "\e[0m") \
-		LESS_TERMCAP_us=$(printf "\e[1;32m") \
-			man "$@"
-}
+# man() {
+# 	env \
+# 		LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+# 		LESS_TERMCAP_md=$(printf "\e[1;31m") \
+# 		LESS_TERMCAP_me=$(printf "\e[0m") \
+# 		LESS_TERMCAP_se=$(printf "\e[0m") \
+# 		LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+# 		LESS_TERMCAP_ue=$(printf "\e[0m") \
+# 		LESS_TERMCAP_us=$(printf "\e[1;32m") \
+# 			man "$@"
+# }
 
 # trash: Function to moves a file to the MacOS trash
 trash() {
@@ -80,36 +80,9 @@ ii() {
     scselect
     echo -e "\\n${RED}Public facing IP Address :$NC "
     ip
-    echo -e "\\n${RED}DNS Configuration:$NC "
-    scutil --dns
     echo
 }
 
-
-# Count code lines in some directory.
-# $ loc py js css
-# # => Lines of code for .py: 3781
-# # => Lines of code for .js: 3354
-# # => Lines of code for .css: 2970
-# # => Total lines of code: 10105
-function loc() {
-  local total
-  local firstletter
-  local ext
-  local lines
-  total=0
-  for ext in $@; do
-    firstletter=$(echo $ext | cut -c1-1)
-    if [[ firstletter != "." ]]; then
-      ext=".$ext"
-    fi
-    lines=`find-exec "*$ext" cat | wc -l`
-    lines=${lines// /}
-    total=$(($total + $lines))
-    echo "Lines of code for ${fg[blue]}$ext${reset_color}: ${fg[green]}$lines${reset_color}"
-  done
-  echo "${fg[blue]}Total${reset_color} lines of code: ${fg[green]}$total${reset_color}"
-}
 
 # Show how much RAM application uses.
 # $ ram safari
@@ -152,7 +125,7 @@ function size() {
 #  ---------------------------------------------------------------------------
 
 ## hammer a service with curl for a given number of times
-## usage: curlhammer $url
+## usage: curlhammer $url $num_curls
 curlhammer () {
   bot "about to hammer $1 with $2 curls ⇒";
   echo "curl -k -s -D - $1 -o /dev/null | grep 'HTTP/1.1' | sed 's/HTTP\/1.1 //'"
@@ -201,27 +174,6 @@ matrix() {
     echo -e "\\e[1;40m" ; clear ; while :; do echo $LINES $COLUMNS $(( $RANDOM % $COLUMNS)) $(( $RANDOM % 72 )) ;sleep 0.05; done|awk '{ letters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"; c=$4; letter=substr(letters,c,1);a[$3]=0;for (x in a) {o=a[x];a[x]=a[x]+1; printf "\033[%s;%sH\033[2;32m%s",o,x,letter; printf "\033[%s;%sH\033[1;37m%s\033[0;0H",a[x],x,letter;if (a[x] >= $1) { a[x]=0; } }}'
 }
 
-function blt() {
-  if [[ ! -z ${AH_SITE_ENVIRONMENT} ]]; then
-    PROJECT_ROOT="/var/www/html/${AH_SITE_GROUP}.${AH_SITE_ENVIRONMENT}"
-  elif [ "`git rev-parse --show-cdup 2> /dev/null`" != "" ]; then
-    PROJECT_ROOT=$(git rev-parse --show-cdup)
-  else
-    PROJECT_ROOT="."
-  fi
-
-  if [ -f "$PROJECT_ROOT/vendor/bin/blt" ]; then
-    $PROJECT_ROOT/vendor/bin/blt "$@"
-
-  # Check for local BLT.
-  elif [ -f "./vendor/bin/blt" ]; then
-    ./vendor/bin/blt "$@"
-
-  else
-    echo "You must run this command from within a BLT-generated project."
-    return 1
-  fi
-}
 
 
 free-port() { kill "$(lsof -t -i :$1)"; }
@@ -359,11 +311,32 @@ function pat-variable-advisor() {
   DB_FIELDS=($(echo $TERM_DATA))
 
   pt-variable-advisor \
-    --source-of-variables=mysql \
     --host ${DB_FIELDS[1]} \
     --user ${DB_FIELDS[2]} \
     --password ${DB_FIELDS[3]} \
     --port ${DB_FIELDS[4]}
+
+#     Option types: s=string, i=integer, f=float, h/H/a/A=comma-separated list, d=DSN, z=size, m=time
+
+# Rules:
+
+#   This tool accepts additional command-line arguments. Refer to the SYNOPSIS and usage information for details.
+
+# DSN syntax is key=value[,key=value...]  Allowable DSN keys:
+
+#   KEY  COPY  MEANING
+#   ===  ====  =============================================
+#   A    yes   Default character set
+#   D    yes   Default database
+#   F    yes   Only read default options from the given file
+#   P    yes   Port number to use for connection
+#   S    yes   Socket file to use for connection
+#   h    yes   Connect to host
+#   p    yes   Password to use when connecting
+#   u    yes   User for login if not current user
+
+#   If the DSN is a bareword, the word is treated as the 'h' key.
+
 
 }
 
@@ -415,14 +388,6 @@ function db-tuner-idx() {
 
 
 
-
-
-
-
-
-
-
-
 function yubikill() {
   SCDAEMON_CONF="disable-ccid\nreader-port \"$(pcsctest <<< 01 | grep 'Reader 01' | awk -F ': ' '{print $2}' | head -n1)\""
   echo $SCDAEMON_CONF;
@@ -468,3 +433,74 @@ function terminus-token() {
   echo $TOKEN
 }
 
+# remove ANSI escape sequences from file
+function ramsi() {
+  sed -i -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" $1
+}
+
+
+help() {
+    "$@" --help 2>&1 | bathelp
+}
+
+
+blt() {
+  if [[ ! -z ${AH_SITE_ENVIRONMENT} ]]; then
+    PROJECT_ROOT="/var/www/html/${AH_SITE_GROUP}.${AH_SITE_ENVIRONMENT}"
+  elif [ "`git rev-parse --show-cdup 2> /dev/null`" != "" ]; then
+    PROJECT_ROOT=$(git rev-parse --show-cdup)
+  else
+    PROJECT_ROOT="."
+  fi
+
+  if [ -f "$PROJECT_ROOT/vendor/bin/blt" ]; then
+    $PROJECT_ROOT/vendor/bin/blt "$@"
+
+  # Check for local BLT.
+  elif [ -f "./vendor/bin/blt" ]; then
+    ./vendor/bin/blt "$@"
+
+  else
+    echo "You must run this command from within a BLT-generated project."
+    return 1
+  fi
+}
+
+
+
+
+function local-package-dev-() {
+
+    if [[ ! -f "composer.json" ]]; then
+        echo "composer.json not found"
+        exit 1
+    fi
+
+    VENDOR="${2:-pantheon-systems}"
+
+    composer config repositories.$1 '{"type": "path", "url": "path-repos/'$1'", "options": {"symlink": true}}' --file composer.json
+
+    rm -Rf ./vendor
+    rm -Rf ./composer.lock
+
+    composer require $VENDOR/$1 @dev
+
+    #git checkout -- composer.json
+  #  git checkout -- composer.lock
+}
+
+
+# Add to your shell config
+function track() {
+    echo "$(date),$1" >> ~/.terminal_stats.csv
+}
+
+
+function git_exclude() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: git_exclude <path or file eg /composer.lock>"
+        return 1
+    fi
+    echo "$1" >> .git/info/exclude
+    echo "Added '$1' to .git/info/exclude"
+}

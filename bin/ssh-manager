@@ -49,7 +49,7 @@ if [[ $COMMAND_NAME = "copy" ]]; then
 	if [[ ! "$key" ]]; then
 		echo -e "${RED}$ARROW Error: You have to pass key name. Usage: $BIN_NAME copy <name>${NC}"
 	else
-		key="id_ed25519_"$key".pub"
+		key=""$key".pub"
 
 		if [[ ! -f $folder$key ]]; then
 	        echo -e "${RED}$ARROW Error: Key $key does not exists in $folder.${NC}"
@@ -60,10 +60,16 @@ if [[ $COMMAND_NAME = "copy" ]]; then
 fi
 
 if [[ $COMMAND_NAME = "new" ]]; then
-	while true; do
-		read -p "$(echo -e "${YELLOW}$ARROW Enter key file name:${NC} ")" key
+	key=$2
 
-		if [[ -f $HOME"/.ssh/id_ed25519_"$key ]]; then
+	if [[ ! "$key" ]]; then
+			read -p "$(echo -e "${YELLOW}$ARROW Enter key file name:${NC} ")" key
+		else
+			key=$key
+	fi
+
+	while true; do
+		if [[ -f $HOME"/.ssh/"$key ]]; then
 			echo -e "${RED}$ARROW Error: Key with this file name already exists.${NC}"
 		else
 			break
@@ -72,9 +78,9 @@ if [[ $COMMAND_NAME = "new" ]]; then
 
 	read -p "$(echo -e "${YELLOW}$ARROW Enter key comment:${NC} ")" comment
 
-	ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519_$key -C "$comment"
+	ssh-keygen -t rsa -b 4096 -f ~/.ssh/$key -C "$comment"
 
-	if [[ $2 ]] && [[ $2 = "--save" ]]; then
+	if [[ $3 ]] && [[ $3 = "--save" ]]; then
 		echo $key > ~/.ssh/key_name.tmp
 	fi
 
@@ -125,17 +131,17 @@ if [[ $COMMAND_NAME = "host" ]]; then
 	echo " user $user" >> ~/.ssh/config
 
 	if [[ ! $key = "none" ]]; then
-		echo " IdentityFile ~/.ssh/id_ed25519_$key" >> ~/.ssh/config
+		echo " IdentityFile ~/.ssh/$key" >> ~/.ssh/config
 	fi
 
 	echo "" >> ~/.ssh/config
 
-	read -p "$(echo -e "${YELLOW}$ARROW Would you like to transfer public key id_ed25519_$key.pub to server $host ($shortname)? (y|n): ${NC} ")" transfer
+	read -p "$(echo -e "${YELLOW}$ARROW Would you like to transfer public key $key.pub to server $host ($shortname)? (y|n): ${NC} ")" transfer
 
 	if [[ $transfer = "y" ]] || [[ $transfer = "yes" ]]; then
-		publicKey="$(cat ~/.ssh/id_ed25519_$key.pub)"
+		publicKey="$(cat ~/.ssh/$key.pub)"
 		ssh $shortname "mkdir -p ~/.ssh; echo $publicKey >> ~/.ssh/authorized_keys;"
-		echo -e "${GREEN}$ARROW Success: Public key id_ed25519_$key.pub was successfully transfered to the server.${NC}"
+		echo -e "${GREEN}$ARROW Success: Public key $key.pub was successfully transfered to the server.${NC}"
 	fi
 
 	echo -e "${GREEN}$ARROW Success: SSH host '$shortname' was successfully added to SSH config.${NC}"
