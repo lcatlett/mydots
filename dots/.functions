@@ -504,3 +504,10 @@ function git_exclude() {
     echo "$1" >> .git/info/exclude
     echo "Added '$1' to .git/info/exclude"
 }
+
+
+
+timezsh() {
+  shell=${1-$SHELL}
+  for i in $(seq 1 10); do /usr/bin/time $shell -i -c exit; done
+}
