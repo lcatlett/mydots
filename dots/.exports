@@ -4,7 +4,7 @@ export EDITOR=vi
 # Add `~/bin` to the `$PATH`
 export PATH="$HOME/bin:$PATH";
 
-export NVM_DIR="$HOME/.nvm"
+#export NVM_DIR="$HOME/.nvm"
 
 
 
@@ -27,7 +27,8 @@ for path_candidate in /opt/local/sbin \
   $YARN_BIN_EXPORT \
   /opt/local/bin \
   /usr/local/share/npm/bin \
-  ~/bin
+  ~/bin \
+  /opt/homebrew/opt/gnu-sed/libexec/gnubin
 do
   if [ -d ${path_candidate} ]; then
     export PATH=${PATH}:${path_candidate}
@@ -51,5 +52,18 @@ export COMPOSER_MEMORY_LIMIT=-1
 
 export DOCKER_CLIENT_TIMEOUT=2000
 export COMPOSE_HTTP_TIMEOUT=2000
+export BAT_THEME="Sublime Snazzy"
+
+
+export IP_AGCDN='151.101.2.133'
+export IP_FE1='23.185.0.1'
+export IP_FE2='23.185.0.2'
+export IP_FE3='23.185.0.3'
+export IP_FE4='23.185.0.4'
+export IP_FE253='23.185.0.253'
+export IP_AGCDN2='151.101.2.228'
+export CNAME_AGCDN='pantheon-systems.map.fastly.net'
+export CNAME_AGCDN2='advcdn-pantheon.map.fastly.net'
+export NVM_LAZY_LOAD=true
 
 
