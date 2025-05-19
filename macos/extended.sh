@@ -1,4 +1,3 @@
-
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
 running "closing any system preferences to prevent issues with automated changes"
@@ -21,30 +20,29 @@ ok
 sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
 
 # Enable firewall stealth mode (no response to ICMP / ping requests)
-# Source: https://support.apple.com/kb/PH18642
-#sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -int 1
 sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -int 1
 
-
-# Disable the “Are you sure you want to open this application?” dialog
+# Disable the "Are you sure you want to open this application?" dialog
 defaults write com.apple.LaunchServices LSQuarantine -bool false
-
 
 ###############################################################################
 # Override annoying defaults for system and menus#
 ###############################################################################
 
 running "allow 'locate' command"
-sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist > /dev/null 2>&1;
+# On Apple Silicon (M1/M2/M3), the locate database is not enabled by default and SIP may block this. Recommend using 'mdfind' or 'find' instead. Commenting out for M3 compatibility.
+# sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist > /dev/null 2>&1;
 
 running "Set standby delay to 24 hours (default is 1 hour)"
 sudo pmset -a standbydelay 86400;
 
 running "Disable the sound effects on boot"
-sudo nvram SystemAudioVolume=" ";
+# On Apple Silicon (M1/M2/M3), this command is SIP-protected and may not work. Commenting out for M3 compatibility.
+# sudo nvram SystemAudioVolume=" ";
 
 running "Disable local Time Machine snapshots"
-sudo tmutil disablelocal;
+# This command is deprecated since macOS High Sierra and not available on Apple Silicon. Commenting out for M3 compatibility.
+# sudo tmutil disablelocal;
 
 
 running "Set sidebar icon size to medium"
@@ -65,10 +63,10 @@ defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true;
 running "Automatically quit printer app once the print jobs complete"
 defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true;
 
-running "Disable the “Are you sure you want to open this application?” dialog"
+running "Disable the 'Are you sure you want to open this application?' dialog"
 defaults write com.apple.LaunchServices LSQuarantine -bool false;
 
-running "Remove duplicates in the “Open With” menu (also see 'lscleanup' alias)"
+running "Remove duplicates in the 'Open With' menu (also see 'lscleanup' alias)"
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user;
 
 running "Display ASCII control characters using caret notation in standard text views"
@@ -135,6 +133,9 @@ defaults write NSGlobalDomain InitialKeyRepeat -int 10;
 running "Disable auto-correct"
 defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false;
 
+running "Set trackpad tracking speed to fast"
+defaults write -g com.apple.trackpad.scaling -float 2.5
+
 ###############################################################################
 # Screen                                                         #
 ###############################################################################
@@ -144,10 +145,12 @@ defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 0;
 
 running "Enable subpixel font rendering on non-Apple LCDs"
-defaults write NSGlobalDomain AppleFontSmoothing -int 2;
+#defaults write NSGlobalDomain AppleFontSmoothing -int 2;
 
 running "Enable HiDPI display modes (requires restart)"
 sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutionEnabled -bool true;
+
+defaults -currentHost write -g AppleFontSmoothing -int 0
 
 ###############################################################################
 # Finder                                                        #
@@ -215,7 +218,7 @@ defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true;
 # Fix vscode fonts in terminal
 defaults write com.microsoft.VSCode.helper.NP CGFontRenderingFontSmoothingDisabled -bool false
 
-running "Expand the following File Info panes: “General”, “Open with”, and “Sharing & Permissions”"
+running "Expand the following File Info panes: 'General', 'Open with', and 'Sharing & Permissions'"
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
   General -bool true \
   OpenWith -bool true \
@@ -231,22 +234,21 @@ defaults write com.apple.terminal StringEncodings -array 4;
 #
 # running "Use a modified version of the Solarized Dark theme by default in Terminal.app"
 # TERM_PROFILE='Solarized Dark xterm-256color';
-# CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')";
-# if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
-# 	open "./configs/${TERM_PROFILE}.terminal";
-# 	sleep 1; # Wait a bit to make sure the theme is loaded
-# 	defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}";
-# 	defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}";
-# fi;
+ CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')";
+ if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
+ 	open "./configs/${TERM_PROFILE}.terminal";
+ 	sleep 1; # Wait a bit to make sure the theme is loaded
+ 	defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}";
+ 	defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}";
+ fi;
 
 #running "Enable “focus follows mouse” for Terminal.app and all X11 apps"
 # i.e. hover over a window and start `typing in it without clicking first
 defaults write com.apple.terminal FocusFollowsMouse -bool true
 #defaults write org.x.X11 wm_ffm -bool true;
 running "Installing the custom theme for iTerm (opening file)"
-open "../iterm/lindsey.itermcolors";
 
-running "Don’t display the annoying prompt when quitting iTerm"
+running "Don't display the annoying prompt when quitting iTerm"
 defaults write com.googlecode.iterm2 PromptOnQuit -bool false;
 running "hide tab title bars"
 defaults write com.googlecode.iterm2 HideTab -bool true;
@@ -263,8 +265,7 @@ defaults write com.googlecode.iterm2 HotkeyModifiers -int 262401;
 running "Make iTerm2 load new tabs in the same directory"
 /usr/libexec/PlistBuddy -c "set \"New Bookmarks\":0:\"Custom Directory\" Recycle" ~/Library/Preferences/com.googlecode.iterm2.plist
 running "setting fonts"
-defaults write com.googlecode.iterm2 "Normal Font" -string "Hack-Regular 14";
-defaults write com.googlecode.iterm2 "Non Ascii Font" -string "RobotoMonoForPowerline-Regular 14";
+
 ok
 running "reading iterm settings"
 defaults read -app iTerm > /dev/null 2>&1;

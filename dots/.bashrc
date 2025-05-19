@@ -21,3 +21,8 @@ alias gdrive="/usr/local/bin/gdrive"
 
 # E2E Performance Testing Framework completion
 source /Users/lindseycatlett/.bash_completion.d/e2e
+
+. "$HOME/.atuin/bin/env"
+
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+eval "$(atuin init bash)"

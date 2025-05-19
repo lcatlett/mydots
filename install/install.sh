@@ -11,10 +11,10 @@ DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 . "$DOTFILES_DIR/install/composer.sh"
 
 # Install nvm, node, npm, yarn
-. "$DOTFILES_DIR/install/node_setup.sh"
+#. "$DOTFILES_DIR/install/node_setup.sh"
 
 # Install npm global packages
-. "$DOTFILES_DIR/install/yarn.sh"
+#. "$DOTFILES_DIR/install/yarn.sh"/Users/lindsey.catlett/dotfiles/macos/defaults.sh
 
 # Install valet
 #. "$DOTFILES_DIR/install/valet.sh"

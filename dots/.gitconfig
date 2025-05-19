@@ -1,50 +1,49 @@
 [user]
-	name = lcatlett
+	name = Lindsey Catlett
 	email = lindsey.catlett@gmail.com
 
 [github]
-  # https://github.com/blog/180-local-github-config
-  user = lcatlett
+	# https://github.com/blog/180-local-github-config
+	user = lcatlett
+
 [color]
-# ui = true is a superset of all the more specific color options
-#  as documented at http://book.git-scm.com/5_customizing_git.html
-# When set to always, always use colors in all git commands which are capable of colored output.
-# When false, never. When set to true or auto, use colors only when the output is to the terminal.
-# When more specific variables of color.* are set, they always take precedence over this setting.
-# Defaults to false.
+	# ui = true is a superset of all the more specific color options
+	#  as documented at http://book.git-scm.com/5_customizing_git.html
+	# When set to always, always use colors in all git commands which are capable of colored output.
+	# When false, never. When set to true or auto, use colors only when the output is to the terminal.
+	# When more specific variables of color.* are set, they always take precedence over this setting.
+	# Defaults to false.
 	ui = true
 
 [color "branch"]
-  current = yellow reverse
-  local = yellow
-  remote = green
+	current = yellow reverse
+	local = yellow
+	remote = green
 
 [color "status"]
-  added = yellow
-  changed = green
-  untracked = cyan
+	added = yellow
+	changed = green
+	untracked = cyan
 
 [advice]
-  statusHints = false
-
+	statusHints = false
 
 [core]
 	excludesfile = /Users/lindseycatlett/.gitignore_global
-  quotepath = false
-  # line endings
-  # force LF during add
-  autocrlf = input
-  # autocrlf = true # for windows to convert to CRLF on checkout and LF on add
-  # warn but allow line ending conversion to proceed
-  safecrlf = warn
-  # prevent crlf (then you will have to deal with the problem -- dos2unix, etc)
-  #safecrlf = true
-  editor = vim
+	quotepath = false
+	# line endings
+	# force LF during add
+	autocrlf = input
+	# autocrlf = true # fos windows to convert to CRLF on checkout and LF on add
+	# warn but allow line ending conversion to proceed
+	safecrlf = warn
+	# prevent crlf (then you will have to deal with the problem -- dos2unix, etc)
+	#safecrlf = true
+	editor = vim
 	pager = delta
-	compression = 0
-  packedGitLimit = 1028m
-  packedGitWindowSize = 512m
 	compression = 9
+	packedGitLimit = 1028m
+	packedGitWindowSize = 512m
 	symlinks = true
 
 	# Prevent showing files whose names contain non-ASCII symbols as unversioned.
@@ -54,216 +53,205 @@
 	# Speed up commands involving untracked files such as `git status`.
 	# https://git-scm.com/docs/git-update-index#_untracked_cache
 	untrackedCache = true
-
+	fsmonitor = true
+	#sshCommand = ssh -F /tmp/.ssh/config -i /tmp/.ssh/id_rsa
 
 [pack]
-  deltaCacheSize = 2047m
-  packSizeLimit = 2047m
-  windowMemory = 2047m
+	deltaCacheSize = 2047m
+	packSizeLimit = 2047m
+	windowMemory = 2047m
 
 [delta]
-  features = unobtrusive-line-numbers decorations
-  navigate = true
-  hyperlinks = true
-  side-by-side = true
-  hyperlinks-file-link-format = "vscode://file/{path}:{line}"
-  dark = true
-  syntax-theme = "TwoDark"
+	features = unobtrusive-line-numbers decorations
+	navigate = true
+	hyperlinks = true
+	side-by-side = true
+	hyperlinks-file-link-format = "vscode://file/{path}:{line}"
+	dark = true
+	syntax-theme = "TwoDark"
 
 [delta "unobtrusive-line-numbers"]
-    line-numbers = true
-    line-numbers-minus-style = "#444444"
-    line-numbers-zero-style = "#444444"
-    line-numbers-plus-style = "#444444"
-    line-numbers-left-format = "{nm:>4}┊"
-    line-numbers-right-format = "{np:>4}│"
-    line-numbers-left-style = blue
-    line-numbers-right-style = blue
+	line-numbers = true
+	line-numbers-minus-style = "#444444"
+	line-numbers-zero-style = "#444444"
+	line-numbers-plus-style = "#444444"
+	line-numbers-left-format = "{nm:>4}┊"
+	line-numbers-right-format = "{np:>4}│"
+	line-numbers-left-style = blue
+	line-numbers-right-style = blue
 
 [delta "decorations"]
-    commit-decoration-style = blue ol
-    commit-style = raw
-    file-style = bold yellow ul
-    hunk-header-decoration-style = blue box
-    hunk-header-file-style = red
-    hunk-header-line-number-style = "#067a00"
-    hunk-header-style = file line-number syntax
+	commit-decoration-style = blue ol
+	commit-style = raw
+	file-style = bold yellow ul
+	hunk-header-decoration-style = blue box
+	hunk-header-file-style = red
+	hunk-header-line-number-style = "#067a00"
+	hunk-header-style = file line-number syntax
 
 [interactive]
-    diffFilter = delta --color-only
-
+	diffFilter = delta --color-only
 
 [alias]
-  s = status -s -u
+	s = status -s -u
 
-  # force clean of current working directory
-  nuke = !git clean -fd && git reset --hard
+	# force clean of current working directory
+	nuke = !git clean -fd && git reset --hard
 
-  g = grep --break --heading --line-number
+	g = grep --break --heading --line-number
 	cp = cherry-pick
 
+	# get author of last commit
+	whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
 
-# get author of last commit
-  whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+	# quick save of current repo wip state
+	wip = !git add -A && git commit -m 'wip: savepoint'
 
-# quick save of current repo wip state
-  wip = !git add -A && git commit -m 'wip: savepoint'
+	# List branches according to you most recent checkouts.
+	recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
 
-# List branches according to you most recent checkouts.
-  recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
+	# map typos
+	remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
 
-# map typos
-  remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
+	# list tags version sorted
+	tags = "!f() { git tag | sort --version-sort; }; f"
 
-# list tags version sorted
-  tags = "!f() { git tag | sort --version-sort; }; f"
+	# Find commits by source code
+	fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
 
-# Find commits by source code
-  fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+	# Show the diff between the latest commit and the current state
+	d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-# Show the diff between the latest commit and the current state
-  d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+	# View the diff of the last commit
+	dlc = diff --cached HEAD^
 
-# View the diff of the last commit
-  dlc = diff --cached HEAD^
+	# Show unpushed/ahead changes
+	ahead = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline
 
-# Show unpushed/ahead changes
-  ahead = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git log origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH --oneline
+	# Show the diff of upushed/ahead changes
+	ahead-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH
 
-# Show the diff of upushed/ahead changes
-  ahead-diff = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git diff origin/$GIT_CURRENT_BRANCH..$GIT_CURRENT_BRANCH
+	# list git aliases
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
 
-# list git aliases
-  alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+	# Resolve incoming merge conflict in favor of the current working branch
+	ours = "!f() { git checkout --ours $@ && git add $@; }; f"
 
-# Resolve ncoming merge conflict in favor of the current working branch
-ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+	# Resolve all incoming merge conflicts in favor of the current working branch
+	all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
 
-# Resolve all incoming merge conflicts in favor of the current working branch
-all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
+	# Resolve incoming merge conflict in favor of the upstream repo
+	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
-# Resolve incoming merge conflict in favor of the upstream repo
-theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+	# Resolve all incoming merge conflicts in favor of the upstream repo
+	all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
 
-# Resolve all incoming merge conflicts in favor of the upstream repo
-all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
+	# Git rebase --continue
+	rc = rebase --continue
 
-# Git rebase --continue
-rc = rebase --continue
+	# Delete branch
+	del = branch -D
 
-# Delete branch
-del = branch -D
+	# Update your local and replay your commits on upstream HEAD
+	pl = pull --rebase
 
-# Update your local and replay your commits on upstream HEAD
-pl = pull --rebase
+	# Undo last commit
+	undo = reset --soft HEAD~1
 
-# Undo last commit
-undo = reset --soft HEAD~1
+	# View a pretty formatted git log summary
+	ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate -n 20
 
-# View a pretty formatted git log summary
-  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate -n 20
+	# View a pretty extended format git log
+	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat -n 20
 
-# View a pretty extended format git log
-  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat -n 20
+	# View a pretty formatted git log and graph of all branches
+	lol = log --pretty=oneline --graph --abbrev-commit --all -n 20
 
-# View a pretty formatted git log and graph of all branches
-lol = log --pretty=oneline --graph --abbrev-commit --all -n 20
+	# List history in a single line: git list
+	list = log --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" --abbrev-commit
 
-# List history in a single line: git list
+	# Show all branches with added information: git branches
+	branches = branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]'
 
-list = log --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" --abbrev-commit
+	hide = "!f() { if [ -d \"$1\" ]; then git ls-files \"$1\" | xargs git update-index --assume-unchanged; else git update-index --assume-unchanged \"$1\"; fi }; f"
 
-# Show all branches with added information: git branches
+	unhide = "!f() { if [ -d \"$1\" ]; then git ls-files \"$1\" | xargs git update-index --no-assume-unchanged; else git update-index --no-assume-unchanged \"$1\"; fi }; f"
 
-branches = branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]'
+	# Find a file path in codebase
+	f = "!git ls-files | grep -i"
 
+	# List available git config aliases
+	la = "!git config -l | grep alias | cut -c 7-"
 
+	# amend last commit without changing commit message
+	amend = commit --amend --no-edit
+	cane = commit --amend --no-edit
 
-
-#Find a file path in codebase
-  f = "!git ls-files | grep -i"
-
- # List available git config aliases
-  la = "!git config -l | grep alias | cut -c 7-"
-
-
-# Keep a file tracked, but hide it from the index. Useful if you need to change a file and keep it tracked, but don't want to ever commit that change.
-# git hide path/to/file
-hide = "update-index --assume-unchanged"
-
-# git unhide path/to/file
-unhide = "update-index --no-assume-unchanged"
-
-
-# amend last commit without changing commit message
-  amend = commit --amend --no-edit
-  cane = commit --amend --no-edit
-
-# helpful merge and rebase aliases
+	# helpful merge and rebase aliases
 	mc = merge --continue
-  ri = rebase --interactive
-  squash = "!f(){ git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
+	ri = rebase --interactive
+	squash = "!f(){ git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
 
-  rcc = "-c core.editor=true rebase --continue"
+	rcc = "-c core.editor=true rebase --continue"
 	mergetest = "!f(){ git mergediff $@ | sed -ne \"/^+<<</,/^+>>>/ p\" ; };f "
 	mergediff = "!f(){ branch=\"$1\" ; into=\"$2\" ; git merge-tree $(git merge-base \"$branch\" \"$into\") \"$into\" \"$branch\" ; };f "
 
 	conflicts = !git ls-files -u | cut -f 2 | sort -u
-# apply changes in gitignore
-  apply-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
-  apply-global-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
+	# apply changes in gitignore
+	apply-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
+	apply-global-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
 	cherry-pick-skip = "!f() { git cherry-pick \"$@\" || git cherry-pick --skip; }; f"
+	co = checkout
 
-  # git add -A && git commit -m "Apply global gitignore"
-
-
-
-
-
+[push]
+	default = simple
+	followTags = true
 
 [format]
-    pretty = format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
+	pretty = format:%C(blue)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
 
 [diff]
-    # Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject
-    # instead of a/b/c/d as prefixes for patches
-  mnemonicprefix = true
+	# Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject
+	# instead of a/b/c/d as prefixes for patches
+	mnemonicprefix = true
 	renameLimit = 75000
-  colorMoved = default
-
+	colorMoved = default
 
 [help]
-    autocorrect = 0
-[credential]
-	helper =
-	helper =
-	helper = /usr/local/share/gcm-core/git-credential-manager
-[credential "https://dev.azure.com"]
-	useHttpPath = true
-[commit]
-	verbose = false
-	template = /Users/lindseycatlett/.stCommitMsg
+	autocorrect = 0
 
 [merge]
-  conflictstyle = diff3
+	summary = true
+	verbosity = 1
+	tool = mvimdiff
+	conflictstyle = diff3
 
+[apply]
+	whitespace = nowarn
 
-[merge "conflicts"]
-	driver = true
+[branch]
+	autosetupmerge = true
+
 [rerere]
+	# Remember my merges
 	enabled = true
-	autoupdate = false
-[http]
-	postBuffer = 524288000
-	maxRequests = 10
-[grep]
-	lineNumber = true
+
+[include]
+	path = .gitconfig.user
+
 [pager]
 	grep = false
-	grep = false
-[url "https://[REDACTED_OAUTH_TOKEN]:x-oauth-basic@github.com/pantheon-systems/"]
-	insteadOf = https://github.com/pantheon-systems/
-[credential "https://git.drupalcode.org"]
-	provider = generic
-[push]
-	autoSetupRemote = true
+
+
+# If you need to configure URL rewrites, use SSH keys instead of tokens
+# [url "https://YOUR_TOKEN@github.com/"]
+#	insteadOf = https://github.com/
+
+[init]
+	defaultBranch = main
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

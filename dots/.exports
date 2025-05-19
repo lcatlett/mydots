@@ -12,8 +12,6 @@ LOCAL_BIN_EXPORT="$HOME/.local/bin"
 YARN_BIN_EXPORT="$HOME/.config/yarn/global/node_modules/.bin"
 COMPOSER_BIN_EXPORT="$HOME/.composer/vendor/bin"
 
-
-
 # Base PATH
 PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin
 
@@ -43,7 +41,6 @@ export PATH="/usr/local/opt/curl/bin:$PATH"
 
 export COMPOSER_MEMORY_LIMIT=-1
 export COMPOSER_EXIT_ON_PATCH_FAILURE=0
-export HOMEBREW_GITHUB_API_TOKEN=[REDACTED]
 
 # Allow for using go get path@version - this will be deprecated in go 1.17
 export GO111MODULE=on
@@ -65,5 +62,20 @@ export IP_AGCDN2='151.101.2.228'
 export CNAME_AGCDN='pantheon-systems.map.fastly.net'
 export CNAME_AGCDN2='advcdn-pantheon.map.fastly.net'
 export NVM_LAZY_LOAD=true
+export MCFLY_RESULTS=50
+
+if [[ "$(defaults read -g AppleInterfaceStyle 2&>/dev/null)" != "Dark" ]]; then
+    export MCFLY_LIGHT=TRUE
+fi
+
+export CARGO_BUILD_JOBS=4
+
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5@20251001"
+export ANTHROPIC_DEFAULT_MODEL="claude-sonnet-4-5@20250929"
+export AnTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-5@20251101"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-5@20250929"
 
 
+# GitHub token (stored securely in macOS Keychain)
+# Added by security fix script
+export HOMEBREW_GITHUB_API_TOKEN=$(security find-generic-password -a "$USER" -s "homebrew-github-token" -w 2>/dev/null)

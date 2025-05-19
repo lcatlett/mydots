@@ -1,4 +1,4 @@
-q#!/bin/bash
+#!/bin/bash
 
 # This script is used to streamline the process of collecting logs accross multiple environments and containers for a site.
 # It sets up the necessary SSH configuration and keys to disable interactive prompts, then uses Terminus to collect logs from the desired site's environments.
@@ -39,12 +39,12 @@ function ssh_config_setup() {
     if grep -q "Host \*.drush.in" ~/.ssh/config; then
         echo "Host *.drush.in already exists in ~/.ssh/config. Updating config."
         awk '
-        BEGIN { 
-            printHost=0 
+        BEGIN {
+            printHost=0
             updated=0
         }
-        /^Host \*.drush.in/ { 
-            printHost=1 
+        /^Host \*.drush.in/ {
+            printHost=1
         }
         printHost && /^  StrictHostKeyChecking/ {
             print "  StrictHostKeyChecking no"
@@ -61,8 +61,8 @@ function ssh_config_setup() {
             updated=1
             next
         }
-        printHost && /^  / { 
-            printHost=0 
+        printHost && /^  / {
+            printHost=0
         }
         { print }
         END {
@@ -82,7 +82,7 @@ function ssh_config_setup() {
 }
 #function ssh_config_setup() {
  #   echo -e "Host *.drush.in\n    StrictHostKeyChecking no\n    PasswordAuthentication no\n    HostkeyAlgorithms +ssh-rsa\n    PubkeyAcceptedAlgorithms +ssh-rsa" >>~/.ssh/config
-# 
+#
 
 # Ensure that the SSH agent is running and has the private key loaded for this site.
 # This is critical for avoiding password prompts when using git and ssh.

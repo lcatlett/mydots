@@ -43,7 +43,7 @@ while [ $i -le $# ]
         "--debug" | "-debug")
         set -- "$@"  -H  "pantheon-debug: 1"
         i=$(($i+1))
-        set -- "$@"  -w  "     time_namelookup:  %{time_namelookup}s\n        time_connect:  %{time_connect}s\n     time_appconnect:  %{time_appconnect}s\n    time_pretransfer:  %{time_pretransfer}s\n       time_redirect:  %{time_redirect}s\n  time_starttransfer:  %{time_starttransfer}s\n                     ----------\n          time_total:  %{time_total}s\n"
+        set -- "$@"  -w  "\n=== Timing Statistics ===\n    Name Lookup:    %{time_namelookup}s\n    Connect:        %{time_connect}s\n    App Connect:    %{time_appconnect}s\n    Pre-transfer:   %{time_pretransfer}s\n    Redirect:       %{time_redirect}s\n    Start Transfer: %{time_starttransfer}s\n    ----------------------\n    Total Time:     %{time_total}s\n"
         i=$(($i+1))
       ;;
         "--fastly-debug" | "-fastly-debug" | "--fdebug" | "-fdebug")
@@ -93,16 +93,34 @@ then
     set -- "$@" "--resolve" "$DOMAIN:443:$RESOLVE"
   fi
 
-  eval "curl ${*@Q} -s -D - -o /dev/null"
-  err=$?
-  echo "host: $DOMAIN"
-  echo "a-record: $(curl "https://dns.google/resolve?name=${DOMAIN}&type=A" -s | jq -r '(.Answer // [])[] | select(.type == 1) | .data' | xargs echo)"
+  echo -e "\n=== Request Details ==="
+  echo "Host: $DOMAIN"
+  echo "A-Record: $(curl "https://dns.google/resolve?name=${DOMAIN}&type=A" -s | jq -r '(.Answer // [])[] | select(.type == 1) | .data' | xargs echo)"
   if [ ! -z "$RESOLVE" ]
   then
-    echo "dns-spoof: $RESOLVE"
+    echo "DNS Override: $RESOLVE"e
   fi
 
-  echo curl "${*@Q}" -s -D - -o /dev/null
+  # Format the curl command for display
+  echo -e "\n=== cURL Command ==="
+  echo "curl \"$DOMAIN\" \\"
+  for arg in "$@"; do
+    if [[ "$arg" == "$DOMAIN" || "$arg" == "https://$DOMAIN" ]]; then
+      continue
+    fi
+    if [[ "$arg" == "-w"* ]]; then
+      continue
+    fi
+    if [[ "$arg" == *"%{"* ]]; then
+      continue
+    fi
+    echo "  $arg \\"
+  done
+  echo "  -s -D - -o /dev/null"
+
+  echo -e "\n=== Response ====="
+  eval "curl ${*@Q} -s -D - -o /dev/null"
+  err=$?
   exit $err
 fi
 
