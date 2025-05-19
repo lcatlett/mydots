@@ -13,6 +13,8 @@ ehthumbs.db
 Thumbs.db
 .DB_Store
 .vscode
+.history
+docs/*
 
 *.code-workspace
 
@@ -44,3 +46,4 @@ Thumbs.db
 
 
 
+.DS_Store

@@ -12,7 +12,25 @@ alias functions="declare -f | grep '^[a-z].* ()' | sed 's/{$//'"
 alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
 alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
 
-alias rmds="find . -type f -name '*.DS_Store' -ls -delete"
+# alias ld='eza -lD’
+# alias lf='eza -lF --color=always | grep -v /'
+# alias lh='eza -dl .* --group-directories-first'
+# alias ll='eza -al --group-directories-'
+# alias ls='eza -alF --color=always --sort=size | grep -v /'
+# alias lt='eza -al --sort=modified'
+
+alias -g ldd='eza -D --sort=mod'    # list directories, sort, descending, MODIFIED
+alias -g ldn='eza -Dr'              # list directories, sort, descending, NAME
+alias -g lsD='eza -r --sort=mod'    # sort, ascending, MODIFIED
+alias -g lsN='eza -r'               # sort, ascending, name
+alias -g lsS='eza -r --sort=size'   # sort, ascending, size
+alias -g lsd='eza --sort=mod'       # sort, descending, MODIFIED
+alias -g lsn='eza'                  # sort, descending, NAME
+alias -g lss='eza --sort=size'      # sort, descending, SIZE
+alias -g lst='eza --tree --level=2' # sort, descending, NAME && show directory tree
+
+alias rm-ds="find . -name .DS_Store -print0 | xargs -0 git rm --ignore-unmatch -f"
+
 
 alias flushdns='sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder;echo "✌️ DNS flushed"'
 alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
@@ -23,7 +41,10 @@ alias shrug='echo '\''¯\_(ツ)_/¯'\'' | pbcopy'
 
 alias week='date +%V'
 
+alias sizes='du -sh -c *'
 
+# Copy pwd to clipboard
+alias cwd="pwd && pwd | pbcopy && echo 'Copied to clipboard 📁'"
 
 # Kill all the tabs in Chrome to free up memory
 # [C] explained: http://www.commandlinefu.com/commands/view/402/exclude-grep-from-your-grepped-output-of-ps-alias-included-in-description
@@ -36,7 +57,7 @@ alias reload="exec ${SHELL} -l"
 alias path='echo -e ${PATH//:/\\n}'
 
 
-alias historysummary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
+alias hist-summary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
 
 
 alias recent-branches="!git for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
@@ -44,15 +65,32 @@ alias recent-branches="!git for-each-ref --sort=-committerdate --count=10 --form
 
 alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
 
-alias resetyubi='killall gpg-agent | gpg-connect-agent reloadagent /bye'
-
 alias bfg='java -jar ~/bin/bfg.jar'
 
+alias cat="bat --theme auto:system --theme-dark default --theme-light GitHub"
+
+
+alias bathelp='bat --plain --language=help'
+
+#alias -h='-h 2>&1 | bat --language=help --style=plain'
+#alias --help='--help 2>&1 | bat --language=help --style=plain'
+
+# alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
+# alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
 
 
 
+
+
+alias drush8='REDACTED-HOME/drush/8/vendor/bin/drush'
+alias drush9='REDACTED-HOME/drush/9/vendor/bin/drush'
+alias drush10='REDACTED-HOME/drush/10/vendor/bin/drush'
+alias drush11='REDACTED-HOME/drush/11/vendor/bin/drush'
+alias drush12='REDACTED-HOME/drush/12/vendor/bin/drush'
+alias drush='drush11'
 
 #alias python2.7=REDACTED-HOME/.pyenv/shims/python2
+#alias gdrive='/usr/local/bin/gdrive'
 
 
 

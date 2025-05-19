@@ -1,6 +1,7 @@
 [user]
-	name = Lindsey Catlett
+	name = lcatlett
 	email = lindsey.catlett@gmail.com
+
 [github]
   # https://github.com/blog/180-local-github-config
   user = lcatlett
@@ -17,14 +18,7 @@
   current = yellow reverse
   local = yellow
   remote = green
-[color "diff"]
-	meta = 11
-	frag = magenta bold
-	old = red bold
-	new = green bold
-	func = 146 bold
-	commit = yellow bold
-	whitespace = red reverse
+
 [color "status"]
   added = yellow
   changed = green
@@ -33,11 +27,9 @@
 [advice]
   statusHints = false
 
-[gui]
-  fontdiff = -family Monaco -size 10 -weight normal -slant roman -underline 0 -overstrike 0
 
 [core]
-	excludesfile = REDACTED-HOME/.gitignore
+	excludesfile = REDACTED-HOME/.gitignore_global
   quotepath = false
   # line endings
   # force LF during add
@@ -48,25 +40,68 @@
   # prevent crlf (then you will have to deal with the problem -- dos2unix, etc)
   #safecrlf = true
   editor = vim
-	pager = diff-so-fancy | less --tabs=4 -RFX
+	pager = delta
 	compression = 0
   packedGitLimit = 1028m
   packedGitWindowSize = 512m
 	compression = 9
+	symlinks = true
+
+	# Prevent showing files whose names contain non-ASCII symbols as unversioned.
+	# http://michael-kuehnel.de/git/2014/11/21/git-mac-osx-and-german-umlaute.html
+	precomposeunicode = false
+
+	# Speed up commands involving untracked files such as `git status`.
+	# https://git-scm.com/docs/git-update-index#_untracked_cache
+	untrackedCache = true
+
 
 [pack]
-deltaCacheSize = 2047m
-packSizeLimit = 2047m
-windowMemory = 2047m
+  deltaCacheSize = 2047m
+  packSizeLimit = 2047m
+  windowMemory = 2047m
 
-[rebase]
-  autosquash = true
+[delta]
+  features = unobtrusive-line-numbers decorations
+  navigate = true
+  hyperlinks = true
+  side-by-side = true
+  hyperlinks-file-link-format = "vscode://file/{path}:{line}"
+  dark = true
+  syntax-theme = "TwoDark"
+
+[delta "unobtrusive-line-numbers"]
+    line-numbers = true
+    line-numbers-minus-style = "#444444"
+    line-numbers-zero-style = "#444444"
+    line-numbers-plus-style = "#444444"
+    line-numbers-left-format = "{nm:>4}┊"
+    line-numbers-right-format = "{np:>4}│"
+    line-numbers-left-style = blue
+    line-numbers-right-style = blue
+
+[delta "decorations"]
+    commit-decoration-style = blue ol
+    commit-style = raw
+    file-style = bold yellow ul
+    hunk-header-decoration-style = blue box
+    hunk-header-file-style = red
+    hunk-header-line-number-style = "#067a00"
+    hunk-header-style = file line-number syntax
+
+[interactive]
+    diffFilter = delta --color-only
+
 
 [alias]
   s = status -s -u
 
   # force clean of current working directory
   nuke = !git clean -fd && git reset --hard
+
+  g = grep --break --heading --line-number
+	cp = cherry-pick
+
 
 # get author of last commit
   whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
@@ -102,47 +137,63 @@ windowMemory = 2047m
   alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
 
 # Resolve ncoming merge conflict in favor of the current working branch
-    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+ours = "!f() { git checkout --ours $@ && git add $@; }; f"
 
-  # Resolve all incoming merge conflicts in favor of the current working branch
-    all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
+# Resolve all incoming merge conflicts in favor of the current working branch
+all-ours = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --ours -- \"$@\"; git add -u -- \"$@\"; }; f"
 
-  # Resolve incoming merge conflict in favor of the upstream repo
-    theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+# Resolve incoming merge conflict in favor of the upstream repo
+theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
-  # Resolve all incoming merge conflicts in favor of the upstream repo
-    all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
-	test-all-theirs = "!f() { [ -z \"$@\" ] && \"set - .\"; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
-	test-all-ours = "!\"f() { [ -z \\\"$@\\\" ] && set - .; git checkout --ours -- \\\"$@\\\"; git add -u -- \\\"$@\\\"; }; f\""
-  # Resolve all incoming merge conflicts in favor of the upstream repo, continue rebase
-  #all-next = "git all-theirs && git rebase --continue"
+# Resolve all incoming merge conflicts in favor of the upstream repo
+all-theirs = "!f() { [ -z \"$@\" ] && set - '.'; git checkout --theirs -- \"$@\"; git add -u -- \"$@\"; }; f"
 
 # Git rebase --continue
-  rc = rebase --continue
+rc = rebase --continue
 
 # Delete branch
-  del = branch -D
+del = branch -D
 
-#Update your local and replay your commits on upstream HEAD
-  pl = pull --rebase
+# Update your local and replay your commits on upstream HEAD
+pl = pull --rebase
 
-#Undo last commit
-  undo = reset --soft HEAD~1
+# Undo last commit
+undo = reset --soft HEAD~1
 
 # View a pretty formatted git log summary
-  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate -n 20
 
 # View a pretty extended format git log
-  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat -n 20
 
-#V iew a pretty formatted git log and graph of all branches
-  lol = log --pretty=oneline --graph --abbrev-commit --all
+# View a pretty formatted git log and graph of all branches
+lol = log --pretty=oneline --graph --abbrev-commit --all -n 20
+
+# List history in a single line: git list
+
+list = log --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" --abbrev-commit
+
+# Show all branches with added information: git branches
+
+branches = branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]'
+
+
+
 
 #Find a file path in codebase
   f = "!git ls-files | grep -i"
 
  # List available git config aliases
   la = "!git config -l | grep alias | cut -c 7-"
+
+
+# Keep a file tracked, but hide it from the index. Useful if you need to change a file and keep it tracked, but don't want to ever commit that change.
+# git hide path/to/file
+hide = "update-index --assume-unchanged"
+
+# git unhide path/to/file
+unhide = "update-index --no-assume-unchanged"
+
 
 # amend last commit without changing commit message
   amend = commit --amend --no-edit
@@ -158,6 +209,16 @@ windowMemory = 2047m
 	mergediff = "!f(){ branch=\"$1\" ; into=\"$2\" ; git merge-tree $(git merge-base \"$branch\" \"$into\") \"$into\" \"$branch\" ; };f "
 
 	conflicts = !git ls-files -u | cut -f 2 | sort -u
+# apply changes in gitignore
+  apply-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
+  apply-global-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
+	cherry-pick-skip = "!f() { git cherry-pick \"$@\" || git cherry-pick --skip; }; f"
+
+  # git add -A && git commit -m "Apply global gitignore"
+
+
+
+
 
 
 [format]
@@ -166,37 +227,43 @@ windowMemory = 2047m
 [diff]
     # Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject
     # instead of a/b/c/d as prefixes for patches
-    mnemonicprefix = true
+  mnemonicprefix = true
+	renameLimit = 75000
+  colorMoved = default
+
 
 [help]
     autocorrect = 0
 [credential]
 	helper =
-	helper = /usr/local/share/gcm-core/git-credential-manager-core
+	helper =
+	helper = /usr/local/share/gcm-core/git-credential-manager
 [credential "https://dev.azure.com"]
 	useHttpPath = true
 [commit]
 	verbose = false
 	template = REDACTED-HOME/.stCommitMsg
-[interactive]
-	diffFilter = diff-so-fancy --patch
-[color "diff-highlight"]
-	oldNormal = red bold
-	oldHighlight = red bold 52
-	newNormal = green bold
-	newHighlight = green bold 22
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path =
-[mergetool "sourcetree"]
-	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+
+[merge]
+  conflictstyle = diff3
 
 
 [merge "conflicts"]
 	driver = true
 [rerere]
-	enabled = false
+	enabled = true
 	autoupdate = false
 [http]
-	postBuffer = 52428800
+	postBuffer = 524288000
+	maxRequests = 10
+[grep]
+	lineNumber = true
+[pager]
+	grep = false
+	grep = false
+[url "https://REDACTED:x-oauth-basic@github.com/pantheon-systems/"]
+	insteadOf = https://github.com/pantheon-systems/
+[credential "https://git.drupalcode.org"]
+	provider = generic
+[push]
+	autoSetupRemote = true
