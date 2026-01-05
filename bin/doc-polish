@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Simple wrapper for the professional document formatter
+# Usage: doc-polish <input_file> [output_file]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$SCRIPT_DIR/format-document.sh" "$@"

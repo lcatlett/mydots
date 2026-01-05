@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Check if a site name was provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 <site-name> [environment]"
+  echo "Example: $0 site dev"
+  exit 1
+fi
+
+SITE=$1
+ENV=${2:-"live"}  # Default to dev environment if not specified
+
+# Use the full path to mysql and mysqladmin
+export PATH="/opt/homebrew/opt/mariadb@10.6/bin:$PATH"
+
+# Check if mysql and mysqladmin are in the PATH
+if ! command -v mysql &> /dev/null; then
+    echo "mysql command not found in PATH. Adding MariaDB to PATH..."
+    export PATH="/opt/homebrew/opt/mariadb@10.6/bin:$PATH"
+    if ! command -v mysql &> /dev/null; then
+        echo "Error: mysql command still not found. Please check your MariaDB installation."
+        exit 1
+    fi
+fi
+
+if ! command -v mysqladmin &> /dev/null; then
+    echo "mysqladmin command not found in PATH. Adding MariaDB to PATH..."
+    export PATH="/opt/homebrew/opt/mariadb@10.6/bin:$PATH"
+    if ! command -v mysqladmin &> /dev/null; then
+        echo "Error: mysqladmin command still not found. Please check your MariaDB installation."
+        exit 1
+    fi
+fi
+
+echo "Using mysql at: $(which mysql)"
+echo "Using mysqladmin at: $(which mysqladmin)"
+
+# Get connection info from terminus
+echo "Getting connection info for $SITE.$ENV from Terminus..."
+DB_HOST=$(terminus connection:info "$SITE.$ENV" --format=string --field=mysql_host)
+DB_USER=$(terminus connection:info "$SITE.$ENV" --format=string --field=mysql_username)
+DB_PASS=$(terminus connection:info "$SITE.$ENV" --format=string --field=mysql_password)
+DB_PORT=$(terminus connection:info "$SITE.$ENV" --format=string --field=mysql_port)
+DB_NAME=$(terminus connection:info "$SITE.$ENV" --format=string --field=mysql_database)
+
+# Check if we got the connection info
+if [ -z "$DB_HOST" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASS" ] || [ -z "$DB_PORT" ] || [ -z "$DB_NAME" ]; then
+    echo "Error: Failed to get complete connection info from Terminus."
+    echo "DB_HOST: $DB_HOST"
+    echo "DB_USER: $DB_USER"
+    echo "DB_PASS: ${DB_PASS:0:3}... (truncated for security)"
+    echo "DB_PORT: $DB_PORT"
+    echo "DB_NAME: $DB_NAME"
+    exit 1
+fi
+
+# Create a temporary .my.cnf file
+TEMP_MYCNF=$(mktemp)
+echo "Creating temporary MySQL config at $TEMP_MYCNF"
+
+cat > "$TEMP_MYCNF" << EOF
+[client]
+host=$DB_HOST
+user=$DB_USER
+password=$DB_PASS
+port=$DB_PORT
+database=$DB_NAME
+EOF
+
+# Debug info (without showing the full password)
+echo "Connection details:"
+echo "Host: $DB_HOST"
+echo "User: $DB_USER"
+echo "Password: ${DB_PASS:0:3}... (truncated for security)"
+echo "Port: $DB_PORT"
+echo "Database: $DB_NAME"
+
+
+# Run mysqltuner with the temporary config
+echo "Running MySQLTuner..."
+/opt/homebrew/bin/mysqltuner \
+  --defaults-file="$TEMP_MYCNF" \
+  --dbstat \
+  --sysstat \
+  --pfstat \
+  --buffers \
+  --debug \
+  --outputfile "$SITE.$ENV-db-tuner-summary-$(date +"%Y-%m-%d-%H-%M-%S").txt"
+
+# # Run mysqltuner with the temporary config
+# echo "Running MySQLTuner..."
+# /Users/lindseycatlett/notes/risd/acsf/discovery/source/risd-vibe2/migration-framework/analysis/mysqltuner.pl \
+#   --defaults-file="$TEMP_MYCNF" \
+#   --dbstat \
+#   --sysstat \
+#   --pfstat \
+#   --buffers \
+#   --debug \
+#   --outputfile "$SITE.$ENV-db-tuner-summary-$(date +"%Y-%m-%d-%H-%M-%S").txt"
+
+# Clean up the temporary file
+rm -f "$TEMP_MYCNF"
+echo "Temporary MySQL config removed."

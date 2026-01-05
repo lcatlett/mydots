@@ -33,6 +33,7 @@ path=(
   "/usr/local/opt/openssl@3/bin"
   "$HOME/.local/bin"
   "$HOME/.cargo/bin"
+  "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
   $path
 )
 export PATH
@@ -121,7 +122,7 @@ if [[ -d "$NVM_DIR/versions/node" ]]; then
   [[ -d "$NVM_DIR/versions/node/$NVM_DEFAULT/bin" ]] && path+=("$NVM_DIR/versions/node/$NVM_DEFAULT/bin")
 fi
 nvm_loader() {
-  unset -f nvm node npm npx gemini
+  unset -f nvm node npm npx
   [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
   [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
 }
@@ -130,7 +131,7 @@ nvm()  { nvm_loader; nvm "$@"; }
 node() { nvm_loader; node "$@"; }
 npm()  { nvm_loader; npm "$@"; }
 npx()  { nvm_loader; npx "$@"; }
-gemini() { nvm_loader; gemini "$@"; }
+# gemini wrapper is now in ~/bin/gemini (works in scripts + interactive shells)
 
 # --- Bun ---
 export BUN_INSTALL="$HOME/.bun"

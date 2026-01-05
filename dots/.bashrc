@@ -26,3 +26,5 @@ source /Users/lindseycatlett/.bash_completion.d/e2e
 
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 eval "$(atuin init bash)"
+
+alias claude-mem='bun "/Users/lindseycatlett/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'

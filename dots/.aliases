@@ -89,14 +89,13 @@ alias drush11='/Users/lindseycatlett/drush/11/vendor/bin/drush'
 alias drush12='/Users/lindseycatlett/drush/12/vendor/bin/drush'
 alias drush='drush11'
 
-#alias python2.7=/Users/lindseycatlett/.pyenv/shims/python2
-#alias gdrive='/usr/local/bin/gdrive'
+
 
 # grep is wrapped to use rg (ripgrep) for better performance
 # The wrapper translates grep flags to rg equivalents
 
 
-alias ufc-roo='/Users/lindseycatlett/scripts/utilities/global-prompts-ufc/ufc-roo-cline.sh'
+#alias ufc-roo='/Users/lindseycatlett/scripts/utilities/global-prompts-ufc/ufc-roo-cline.sh'
 
 
 alias memsum='PAGE_SIZE=$(vm_stat | awk "/page size of/ {print \$8}"); SWAP_USED=$(sysctl vm.swapusage | awk "{for(i=1;i<=NF;i++) if(\$i==\"used\") print \$(i+2)}"); TOTAL_RAM=$(sysctl -n hw.memsize); vm_stat | awk -v ps=$PAGE_SIZE -v swap=$SWAP_USED -v total=$TOTAL_RAM "function gb_pages(x){return x*ps/1073741824} function gb_bytes(x){return x/1073741824} /Pages free/ {free=\$3+0} /Pages active/ {act=\$3+0} /Pages inactive/ {inact=\$3+0} /Pages speculative/ {spec=\$3+0} /Pages wired down/ {wired=\$4+0} /Pages purgeable/ {purge=\$3+0} /Pages occupied by compressor/ {comp=\$5+0} END{used=total-free*ps; printf \"RAM: total %.1f GB | used %.1f GB | free %.1f GB\nActive: %.1f GB | inactive+spec: %.1f GB | wired: %.1f GB | purgeable: %.1f GB | compressed: %.1f GB | swap used: %s\n\", gb_bytes(total), gb_bytes(used), gb_pages(free), gb_pages(act), gb_pages(inact+spec), gb_pages(wired), gb_pages(purge), gb_pages(comp), swap }"'
@@ -108,4 +107,8 @@ alias memsum='PAGE_SIZE=$(vm_stat | awk "/page size of/ {print \$8}"); SWAP_USED
 # alias cd='z'
 alias serena='/opt/homebrew/bin/uvx --from git+https://github.com/oraios/serena serena'
 # AIP tool alias (after installation)
-alias aip='~/projects/curator-implem/aip-tool/venv/bin/python ~/projects/curator-implem/aip-tool/aip.py'
+#alias aip='~/projects/curator-implem/aip-tool/venv/bin/python ~/projects/curator-implem/aip-tool/aip.py'
+
+
+# Use Cursor instead of VS Code
+
