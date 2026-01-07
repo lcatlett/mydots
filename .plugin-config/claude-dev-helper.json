@@ -1,0 +1,9 @@
+{
+  "autoOpen": {
+    "enabled": true,
+    "focus": false,
+    "openLocation": 0,
+    "maxQueueSize": 10
+  },
+  "_pluginVersion": "1.4.0"
+}

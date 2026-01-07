@@ -20,11 +20,13 @@ alias gdrive="/usr/local/bin/gdrive"
 . "$HOME/.local/bin/env"
 
 # E2E Performance Testing Framework completion
-source /Users/lindseycatlett/.bash_completion.d/e2e
+#source /Users/lindseycatlett/.bash_completion.d/e2e
 
 . "$HOME/.atuin/bin/env"
 
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 eval "$(atuin init bash)"
+
+
 
 alias claude-mem='bun "/Users/lindseycatlett/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'

@@ -61,6 +61,7 @@ export IP_FE253='23.185.0.253'
 export IP_AGCDN2='151.101.2.228'
 export CNAME_AGCDN='pantheon-systems.map.fastly.net'
 export CNAME_AGCDN2='advcdn-pantheon.map.fastly.net'
+export NVM_LAZY_LOAD=true
 export MCFLY_RESULTS=50
 
 if [[ "$(defaults read -g AppleInterfaceStyle 2&>/dev/null)" != "Dark" ]]; then

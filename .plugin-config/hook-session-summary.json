@@ -1,0 +1,25 @@
+{
+  "showLogs": false,
+  "outputDirectory": "",
+  "outputFile": ".session-summary.md",
+  "includeTimestamp": true,
+  "trackedTools": [
+    "Write",
+    "Edit",
+    "Read",
+    "NotebookEdit"
+  ],
+  "operationPriority": [
+    "Created",
+    "Updated",
+    "Modified",
+    "Read"
+  ],
+  "treeVisualization": true,
+  "statistics": {
+    "totalFiles": true,
+    "byOperationType": true,
+    "byFileExtension": false
+  },
+  "_pluginVersion": "1.1.1"
+}
