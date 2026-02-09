@@ -1,0 +1,69 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Global Settings
+add_newline = true # Inserts a blank line between shell prompts
+
+# The main prompt layout
+format = """
+$directory\
+$git_branch\
+$git_status\
+$mise\
+$cmd_duration\
+$status\
+$battery\
+$line_break\
+$character"""
+
+[directory]
+style = "bold blue"
+truncation_length = 3 # Truncates path to 3 parent folders
+truncation_symbol = "…/"
+# Creative Substitution: Replace common paths with icons
+substitutions = { "notes" = "📝 ", "sites" = "🌐 ", "tools" = "🛠️ ", "projects" = "📁 " }
+
+[character]
+# Pure-style prompt symbol
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)" # Symbol for Vim normal mode
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "on [$symbol$branch]($style) " #
+
+[git_status]
+style = "bold red"
+format = '([\[$all_status$ahead_behind\]]($style) )'
+conflicted = "="
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+untracked = "?"
+modified = "!"
+staged = "+"
+
+[mise]
+# Shows active tool versions managed by mise
+disabled = false
+format = "via [$symbol($health )]($style) "
+style = "bold yellow"
+
+[cmd_duration]
+min_time = 2000 # Only show if command took longer than 2 seconds
+format = "took [$duration](bold yellow) "
+
+[status]
+# Shows the exit code only when a command fails
+disabled = false
+format = "[$symbol$status]($style) "
+symbol = "✘ "
+style = "bold red"
+
+[battery]
+# Only appears when your battery is below 10%
+full_symbol = "🔋 "
+charging_symbol = "⚡️ "
+discharging_symbol = "💀 "

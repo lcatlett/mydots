@@ -1,0 +1,36 @@
+#!/bin/bash
+# claude-safe - Run Claude Code in tmux to work around macOS PTY escape sequence bug
+# See: https://github.com/anthropics/claude-code/issues/17787
+
+# If any args are passed that indicate non-interactive mode, run directly
+for arg in "$@"; do
+    case "$arg" in
+        -p|--print|-h|--help|--version)
+            exec /opt/homebrew/bin/claude "$@"
+            ;;
+    esac
+done
+
+# If stdin is not a terminal (piped input), run directly
+if [ ! -t 0 ]; then
+    exec /opt/homebrew/bin/claude "$@"
+fi
+
+# Check if already in tmux
+if [ -n "$TMUX" ]; then
+    exec /opt/homebrew/bin/claude "$@"
+fi
+
+# Generate unique session name based on current directory
+DIR_HASH=$(echo "$PWD" | md5 | cut -c1-6)
+SESSION_NAME="cc-${DIR_HASH}"
+
+# Check if session already exists
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    # Attach to existing session
+    exec tmux attach-session -t "$SESSION_NAME"
+else
+    # Create new session with claude
+    # Use -- to separate tmux args from the command
+    exec tmux new-session -s "$SESSION_NAME" -- /opt/homebrew/bin/claude "$@"
+fi

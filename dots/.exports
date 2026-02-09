@@ -1,51 +1,7 @@
 export EDITOR=vi
 
-
-# Add `~/bin` to the `$PATH`
-export PATH="$HOME/bin:$PATH";
-
-#export NVM_DIR="$HOME/.nvm"
-
-
-
-LOCAL_BIN_EXPORT="$HOME/.local/bin"
-YARN_BIN_EXPORT="$HOME/.config/yarn/global/node_modules/.bin"
-COMPOSER_BIN_EXPORT="$HOME/.composer/vendor/bin"
-
-# Base PATH
-PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin
-
-# Conditional PATH additions
-for path_candidate in /opt/local/sbin \
-  $DOTFILES_EXPORT \
-  $YARN_BIN_EXPORT \
-  $LOCAL_BIN_EXPORT \
-  $LOCAL_SBIN_EXPORT \
-  $COMPOSER_BIN_EXPORT \
-  $YARN_BIN_EXPORT \
-  /opt/local/bin \
-  /usr/local/share/npm/bin \
-  ~/bin \
-  /opt/homebrew/opt/gnu-sed/libexec/gnubin
-do
-  if [ -d ${path_candidate} ]; then
-    export PATH=${PATH}:${path_candidate}
-  fi
-done
-#export PATH=$HOME/.composer/vendor/bin:$PATH
-
-export PATH="$PATH:$HOME/.composer/vendor/bin"
-
-#PATH="$(composer config -g home)/vendor/bin:$PATH"
-export PATH="/usr/local/opt/curl/bin:$PATH"
-
 export COMPOSER_MEMORY_LIMIT=-1
 export COMPOSER_EXIT_ON_PATCH_FAILURE=0
-
-# Allow for using go get path@version - this will be deprecated in go 1.17
-export GO111MODULE=on
-
-export COMPOSER_MEMORY_LIMIT=-1
 
 export DOCKER_CLIENT_TIMEOUT=2000
 export COMPOSE_HTTP_TIMEOUT=2000
@@ -71,7 +27,7 @@ export CARGO_BUILD_JOBS=4
 
 export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5@20251001"
 export ANTHROPIC_DEFAULT_MODEL="claude-sonnet-4-5@20250929"
-export AnTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-5@20251101"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-5@20251101"
 export ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-5@20250929"
 
 

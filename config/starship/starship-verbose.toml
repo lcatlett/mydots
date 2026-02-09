@@ -1,0 +1,55 @@
+# Get editor completions
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Global Layout: Directory on top, prompt symbol on bottom
+# ~/.config/starship-verbose.toml
+format = """$all""" # This enables every module Starship detects
+[directory]
+style = "bold blue"
+truncation_length = 0 # Show the full path
+
+truncation_symbol = "…/"
+# Creative Shortcuts: Replace long paths with icons
+substitutions = { "notes" = "📝 ", "sites" = "🌐 ", "tools" = "🛠️ ", "projects" = "📁 ", "work" = "💼 " }
+
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "on [$symbol$branch]($style) "
+
+[git_status]
+style = "bold red"
+format = '([\[$all_status$ahead_behind\]]($style) )'
+# Specific metrics for high-signal updates
+staged = '[+$count](green)'
+modified = '[!$count](yellow)'
+deleted = '[✘$count](red)'
+
+[mise]
+disabled = false
+format = "via [$symbol($health )]($style) "
+style = "bold yellow"
+
+[cmd_duration]
+min_time = 2000 # Only shows if the command took > 2 seconds
+format = "took [$duration](bold yellow)"
+
+[fill]
+symbol = " " # Pushes everything after it to the right
+
+[status]
+disabled = false
+format = "[$symbol$status]($style) "
+symbol = "✘ "
+
+[battery]
+full_symbol = "🔋 "
+charging_symbol = "⚡️ "
+discharging_symbol = "💀 "
+display = [{ threshold = 15, style = "bold red" }] # Only shows under 15%

@@ -1,5 +1,5 @@
 alias c='clear'
-alias .='pwd'
+
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ....='cd ../../../'
@@ -12,3 +12,28 @@ alias functions="declare -f | grep '^[a-z].* ()' | sed 's/{$//'"
 alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
 alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
 
+alias flushdns='sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder;echo "✌️ DNS flushed"'
+alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
+
+alias shrug='echo '\''¯\_(ツ)_/¯'\'' | pbcopy'
+
+# Kill all the tabs in Chrome to free up memory
+# [C] explained: http://www.commandlinefu.com/commands/view/402/exclude-grep-from-your-grepped-output-of-ps-alias-included-in-description
+alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v extension-process | tr -s ' ' | cut -d ' ' -f2 | xargs kill"
+
+
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload="exec ${SHELL} -l"
+
+
+# A dedicated alias for when you need to REINSTALL or UPGRADE PHP
+alias mise-php-build='export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig:$(brew --prefix libxml2)/lib/pkgconfig:$(brew --prefix icu4c)/lib/pkgconfig:$(brew --prefix libzip)/lib/pkgconfig:$(brew --prefix libiconv)/lib/pkgconfig" && \
+export LDFLAGS="-L$(brew --prefix openssl@3)/lib -L$(brew --prefix libxml2)/lib -L$(brew --prefix icu4c)/lib -L$(brew --prefix libiconv)/lib" && \
+export CPPFLAGS="-I$(brew --prefix openssl@3)/include -I$(brew --prefix libxml2)/include -I$(brew --prefix icu4c)/include -I$(brew --prefix libiconv)/include" && \
+export PHP_CONFIGURE_OPTIONS="--with-openssl=$(brew --prefix openssl@3) --with-curl --with-zlib --enable-mbstring --with-xmlrpc --with-iconv=$(brew --prefix libiconv) --with-bz2=$(brew --prefix bzip2) --with-icu-dir=$(brew --prefix icu4c)"'
+
+alias star-min='export STARSHIP_CONFIG=~/.config/starship-minimal.toml && exec zsh'
+alias star-max='export STARSHIP_CONFIG=~/.config/starship-verbose.toml && exec zsh'
+alias star-new='export STARSHIP_CONFIG=~/.config/new.toml && exec zsh'
+alias star2-new='export STARSHIP_CONFIG=~/.config/new2.toml && exec zsh'

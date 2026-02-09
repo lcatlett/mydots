@@ -1,0 +1,159 @@
+#!/bin/bash
+# mise-audit - Audit mise configuration and log issues
+# Location: ~/bin/mise-audit
+# Usage: mise-audit [--fix]
+
+set -eo pipefail
+
+LOG="${HOME}/.claude/mise-issues.log"
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
+VERBOSE=${VERBOSE:-0}
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+log_issue() {
+    local category="$1"
+    local message="$2"
+    shift 2
+    echo "[$TIMESTAMP] $category: $message" >> "$LOG"
+    for detail in "$@"; do
+        echo "  - $detail" >> "$LOG"
+    done
+    echo ""  >> "$LOG"
+}
+
+print_status() {
+    local status="$1"
+    local message="$2"
+    case "$status" in
+        ok)    echo -e "${GREEN}[OK]${NC} $message" ;;
+        warn)  echo -e "${YELLOW}[WARN]${NC} $message" ;;
+        error) echo -e "${RED}[ERROR]${NC} $message" ;;
+        info)  echo -e "[INFO] $message" ;;
+    esac
+}
+
+echo "=========================================="
+echo "  Mise Configuration Audit"
+echo "  $(date)"
+echo "=========================================="
+echo ""
+
+ISSUES_FOUND=0
+
+# Check 1: Mise doctor
+echo "Checking mise health..."
+DOCTOR_OUTPUT=$(mise doctor 2>&1 || true)
+if echo "$DOCTOR_OUTPUT" | grep -qE "^[0-9]+ problem"; then
+    PROBLEM_COUNT=$(echo "$DOCTOR_OUTPUT" | grep -oE "^[0-9]+ problem" | grep -oE "^[0-9]+")
+    print_status error "mise doctor: $PROBLEM_COUNT problem(s) found"
+    log_issue "CONFIG_ISSUE" "mise doctor reported problems" \
+        "$(echo "$DOCTOR_OUTPUT" | tail -20)"
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+else
+    print_status ok "mise doctor: no problems"
+fi
+
+# Check 2: Outdated tools
+echo "Checking for outdated tools..."
+OUTDATED=$(mise outdated 2>&1 || true)
+if [[ -n "$OUTDATED" && "$OUTDATED" != *"All tools are up to date"* ]]; then
+    OUTDATED_COUNT=$(echo "$OUTDATED" | wc -l | tr -d ' ')
+    print_status warn "$OUTDATED_COUNT outdated tool(s)"
+    if [[ "$VERBOSE" == "1" ]]; then
+        echo "$OUTDATED"
+    fi
+    log_issue "CONFIG_ISSUE" "Outdated mise tools detected" \
+        "Run 'mise upgrade' to update" \
+        "Tools: $(echo "$OUTDATED" | awk '{print $1}' | tr '\n' ', ')"
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+else
+    print_status ok "All tools up to date"
+fi
+
+# Check 3: PATH conflicts for key tools
+echo "Checking for PATH conflicts..."
+TOOLS_TO_CHECK="go node python php uv bun"
+
+for tool in $TOOLS_TO_CHECK; do
+    TOOL_PATH=$(command -v "$tool" 2>/dev/null || echo "not found")
+    if [[ "$TOOL_PATH" == "not found" ]]; then
+        continue
+    fi
+
+    # Check if it's a function (mise wrapper) or binary
+    TOOL_TYPE=$(type "$tool" 2>/dev/null | head -1 || echo "")
+    if echo "$TOOL_TYPE" | grep -q "function"; then
+        print_status ok "$tool: using mise wrapper"
+    elif [[ "$TOOL_PATH" == *"mise"* ]]; then
+        print_status ok "$tool: $TOOL_PATH"
+    elif [[ "$TOOL_PATH" == *"homebrew"* || "$TOOL_PATH" == "/opt/homebrew"* ]]; then
+        print_status error "$tool: using Homebrew instead of mise"
+        log_issue "PATH_CONFLICT" "$tool binary from Homebrew shadows mise version" \
+            "Current path: $TOOL_PATH" \
+            "Resolution: brew uninstall $tool"
+        ISSUES_FOUND=$((ISSUES_FOUND + 1))
+    fi
+done
+
+# Check 4: Duplicate installations in mise
+echo "Checking for duplicate mise installations..."
+RIPGREP_COUNT=$(mise ls 2>/dev/null | grep -c ripgrep || echo 0)
+if [[ "$RIPGREP_COUNT" -gt 1 ]]; then
+    print_status warn "Multiple ripgrep installations in mise"
+    log_issue "CONFIG_ISSUE" "Duplicate ripgrep in mise config" \
+        "Found $RIPGREP_COUNT ripgrep entries" \
+        "Resolution: Remove one from ~/.config/mise/config.toml"
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+fi
+
+# Check 5: Homebrew overlap check
+echo "Checking for Homebrew overlaps..."
+OVERLAP_TOOLS="go node php python uv"
+OVERLAPS=""
+for tool in $OVERLAP_TOOLS; do
+    if brew list --formula 2>/dev/null | grep -qE "^${tool}(@|$)"; then
+        BREW_VERSIONS=$(brew list --formula 2>/dev/null | grep -E "^${tool}(@|$)" | tr '\n' ' ')
+        if mise ls 2>/dev/null | grep -qE "^${tool}\s"; then
+            OVERLAPS="$OVERLAPS$tool (brew: $BREW_VERSIONS) "
+        fi
+    fi
+done
+
+if [[ -n "$OVERLAPS" ]]; then
+    print_status warn "Tools in both Homebrew and mise: $OVERLAPS"
+    log_issue "HOMEBREW_USED" "Overlapping Homebrew/mise installations" \
+        "Overlaps: $OVERLAPS" \
+        "Resolution: Consider removing Homebrew versions"
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+else
+    print_status ok "No overlapping installations"
+fi
+
+# Check 6: Pruneable versions
+echo "Checking for pruneable versions..."
+PRUNABLE=$(mise prune --dry-run 2>&1 | grep -c "uninstall" || true)
+PRUNABLE=${PRUNABLE:-0}
+if [[ "$PRUNABLE" =~ ^[0-9]+$ ]] && [[ "$PRUNABLE" -gt 0 ]]; then
+    print_status info "$PRUNABLE old version(s) can be pruned"
+    if [[ "$VERBOSE" == "1" ]]; then
+        mise prune --dry-run 2>&1 | grep "uninstall"
+    fi
+fi
+
+echo ""
+echo "=========================================="
+if [[ "$ISSUES_FOUND" -eq 0 ]]; then
+    print_status ok "No issues found!"
+    log_issue "AUDIT" "System check passed" "No issues detected"
+else
+    print_status warn "$ISSUES_FOUND issue(s) found - see $LOG"
+fi
+echo "Log: $LOG"
+echo "=========================================="
+
+exit $ISSUES_FOUND

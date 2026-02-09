@@ -1,0 +1,5 @@
+#!/bin/bash
+# Wrapper to make OrbStack's docker work with Node.js v25+
+# OrbStack uses empty stub files that rely on kernel hooks,
+# but Node.js v25 changed spawning behavior and bypasses this.
+exec /Applications/OrbStack.app/Contents/MacOS/OrbStack docker "$@"

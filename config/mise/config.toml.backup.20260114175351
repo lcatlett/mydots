@@ -1,0 +1,10 @@
+[tools]
+bun = "latest"
+go = "latest"
+"go:github.com/steveyegge/beads/cmd/bd" = "latest"
+node = "latest"
+"npm:@mermaid-js/mermaid-cli" = "latest"
+"npm:@mermaidchart/cli" = "latest"
+php = "8.3"
+python = ["3.12", "3.13", "3.11", "3.14"]
+uv = "latest"

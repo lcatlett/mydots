@@ -29,7 +29,7 @@
 	statusHints = false
 
 [core]
-	excludesfile = /Users/lindseycatlett/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	quotepath = false
 	# line endings
 	# force LF during add
@@ -52,8 +52,8 @@
 
 	# Speed up commands involving untracked files such as `git status`.
 	# https://git-scm.com/docs/git-update-index#_untracked_cache
-	untrackedCache = true
-	fsmonitor = true
+	untrackedcache = false
+	fsmonitor = false
 	#sshCommand = ssh -F /tmp/.ssh/config -i /tmp/.ssh/id_rsa
 
 [pack]

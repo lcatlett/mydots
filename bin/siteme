@@ -1,56 +1,133 @@
 #!/bin/bash
-# usage e.g. siteme <domain.com> siteme <sitename> siteme <url> siteme <site_id>
+# usage: siteme <domain.com> | siteme <sitename> | siteme <url> | siteme <site_id>
 # A simple script to fetch the pantheon admin site dashboard
-
-# Requirements ggrep
+# Carey Dayrit - 01/Jul/2021
+# Thanks to Albert Causing
+# Requirements: ggrep (macOS only)
 # brew install grep
 # Use it at your own risk
 
+set -euo pipefail
+set -x
+
+# Configuration
+readonly YGGDRASIL_HOST="yggdrasil-12fe1f82.panth.io"
+readonly SSH_TIMEOUT=10
+readonly DNS_TIMEOUT=5
+
+# Locale settings
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-if [ -z "$1" ]; then
-    echo "Usage siteme ufc.com / siteme ufc / siteme 7a1e4432-7c89-422e-9a69-eeb139ad83a1"
-    exit
-fi
+# Cached values (populated on first use)
+_CACHED_IP=""
+_CACHED_USERNAME=""
 
-# Fetch the username on ~/.ssh/config
-PANTH_USERNAME="`ssh -G yggdrasil-12fe1f82.panth.io | grep 'user ' | awk -F' ' '{ print $2 }' | xargs`"
+usage() {
+    cat <<EOF
+Usage: siteme <domain|sitename|site_id>
 
-# strip http and https
-SITE="`echo $1 | sed -e 's/^http:\/\///g' -e 's/^https:\/\///g'`"
+Examples:
+    siteme ufc.com                              # Domain lookup
+    siteme ufc                                  # Site name lookup
+    siteme 7a1e4432-7c89-422e-9a69-eeb139ad83a1 # Site ID lookup
 
-# remove characters after /
-SITE="`cut -f1 -d"/" <<< $SITE`"
+Options:
+    -h, --help    Show this help message
 
-UNAME=$(uname)
+Requirements:
+    - ggrep on macOS (brew install grep)
+    - SSH access configured for Pantheon
+EOF
+    exit 0
+}
 
-if [[ "$UNAME" == "Linux" ]]; then
-	FQDN="`echo $SITE | grep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)'`"
-	else
-	if ! [ -x "$(command -v ggrep)" ]; then
-		echo 'Error: The ggrep command was not found. Please install it yourself and try again. https://formulae.brew.sh/formula/grep' >&2
-		exit 1
-	fi
-	FQDN="`echo $SITE | ggrep -P '(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)'`"
-fi
+die() {
+    echo "Error: $1" >&2
+    exit "${2:-1}"
+}
 
+# Cache and return Yggdrasil IP address
+get_yggdrasil_ip() {
+    if [[ -z "${_CACHED_IP}" ]]; then
+        _CACHED_IP=$(timeout "${DNS_TIMEOUT}" dig +short "${YGGDRASIL_HOST}" | tail -1) || true
+        if [[ -z "${_CACHED_IP}" ]]; then
+            die "Failed to resolve ${YGGDRASIL_HOST}" 2
+        fi
+    fi
+    echo "${_CACHED_IP}"
+}
 
-# conditional if the input is an FQDN or a sitename
-if [[ -n $FQDN ]]; then
-	# domain url
-    ssh $PANTH_USERNAME@`dig +short yggdrasil-12fe1f82.panth.io | tail -1` "/usr/local/bin/pantheon sites:$1" >&1| tail -n 3 | head -n 1
+# Cache and return Pantheon username from SSH config
+get_pantheon_username() {
+    if [[ -z "${_CACHED_USERNAME}" ]]; then
+        _CACHED_USERNAME=$(ssh -G "${YGGDRASIL_HOST}" 2>/dev/null | awk '/^user / {print $2}') || true
+        if [[ -z "${_CACHED_USERNAME}" ]]; then
+            die "Failed to determine Pantheon username from SSH config" 3
+        fi
+    fi
+    echo "${_CACHED_USERNAME}"
+}
+
+# Execute pantheon sites command via SSH
+run_pantheon_sites() {
+    local site_arg="$1"
+    local username ip
+
+    username=$(get_pantheon_username)
+    ip=$(get_yggdrasil_ip)
+
+    ssh -o ConnectTimeout="${SSH_TIMEOUT}" \
+        -o BatchMode=yes \
+        "${username}@${ip}" \
+        "/usr/local/bin/pantheon sites:${site_arg}" 2>/dev/null | tail -n 3 | head -n 1
+}
+
+# Check if input is an FQDN
+is_fqdn() {
+    local site="$1"
+    local fqdn_regex='(?=^.{1,254}$)(^(?>(?!\d+\.)[a-zA-Z0-9_\-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)'
+
+    if [[ "$(uname)" == "Linux" ]]; then
+        echo "${site}" | grep -qP "${fqdn_regex}"
+    else
+        if ! command -v ggrep &>/dev/null; then
+            die "ggrep not found. Install with: brew install grep" 4
+        fi
+        echo "${site}" | ggrep -qP "${fqdn_regex}"
+    fi
+}
+
+# Validate UUID format
+is_valid_uuid() {
+    local uuid="$1"
+    [[ "${uuid}" =~ ^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$ ]]
+}
+
+# Parse arguments
+case "${1:-}" in
+    -h|--help)
+        usage
+        ;;
+    "")
+        die "Missing argument. Use --help for usage." 1
+        ;;
+esac
+
+# Normalize input: strip protocol and path
+site="$1"
+site="${site#http://}"
+site="${site#https://}"
+site="${site%%/*}"
+
+# Determine input type and execute appropriate lookup
+if is_fqdn "${site}"; then
+    run_pantheon_sites "$1"
+elif [[ ${#site} -eq 36 ]]; then
+    if ! is_valid_uuid "${site}"; then
+        die "Site ID format invalid. Expected UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 5
+    fi
+    run_pantheon_sites "$1"
 else
-   if [[ ${#SITE} -eq 36 ]];then
-    # site_id
-	CHECKSITE_ID=$(echo $1 | grep '^[a-zA-Z0-9]\{8\}[ -][a-zA-Z0-9]\{4\}[ -][a-zA-Z0-9]\{4\}[ -][a-zA-Z0-9]\{4\}[ -][a-zA-Z0-9]\{12\}$')
-	if [ -z ${CHECKSITE_ID} ]; then
-		echo "Site ID invalid"
-		exit 1
-	fi
-	ssh $PANTH_USERNAME@`dig +short yggdrasil-12fe1f82.panth.io | tail -1` "/usr/local/bin/pantheon sites:$1" >&1| tail -n 3 | head -n 1
-   else
-    #site_name
-    ssh $PANTH_USERNAME@`dig +short yggdrasil-12fe1f82.panth.io | tail -1` "/usr/local/bin/pantheon sites:dev-$1.pantheonsite.io" >&1| tail -n 3 | head -n 1
-   fi
+    run_pantheon_sites "dev-${site}.pantheonsite.io"
 fi

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo "Verifying dotfiles installation..."
+
+# Test symlinks
+for file in .zshrc .exports .aliases .functions .gitconfig; do
+  if [[ -L ~/$file && $(readlink ~/$file) == */dotfiles/dots/$file ]]; then
+    echo -e "${GREEN}✓${NC} $file symlink correct"
+  else
+    echo -e "${RED}✗${NC} $file symlink broken or missing"
+  fi
+done
+
+# Test PATH order
+first_path=$(echo $PATH | cut -d: -f1)
+if [[ "$first_path" == "$HOME/bin" ]]; then
+  echo -e "${GREEN}✓${NC} PATH priority correct (~/bin first)"
+else
+  echo -e "${RED}✗${NC} PATH priority wrong (expected ~/bin, got $first_path)"
+fi
+
+# Test critical tools
+for tool in git node npm php composer; do
+  if command -v $tool &> /dev/null; then
+    echo -e "${GREEN}✓${NC} $tool available"
+  else
+    echo -e "${RED}✗${NC} $tool missing"
+  fi
+done
+
+# Test NVM resolution
+else
+  echo -e "${RED}✗${NC} NVM default bin not resolved"
+fi
+
+# Test shadow detection exists
+if grep -q "CRITICAL TOOL SHADOW DETECTION" ~/.zshrc; then
+  echo -e "${GREEN}✓${NC} Shadow detection present in .zshrc"
+else
+  echo -e "${RED}✗${NC} Shadow detection missing from .zshrc"
+fi
+
+echo "Done!"

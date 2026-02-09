@@ -3,7 +3,7 @@
 # Check if a site name was provided
 if [ -z "$1" ]; then
   echo "Usage: $0 <site-name> [environment]"
-  echo "Example: $0 site dev"
+  echo "Example: $0 holly-hunt dev"
   exit 1
 fi
 

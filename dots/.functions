@@ -186,10 +186,9 @@ function unset-impersonate() {
     gcloud config unset auth/impersonate_service_account
 }
 
-# Make switching versions easy
+# Make switching versions easy (uses mise)
 function phpv() {
-    brew unlink php
-    brew link --overwrite --force "php@$1"
+    mise use php@$1
     php -v
 }
 

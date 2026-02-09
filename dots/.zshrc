@@ -8,73 +8,14 @@ export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 # --- Interactive TTY safety tweaks (only when interactive) ---
 if [[ -o interactive ]] && [[ -t 0 ]]; then
-  stty -tostop 2>/dev/null
-  stty susp undef 2>/dev/null
+  stty -tostop 2>/dev/null      # Don't stop bg jobs on output
+  stty susp undef 2>/dev/null   # Disable ^Z suspend
 fi
 
-# ==============================================================================
-# CRITICAL TOOL SHADOW DETECTION
-# ==============================================================================
-# Blocks shell startup if critical tools are shadowed by unexpected sources.
-# This prevents silent failures where the wrong version of a tool runs.
-#
-# To fix: Remove the shadowing binary or adjust PATH order.
-# To bypass temporarily: SKIP_SHADOW_CHECK=1 zsh
-# ==============================================================================
 
-if [[ -z "$SKIP_SHADOW_CHECK" && -o interactive ]]; then
-  _shadow_check_failed=0
-  _shadow_errors=()
-
-  # Define expected tool locations
-  # Format: "tool_name:expected_path_pattern"
-  _expected_tools=(
-    "claude:$HOME/.local/bin/claude"
-    "gemini:$HOME/.nvm/versions/node/*/bin/gemini"
-  )
-
-  for _tool_spec in "${_expected_tools[@]}"; do
-    _tool_name="${_tool_spec%%:*}"
-    _expected_pattern="${_tool_spec#*:}"
-
-    _actual_path=$(command -v "$_tool_name" 2>/dev/null)
-
-    if [[ -n "$_actual_path" ]]; then
-      # Check if actual path matches expected pattern
-      if [[ ! "$_actual_path" == ${~_expected_pattern} ]]; then
-        _shadow_errors+=("$_tool_name: expected '$_expected_pattern' but found '$_actual_path'")
-        _shadow_check_failed=1
-      fi
-    fi
-  done
-
-  if [[ $_shadow_check_failed -eq 1 ]]; then
-    echo ""
-    echo "╔══════════════════════════════════════════════════════════════════════════════╗"
-    echo "║  ⛔ CRITICAL: Tool shadowing detected - shell startup blocked               ║"
-    echo "╠══════════════════════════════════════════════════════════════════════════════╣"
-    for _err in "${_shadow_errors[@]}"; do
-      printf "║  %-74s ║\n" "$_err"
-    done
-    echo "╠══════════════════════════════════════════════════════════════════════════════╣"
-    echo "║  Fix: Remove the shadowing binary or check PATH order in ~/.zshrc           ║"
-    echo "║  Bypass: SKIP_SHADOW_CHECK=1 zsh                                            ║"
-    echo "╚══════════════════════════════════════════════════════════════════════════════╝"
-    echo ""
-
-    # Return to prevent rest of zshrc from loading
-    # User gets a minimal shell to fix the issue
-    return 1
-  fi
-
-  unset _shadow_check_failed _shadow_errors _expected_tools _tool_spec _tool_name _expected_pattern _actual_path _err
-fi
 
 # --- Powerlevel10k instant prompt ---
-# Re-enable this if Claude Code TUI duplication is resolved
-# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-#   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-# fi
+
 
 # --- Load modular config files if present ---
 for file in ~/.{exports,aliases,extra}; do
@@ -106,41 +47,14 @@ setopt hist_reduce_blanks      # Remove extra blanks
 # ==============================================================================
 # Priority order (first wins):
 #   1. ~/bin                    - Your explicit overrides (always wins)
-#   2. ~/.local/bin             - Direct installs, Claude Code auto-updater
-#   3. NVM bin                  - Node tools from your default NVM version
-#   4. Homebrew                 - System packages
-#   5. System paths             - /usr/bin, etc.
-#   6. Language-specific        - Go, PHP, Rust, etc.
-#   7. Package managers (LAST)  - pnpm, bun (can't shadow above)
+#   2. ~/.local/bin             - Direct installs
+#   3. Homebrew                 - System packages
+#   4. System paths             - /usr/bin, etc.
+#   5. Language-specific        - Go, PHP, Rust, etc.
+#   6. Package managers (LAST)  - pnpm, bun (can't shadow above)
 # ==============================================================================
 
 typeset -U path
-
-# --- NVM lazy loader preparation (resolve default version BEFORE PATH construction) ---
-export NVM_DIR="$HOME/.nvm"
-
-# Resolve NVM default version for PATH (handles aliases like "22" -> "v22.21.1")
-_nvm_default_bin=""
-if [[ -d "$NVM_DIR/versions/node" ]]; then
-  _nvm_alias=$(/bin/cat "$NVM_DIR/alias/default" 2>/dev/null)
-  if [[ -n "$_nvm_alias" ]]; then
-    # Try direct match (e.g., "v22.21.1"), then resolve alias (e.g., "22" -> "v22.x.x")
-    if [[ -d "$NVM_DIR/versions/node/$_nvm_alias" ]]; then
-      _nvm_default_bin="$NVM_DIR/versions/node/$_nvm_alias/bin"
-    elif [[ -d "$NVM_DIR/versions/node/v$_nvm_alias" ]]; then
-      _nvm_default_bin="$NVM_DIR/versions/node/v$_nvm_alias/bin"
-    else
-      # Use absolute paths to ensure commands work even with minimal PATH
-      _nvm_ver=$(/bin/ls -d "$NVM_DIR/versions/node/v${_nvm_alias}"* 2>/dev/null | /usr/bin/sort -V | /usr/bin/tail -1)
-      [[ -d "$_nvm_ver/bin" ]] && _nvm_default_bin="$_nvm_ver/bin"
-    fi
-  fi
-  # Fallback to latest installed version
-  if [[ -z "$_nvm_default_bin" ]]; then
-    _nvm_latest=$(/bin/ls "$NVM_DIR/versions/node" 2>/dev/null | /usr/bin/sort -V | /usr/bin/tail -1)
-    [[ -d "$NVM_DIR/versions/node/$_nvm_latest/bin" ]] && _nvm_default_bin="$NVM_DIR/versions/node/$_nvm_latest/bin"
-  fi
-fi
 
 # --- Priority 1-2: Your overrides and direct installs ---
 path=(
@@ -148,10 +62,7 @@ path=(
   "$HOME/.local/bin"
 )
 
-# --- Priority 3: NVM (resolved above) ---
-[[ -n "$_nvm_default_bin" ]] && path+=("$_nvm_default_bin")
-
-# --- Priority 4: Homebrew ---
+# --- Priority 3: Homebrew ---
 path+=(
   "/opt/homebrew/bin"
   "/opt/homebrew/sbin"
@@ -160,7 +71,7 @@ path+=(
   "/usr/local/opt/openssl@3/bin"
 )
 
-# --- Priority 5: System paths ---
+# --- Priority 4: System paths ---
 path+=(
   "/usr/bin"
   "/bin"
@@ -174,26 +85,26 @@ export PANTHEON_CA_CERT="$HOME/certs/ca.crt"
 export PANTHEON_CERT="$HOME/certs/lindsey.catlett@getpantheon.com.pem"
 export TERMINUS_HOST_CERT="$HOME/certs/lindsey.catlett@getpantheon.com.pem"
 
-# --- Priority 6: Language-specific tools ---
+# --- Priority 5: Language-specific tools ---
 # Cargo/Rust
 path+=("$HOME/.cargo/bin")
 
 # Go
 export GOPATH="$HOME/go"
-export GOROOT="$(brew --prefix golang 2>/dev/null)/libexec"
+#export GOROOT="$(brew --prefix golang 2>/dev/null)/libexec"
 [[ -n "$GOROOT" && -d "$GOROOT" ]] && path+=("$GOPATH/bin" "$GOROOT/bin")
 
 # Composer
 export COMPOSER_MEMORY_LIMIT=-1
-path+=("$HOME/.composer/vendor/bin")
+# path+=("$HOME/.composer/vendor/bin")
 
-# PHP versions
-path+=(
-  "/opt/homebrew/opt/php@8.1/bin"
-  "/opt/homebrew/opt/php@8.1/sbin"
-  "/opt/homebrew/opt/php@8.3/bin"
-  "/opt/homebrew/opt/php@8.3/sbin"
-)
+# # PHP versions
+# path+=(
+#   "/opt/homebrew/opt/php@8.1/bin"
+#   "/opt/homebrew/opt/php@8.1/sbin"
+#   "/opt/homebrew/opt/php@8.3/bin"
+#   "/opt/homebrew/opt/php@8.3/sbin"
+# )
 
 # PHPVM
 export PHPVM_DIR="$HOME/.phpvm"
@@ -212,21 +123,18 @@ path+=("$HOME/scripts/tasks/bin")
 path+=("$HOME/.antigravity/antigravity/bin")
 path+=("$HOME/.platform-nestle-cli/bin")
 
-# --- Priority 7: Package managers (LAST - cannot shadow above) ---
+# --- Priority 6: Package managers (LAST - cannot shadow above) ---
 # PNPM - APPENDED not prepended
-export PNPM_HOME="$HOME/Library/pnpm"
-path+=("$PNPM_HOME")
+#export PNPM_HOME="$HOME/Library/pnpm"
+#path+=("$PNPM_HOME")
 
 # Bun
-export BUN_INSTALL="$HOME/.bun"
-path+=("$BUN_INSTALL/bin")
 
 export PATH
 
 # --- McFly ---
 eval "$(mcfly init zsh)"
-export MCFLY_FUZZY=2
-export MCFLY_INTERFACE_VIEW=BOTTOM
+
 
 # --- SSH / GPG agent handling ---
 # Start ssh-agent and add keys if needed
@@ -254,20 +162,8 @@ if [[ -z "$SSH_CLIENT" ]]; then
   echo UPDATESTARTUPTTY | gpg-connect-agent >/dev/null 2>&1
 fi
 
-# --- NVM lazy loader functions (prevents slow startup) ---
-nvm_loader() {
-  unset -f nvm node npm npx
-  [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
-  [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
-}
-
-nvm()  { nvm_loader; nvm "$@"; }
-node() { nvm_loader; node "$@"; }
-npm()  { nvm_loader; npm "$@"; }
-npx()  { nvm_loader; npx "$@"; }
-
 # --- Bun completion ---
-[[ -s "$HOME/.bun/_bun" ]] && source "$HOME/.bun/_bun"
+
 
 # --- Platform.sh Nestlé CLI configuration ---
 [[ -f "$HOME/.platform-nestle-cli/shell-config.rc" ]] && source "$HOME/.platform-nestle-cli/shell-config.rc"
@@ -337,11 +233,13 @@ else
 fi
 
 # --- zoxide (must load after compinit) ---
-eval "$(zoxide init zsh)"
+#eval "$(zoxide init zsh)"
 
 # --- Powerlevel10k theme ---
-source ~/powerlevel10k/powerlevel10k.zsh-theme
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+#source ~/powerlevel10k/powerlevel10k.zsh-theme
+#[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+#eval "$(starship init zsh)"
 
 # --- Zsh completion cache configuration ---
 export ZSH_CACHE_DIR="$HOME/.zsh/cache"
@@ -351,3 +249,57 @@ export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
 # --- Final PATH export and deduplication ---
 typeset -U path
 export PATH
+
+eval "$(mise activate zsh)"
+
+
+# --- Claude Code (runs in tmux to work around macOS PTY bug) ---
+alias claude='claude-safe'
+alias cc='claude-safe'
+# Direct access to raw claude if needed (will have TUI issues outside tmux)
+alias claude-raw='/opt/homebrew/bin/claude'
+
+# bun completions
+[ -s "/Users/lindseycatlett/.bun/_bun" ] && source "/Users/lindseycatlett/.bun/_bun"
+
+# bun
+#export BUN_INSTALL="$HOME/.bun"
+#export PATH="$BUN_INSTALL/bin:$PATH"
+
+alias claude-mem='bun "/Users/lindseycatlett/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+
+# Fix mise wrapper bugs - use mise exec for reliable execution
+alias npm='mise exec -- npm'
+alias npx='mise exec -- npx'
+alias php='mise exec -- php'
+alias composer='mise exec -- composer'
+
+# 1. Point to your custom config file
+export STARSHIP_CONFIG=~/.config/starship-minimal.toml
+
+# 2. Initialize Starship
+eval "$(starship init zsh)"
+
+# 3. Transient Prompt Logic
+# This makes previous prompts disappear, leaving only the '❯' symbol
+function starship_zle-keymap-select {
+  zle reset-prompt
+}
+zle -N starship_zle-keymap-select
+
+starship_precmd() {
+  # If the prompt contains our '❯' symbol, replace it with a clean version after Enter
+  [[ $PS1 == *'❯'* ]] && export PS1="[❯](bold green) "
+}
+add-zsh-hook precmd starship_precmd
+
+
+# Theme Swapper
+
+
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+. "$HOME/.local/bin/env"
