@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch between editors by uncommenting one:
+# exec cursor "$@"
+exec /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code "$@"

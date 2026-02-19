@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# kill-claude — reusable “kill Claude + MCP daemons” cleanup for macOS/Linux
+# Usage examples:
+#   ./kill-claude              # TERM then KILL if needed (default)
+#   ./kill-claude --dry-run    # show what it would do
+#   ./kill-claude --term-only  # only send TERM (no KILL)
+#   ./kill-claude --kill-now   # send KILL immediately
+#   ./kill-claude --no-tree    # don’t kill child processes first
+#   ./kill-claude --pattern 'my-extra-thing|another'  # extend match regex
+#   ./kill-claude --launchd    # also list launchd jobs that look relevant
+
+set -euo pipefail
+
+DRY_RUN=0
+TERM_ONLY=0
+KILL_NOW=0
+KILL_TREE=1
+SHOW_LAUNCHD=0
+
+PAT_DEFAULT='mcp-server|chroma-mcp|claude-mem|worker-service\.cjs|claude(\b|[- ])|claude-forge|claude-server-commander|node.*claude'
+PAT_EXTRA=""
+
+usage() {
+  cat <<'EOF'
+kill-claude — kill Claude/MCP related processes
+
+Options:
+  -n, --dry-run        Don’t kill anything; just print what would happen
+  -t, --term-only      Only send SIGTERM (no SIGKILL fallback)
+  -k, --kill-now       Send SIGKILL immediately (skips SIGTERM)
+      --no-tree        Don’t kill child processes first
+  -p, --pattern REGEX  Append extra regex to match additional processes
+      --launchd        Also list launchd jobs that match (claude|mcp|chroma)
+  -h, --help           Show this help
+
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -n|--dry-run) DRY_RUN=1; shift ;;
+    -t|--term-only) TERM_ONLY=1; shift ;;
+    -k|--kill-now) KILL_NOW=1; shift ;;
+    --no-tree) KILL_TREE=0; shift ;;
+    -p|--pattern)
+      [[ $# -ge 2 ]] || { echo "Missing value for --pattern"; exit 2; }
+      PAT_EXTRA="$2"
+      shift 2
+      ;;
+    --launchd) SHOW_LAUNCHD=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown arg: $1"; usage; exit 2 ;;
+  esac
+done
+
+PAT="$PAT_DEFAULT"
+if [[ -n "$PAT_EXTRA" ]]; then
+  PAT="$PAT|$PAT_EXTRA"
+fi
+
+say() { printf '%s\n' "$*"; }
+
+run() {
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    say "[dry-run] $*"
+  else
+    eval "$@"
+  fi
+}
+
+list_matches() {
+  # ps with grep shows full command line (pgrep -a doesn't work well on macOS)
+  ps axo pid,state,command | grep -E "$PAT" | grep -v "grep -E" || true
+}
+
+get_pids() {
+  pgrep -f "$PAT" 2>/dev/null || true
+}
+
+kill_children_first() {
+  local sig="$1"; shift
+  local pid
+  for pid in "$@"; do
+    # kill direct children of pid
+    run "pkill -${sig} -P ${pid} 2>/dev/null || true"
+  done
+}
+
+kill_pids() {
+  local sig="$1"; shift
+  local pids=("$@")
+  [[ ${#pids[@]} -gt 0 ]] || return 0
+
+  if [[ "$KILL_TREE" -eq 1 ]]; then
+    kill_children_first "$sig" "${pids[@]}"
+  fi
+
+  # Kill the matched PIDs themselves
+  run "kill -${sig} ${pids[*]} 2>/dev/null || true"
+}
+
+say "== Using match regex =="
+say "$PAT"
+say
+
+say "== Matches (before) =="
+list_matches
+say
+
+pids_raw="$(get_pids)"
+if [[ -z "${pids_raw// /}" ]]; then
+  say "No matching processes found. ✅"
+  if [[ "$SHOW_LAUNCHD" -eq 1 ]]; then
+    say
+    say "== launchd jobs (claude|mcp|chroma) =="
+    launchctl list 2>/dev/null | egrep -i 'claude|mcp|chroma' || true
+  fi
+  exit 0
+fi
+
+# Convert to array safely (pgrep outputs one PID per line)
+# Using while loop for bash 3.x compatibility (macOS default)
+PIDS=()
+while IFS= read -r pid; do
+  [[ -n "$pid" ]] && PIDS+=("$pid")
+done <<<"$pids_raw"
+
+if [[ "$KILL_NOW" -eq 1 ]]; then
+  say "== Sending SIGKILL to ${#PIDS[@]} PID(s) =="
+  kill_pids "KILL" "${PIDS[@]}"
+else
+  say "== Sending SIGTERM to ${#PIDS[@]} PID(s) =="
+  kill_pids "TERM" "${PIDS[@]}"
+
+  if [[ "$TERM_ONLY" -eq 0 ]]; then
+    sleep 2
+    say
+    say "== Matches (after SIGTERM) =="
+    list_matches
+    say
+
+    pids_raw2="$(get_pids)"
+    if [[ -n "${pids_raw2// /}" ]]; then
+      PIDS2=()
+      while IFS= read -r pid; do
+        [[ -n "$pid" ]] && PIDS2+=("$pid")
+      done <<<"$pids_raw2"
+      say "== Still alive → sending SIGKILL to ${#PIDS2[@]} PID(s) =="
+      kill_pids "KILL" "${PIDS2[@]}"
+    else
+      say "All gone after SIGTERM. ✅"
+    fi
+  fi
+fi
+
+sleep 1
+say
+say "== Matches (final) =="
+list_matches
+
+if [[ "$SHOW_LAUNCHD" -eq 1 ]]; then
+  say
+  say "== launchd jobs (claude|mcp|chroma) =="
+  launchctl list 2>/dev/null | egrep -i 'claude|mcp|chroma' || true
+fi

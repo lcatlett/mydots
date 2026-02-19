@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+# claude-safe - Run Claude Code in tmux to work around macOS PTY escape sequence bug
+# See: https://github.com/anthropics/claude-code/issues/17787
+#
+# Simplified: Always fresh session, auto-cleanup on exit
+
+TMUX_BIN="$HOME/.local/share/mise/shims/tmux"
+CLAUDE_BIN="/opt/homebrew/bin/claude"
+
+# Non-interactive modes run directly (no tmux needed)
+for arg in "$@"; do
+    case "$arg" in
+        -p|--print|-h|--help|--version)
+            exec "$CLAUDE_BIN" "$@"
+            ;;
+    esac
+done
+
+# Piped input runs directly
+[ ! -t 0 ] && exec "$CLAUDE_BIN" "$@"
+
+# Already in tmux? Run directly
+[ -n "$TMUX" ] && exec "$CLAUDE_BIN" "$@"
+
+# Clean up any old claude sessions before starting
+"$TMUX_BIN" list-sessions -F '#{session_name}' 2>/dev/null | grep '^cc-' | while read s; do
+    "$TMUX_BIN" kill-session -t "$s" 2>/dev/null
+done
+
+# Fresh session every time, random name
+SESSION_NAME="cc-$$"
+
+# Run claude, destroy session when it exits
+exec "$TMUX_BIN" new-session -s "$SESSION_NAME" -- "$CLAUDE_BIN" "$@"

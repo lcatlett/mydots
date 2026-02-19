@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Function to check if a symlink is broken
+check_symlink() {
+    local symlink="$1"
+    if [ ! -e "$symlink" ]; then
+        echo "Broken"
+    else
+        echo "Valid"
+    fi
+}
+
+# Function to calculate the relative path
+relative_path() {
+    local source="$1"
+    local target="$2"
+    local source_dir=$(dirname "$source")
+    local target_dir=$(dirname "$target")
+    local target_base=$(basename "$target")
+
+    # Get the relative path from source_dir to target_dir
+    local relative_dir
+    relative_dir=$(python3 -c "import os.path; print(os.path.relpath('$target_dir', '$source_dir'))" 2>/dev/null || \
+                   python -c "import os.path; print(os.path.relpath('$target_dir', '$source_dir'))" 2>/dev/null)
+
+    # Fallback if python is not available
+    if [ -z "$relative_dir" ]; then
+        echo "$target"
+        return
+    fi
+
+    echo "$relative_dir/$target_base"
+}
+
+# Function to suggest a fix for a broken symlink
+suggest_fix() {
+    local symlink="$1"
+    local target="$2"
+    local relative_target=$(relative_path "$symlink" "$target")
+    echo "ln -sf $relative_target \"$symlink\""
+}
+
+# Check if a path is provided as an argument
+if [ -z "$1" ]; then
+    echo "Usage: $0 <path>"
+    exit 1
+fi
+
+# Set the directory to the provided path
+directory="$1"
+top_dir=$(basename "$directory")
+
+# Initialize counters
+total_symlinks=0
+broken_symlinks=0
+
+# Find all symlinks in the specified directory and subdirectories
+echo "Symlink Audit Report for directory: $top_dir"
+echo "---------------------------------------------"
+echo "| Source (Relative) | Destination | Status | Suggested Fix |"
+echo "|-------------------|-------------|--------|----------------|"
+while IFS= read -r symlink; do
+    total_symlinks=$((total_symlinks + 1))
+    target=$(readlink "$symlink")
+    status=$(check_symlink "$symlink")
+    relative_symlink=$(python -c "import os.path; print(os.path.relpath('$symlink', '$directory'))" 2>/dev/null || echo "$symlink")
+    if [ "$status" == "Broken" ]; then
+        broken_symlinks=$((broken_symlinks + 1))
+        fix_command=$(suggest_fix "$symlink" "$target")
+        echo "| $relative_symlink | $target | Broken | $fix_command |"
+    else
+        echo "| $relative_symlink | $target | Valid | N/A |"
+    fi
+done < <(find "$directory" -type l -not -path "*/changer/*")
+
+# Summary
+echo "---------------------------------------------"
+echo "| Total symlinks: $total_symlinks | Broken symlinks: $broken_symlinks |"
+echo "---------------------------------------------"
