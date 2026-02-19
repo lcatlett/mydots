@@ -93,7 +93,6 @@ brew "parallel"
 brew "percona-toolkit"
 brew "php@8.0", restart_service: :changed
 brew "php@8.1"
-brew "php@8.2", link: true
 brew "pigz"
 brew "pinentry-mac"
 brew "poppler"
