@@ -20,8 +20,8 @@
   remote = green
 
 [color "status"]
-  added = yellow
-  changed = green
+  added = green
+  changed = yellow
   untracked = cyan
 
 [advice]
@@ -29,7 +29,7 @@
 
 
 [core]
-	excludesfile = REDACTED-HOME/.gitignore_global
+	excludesfile = ~/.gitignore_global
   quotepath = false
   # line endings
   # force LF during add
@@ -41,7 +41,6 @@
   #safecrlf = true
   editor = vim
 	pager = delta
-	compression = 0
   packedGitLimit = 1028m
   packedGitWindowSize = 512m
 	compression = 9
@@ -49,7 +48,7 @@
 
 	# Prevent showing files whose names contain non-ASCII symbols as unversioned.
 	# http://michael-kuehnel.de/git/2014/11/21/git-mac-osx-and-german-umlaute.html
-	precomposeunicode = false
+	precomposeunicode = true
 
 	# Speed up commands involving untracked files such as `git status`.
 	# https://git-scm.com/docs/git-update-index#_untracked_cache
@@ -112,8 +111,6 @@
 # List branches according to you most recent checkouts.
   recent = !GIT_CURRENT_BRANCH=$(git branch | grep \\* | awk '{print $2}') && git reflog | grep checkout | cut -d : -f 3 | cut -d ' ' -f 6 | tail -n +2 | cat -n | sort -k2,2 -u | sort -k1,1 -n | cut -f 2 | grep -e '.\\{40\\}' -v | grep "^$GIT_CURRENT_BRANCH$" -v
 
-# map typos
-  remove = !echo 'WARNING: "git remove" does not exist, continuing under the assumption that you meant "git remote"!' && set -x && git remote
 
 # list tags version sorted
   tags = "!f() { git tag | sort --version-sort; }; f"
@@ -197,7 +194,6 @@ unhide = "update-index --no-assume-unchanged"
 
 # amend last commit without changing commit message
   amend = commit --amend --no-edit
-  cane = commit --amend --no-edit
 
 # helpful merge and rebase aliases
 	mc = merge --continue
@@ -211,7 +207,6 @@ unhide = "update-index --no-assume-unchanged"
 	conflicts = !git ls-files -u | cut -f 2 | sort -u
 # apply changes in gitignore
   apply-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
-  apply-global-gitignore = !git ls-files -ci --exclude-standard -z | xargs -0 git rm --cached
 	cherry-pick-skip = "!f() { git cherry-pick \"$@\" || git cherry-pick --skip; }; f"
 
   # git add -A && git commit -m "Apply global gitignore"
@@ -234,22 +229,30 @@ unhide = "update-index --no-assume-unchanged"
 
 [help]
     autocorrect = 0
-[credential]
-	helper =
-	helper =
-	helper = /usr/local/share/gcm-core/git-credential-manager
 [credential "https://dev.azure.com"]
 	useHttpPath = true
 [commit]
 	verbose = false
-	template = REDACTED-HOME/.stCommitMsg
+
+[init]
+  defaultBranch = main
+
+[fetch]
+  prune = true
+
+[pull]
+  rebase = true
+
+[branch]
+  sort = -committerdate
+
+[log]
+  abbrevCommit = true
 
 [merge]
-  conflictstyle = diff3
+  conflictstyle = zdiff3
 
 
-[merge "conflicts"]
-	driver = true
 [rerere]
 	enabled = true
 	autoupdate = false
@@ -260,9 +263,6 @@ unhide = "update-index --no-assume-unchanged"
 	lineNumber = true
 [pager]
 	grep = false
-	grep = false
-[url "https://REDACTED:x-oauth-basic@github.com/pantheon-systems/"]
-	insteadOf = https://github.com/pantheon-systems/
 [credential "https://git.drupalcode.org"]
 	provider = generic
 [push]
