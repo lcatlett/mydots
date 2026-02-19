@@ -1,0 +1,66 @@
+#!/bin/bash
+# Quick system health check - diagnoses memory pressure and stuck processes
+# Usage: syscheck
+
+echo "╭─────────────────────────────────────────╮"
+echo "│         System Health Check             │"
+echo "╰─────────────────────────────────────────╯"
+echo ""
+
+# Uptime and load
+echo "⏱  $(uptime)"
+echo ""
+
+# Memory pressure
+MEM_FREE=$(memory_pressure 2>/dev/null | grep "free percentage" | awk '{print $NF}')
+if [ -n "$MEM_FREE" ]; then
+    echo "💾 Memory free: $MEM_FREE"
+    # Warn if under 30%
+    MEM_NUM=${MEM_FREE%\%}
+    if [ "$MEM_NUM" -lt 30 ]; then
+        echo "   ⚠️  LOW MEMORY - consider closing apps"
+    fi
+else
+    echo "💾 Memory: $(vm_stat | awk '/Pages free/ {print $3}' | tr -d '.') pages free"
+fi
+echo ""
+
+# Stuck processes (UE state = uninterruptible + exiting, Z = zombie)
+STUCK=$(ps aux | awk '$8 ~ /^U|^Z/' | wc -l | tr -d ' ')
+if [ "$STUCK" -gt 0 ]; then
+    echo "🚨 Stuck/zombie processes: $STUCK"
+    echo "   Run: ps aux | awk '\$8 ~ /^U|^Z/'"
+    echo "   Fix: Reboot required for UE-state processes"
+else
+    echo "✅ No stuck processes"
+fi
+echo ""
+
+# Chrome check
+CHROME_COUNT=$(pgrep -f "Google Chrome" 2>/dev/null | wc -l | tr -d ' ')
+CHROME_STUCK=$(ps aux | grep "Google Chrome" | awk '$8 ~ /^U/' | wc -l | tr -d ' ')
+if [ "$CHROME_COUNT" -gt 0 ]; then
+    echo "🌐 Chrome: $CHROME_COUNT processes"
+    if [ "$CHROME_STUCK" -gt 0 ]; then
+        echo "   ⚠️  $CHROME_STUCK stuck (UE state) - reboot needed!"
+    fi
+else
+    echo "🌐 Chrome: not running"
+fi
+echo ""
+
+# Claude Code orphans
+CLAUDE_CODE=$(ps aux | grep "homebrew/bin/claude" | grep -v grep | wc -l | tr -d ' ')
+if [ "$CLAUDE_CODE" -gt 5 ]; then
+    echo "⚠️  Claude Code: $CLAUDE_CODE processes (possible orphans)"
+    echo "   Fix: pkill -f 'homebrew/bin/claude'"
+elif [ "$CLAUDE_CODE" -gt 0 ]; then
+    echo "🤖 Claude Code: $CLAUDE_CODE processes"
+else
+    echo "🤖 Claude Code: not running"
+fi
+echo ""
+
+# Top memory consumers (brief) - macOS compatible
+echo "📊 Top memory consumers:"
+ps aux -m 2>/dev/null | head -6 | tail -5 | awk '{printf "   %-25s %s%%\n", substr($11,1,25), $4}'
