@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Purpose: Show git log between two branches
+# Usage: gcb <branch-a> <branch-b>
 
 a=${1:?'a branch is required'}
 b=${2:-$(git rev-parse --abbrev-ref HEAD)}

@@ -1,4 +1,4 @@
-COMPUTER_NAME="REDACTED-USERNAME"
+COMPUTER_NAME="lindsey-mbp"
 
 osascript -e 'tell application "System Preferences" to quit'
 
@@ -32,11 +32,7 @@ defaults write com.apple.finder WarnOnEmptyTrash -bool false
 # Show indicator lights for open applications in the Dock
 defaults write com.apple.dock show-process-indicators -bool true
 
-# Disable Dashboard
-defaults write com.apple.dashboard mcx-disabled -bool true
-
-# Don’t show Dashboard as a Space
-defaults write com.apple.dock dashboard-in-overlay -bool true
+# Note: Dashboard was removed in macOS Catalina (2019) — these defaults are no-ops
 
 
 # Show the main window when launching Activity Monitor

@@ -1,4 +1,5 @@
 #!/bin/sh
+# PRIVATE: This script contains work-specific configuration and should not be included in public dotfiles
 
 # This is for Pantheon sites.
 

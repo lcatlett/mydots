@@ -3,7 +3,6 @@ alias .='pwd'
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ....='cd ../../../'
-alias path='echo $PATH | tr -s ":" "\n"'
 
 alias aliases="alias | sed 's/=.*//'"
 alias functions="declare -f | grep '^[a-z].* ()' | sed 's/{$//'"
@@ -60,7 +59,7 @@ alias path='echo -e ${PATH//:/\\n}'
 alias hist-summary="history | awk '{a[\$2]++} END{for(i in a){printf \"%5d\t%s\n\",a[i],i}}' | sort -rn | head"
 
 
-alias recent-branches="!git for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
+alias recent-branches="git for-each-ref --sort=-committerdate --count=10 --format='%(refname:short)' refs/heads/"
 
 
 alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
@@ -82,15 +81,6 @@ alias bathelp='bat --plain --language=help'
 
 
 
-alias drush8='REDACTED-HOME/drush/8/vendor/bin/drush'
-alias drush9='REDACTED-HOME/drush/9/vendor/bin/drush'
-alias drush10='REDACTED-HOME/drush/10/vendor/bin/drush'
-alias drush11='REDACTED-HOME/drush/11/vendor/bin/drush'
-alias drush12='REDACTED-HOME/drush/12/vendor/bin/drush'
-alias drush='drush11'
-
-#alias python2.7=REDACTED-HOME/.pyenv/shims/python2
-#alias gdrive='/usr/local/bin/gdrive'
 
 
 

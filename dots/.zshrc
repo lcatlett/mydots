@@ -1,5 +1,5 @@
 # ~/.zshrc - Cleaned and Optimized Configuration
-# Generated: $(date +"%Y-%m-%d %H:%M:%S")
+# Generated: 2026-02-19
 
 # --- Interactive TTY safety tweaks (only when interactive) ---
 if [[ -o interactive ]] && [[ -t 0 ]]; then
@@ -57,7 +57,9 @@ path+=(
   "/opt/homebrew/bin"
   "/opt/homebrew/sbin"
   "/usr/local/bin"
+  "/opt/homebrew/opt/curl/bin"
   "/usr/local/opt/curl/bin"
+  "/opt/homebrew/opt/openssl@3/bin"
   "/usr/local/opt/openssl@3/bin"
 )
 
@@ -90,14 +92,17 @@ export COMPOSER_MEMORY_LIMIT=-1
 #   "/opt/homebrew/opt/php@8.3/sbin"
 # )
 
-# Database clients
-path+=(
-  "/opt/homebrew/opt/mysql@8.4/bin"
-  "/opt/homebrew/opt/mysql-client@8.4/bin"
-)
+# Database clients — guard against non-existent paths
+for _mysqlv in 8.4 8.0; do
+  [[ -d "/opt/homebrew/opt/mysql@${_mysqlv}/bin" ]] && \
+    path+=("/opt/homebrew/opt/mysql@${_mysqlv}/bin")
+  [[ -d "/opt/homebrew/opt/mysql-client@${_mysqlv}/bin" ]] && \
+    path+=("/opt/homebrew/opt/mysql-client@${_mysqlv}/bin")
+done
+unset _mysqlv
 
 # Work tools
-path+=("$HOME/scripts/tasks/bin")
+[[ -d "$HOME/scripts/tasks/bin" ]] && path+=("$HOME/scripts/tasks/bin")
 #path+=("$HOME/.platform-nestle-cli/bin")
 
 # --- Priority 6: Package managers (LAST - cannot shadow above) ---
@@ -121,7 +126,7 @@ bindkey '^R' mcfly-lazy
 
 # --- SSH / GPG agent handling ---
 # Launch GPG agent first (it handles SSH auth)
-if [[ -z "$SSH_CLIENT" ]]; then
+if command -v gpgconf >/dev/null 2>&1 && [[ -z "$SSH_CLIENT" ]]; then
     if ! pgrep -u "$USER" gpg-agent >/dev/null; then
         gpgconf --launch gpg-agent >/dev/null 2>&1 &
     fi
@@ -218,7 +223,7 @@ eval "$(zoxide init zsh)"
 
 # --- Zsh completion cache configuration ---
 export ZSH_CACHE_DIR="$HOME/.zsh/cache"
-mkdir -p "$ZSH_CACHE_DIR"
+[[ -d "$ZSH_CACHE_DIR" ]] || mkdir -p "$ZSH_CACHE_DIR"
 export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
 
 # --- Final PATH export and deduplication ---
@@ -232,13 +237,13 @@ export PATH
 #alias claude-raw='/opt/homebrew/bin/claude'
 
 # bun completions
-[ -s "/Users/lindsey/.bun/_bun" ] && source "/Users/lindsey/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 #export BUN_INSTALL="$HOME/.bun"
 #export PATH="$BUN_INSTALL/bin:$PATH"
 
-alias claude-mem='bun "/Users/lindsey/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
 
 # Fix mise wrapper bugs - use mise exec for reliable execution
 alias npm='mise exec -- npm'
