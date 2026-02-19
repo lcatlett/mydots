@@ -1,0 +1,9 @@
+# Sensitive files — never commit
+dots/.exports
+
+# macOS artifacts
+.DS_Store
+oh-my-zsh/.DS_Store
+
+# Stale Homebrew backup
+install/brew.bak
