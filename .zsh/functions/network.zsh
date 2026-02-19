@@ -7,7 +7,7 @@
 curlheader() {
   if [[ -z "$2" ]]; then
     echo "curl -k -s -D - $1 -o /dev/null"
-    curl -k -s -D - $1 -o /dev/null:
+    curl -k -s -D - "$1" -o /dev/null
   else
     echo "curl -k -s -D - $2 -o /dev/null | grep $1:"
     curl -k -s -D - $2 -o /dev/null | grep $1:

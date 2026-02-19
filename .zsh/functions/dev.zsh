@@ -245,7 +245,7 @@ kill-bloat() {
   local -A child_counts
   local -A proc_names
   local ps_output
-  if ! ps_output=$(ps -eo pid,ppid,comm --no-headers 2>/dev/null); then
+  if ! ps_output=$(ps -axo "pid=,ppid=,comm=" 2>/dev/null); then
     echo "Error: Failed to retrieve process list" >&2
     return 1
   fi
@@ -368,11 +368,8 @@ mise_wrap() {
 
 # Apply the enforcer to your tools
 node() { mise_wrap node "$@"; }
-unalias npm 2>/dev/null
-npm() { mise_wrap node npm "$@"; } # Note: npm needs the node env
-unalias php 2>/dev/null
-php() { mise_wrap php "$@"; }
 python() { mise_wrap python "$@"; }
+# npm and php are handled by aliases in .zshrc (aliases take precedence over functions)
 
 # audit-system: Comprehensive memory and process analysis for macOS
 audit-system() {

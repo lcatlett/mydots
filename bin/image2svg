@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Purpose: Convert raster image to SVG using ImageMagick
+# Usage: image2svg <input-file>
 
 File=$1
 FileWithoutExtension="${File%.*}"

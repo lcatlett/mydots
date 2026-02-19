@@ -36,14 +36,14 @@
   autocrlf = input
   # autocrlf = true # for windows to convert to CRLF on checkout and LF on add
   # warn but allow line ending conversion to proceed
-  safecrlf = warn
+  eol = lf
   # prevent crlf (then you will have to deal with the problem -- dos2unix, etc)
   #safecrlf = true
   editor = vim
 	pager = delta
   packedGitLimit = 1028m
   packedGitWindowSize = 512m
-	compression = 9
+	compression = 1
 	symlinks = true
 
 	# Prevent showing files whose names contain non-ASCII symbols as unversioned.
@@ -56,9 +56,9 @@
 
 
 [pack]
-  deltaCacheSize = 2047m
-  packSizeLimit = 2047m
-  windowMemory = 2047m
+  deltaCacheSize = 512m
+  packSizeLimit = 512m
+  windowMemory = 256m
 
 [delta]
   features = unobtrusive-line-numbers decorations
@@ -228,11 +228,11 @@ unhide = "update-index --no-assume-unchanged"
 
 
 [help]
-    autocorrect = 0
+    autocorrect = prompt
 [credential "https://dev.azure.com"]
 	useHttpPath = true
 [commit]
-	verbose = false
+	verbose = true
 
 [init]
   defaultBranch = main

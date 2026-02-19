@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Purpose: SSH key and config management multi-tool
+# Usage: ssh-manager [list|add|remove|copy|help]
 
 BIN_NAME=$(basename "$0")
 COMMAND_NAME=$1

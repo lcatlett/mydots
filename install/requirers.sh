@@ -8,17 +8,13 @@
 # source ./echos.sh
 
 function require_cask() {
-    running "brew cask $1"
-    brew cask list $1 > /dev/null 2>&1 | true
-    if [[ ${PIPESTATUS[0]} != 0 ]]; then
-        action "brew cask install $1 $2"
-        brew cask install $1
+    if ! brew list --cask "$1" &>/dev/null; then
+        brew install --cask "$1"
         if [[ $? != 0 ]]; then
             error "failed to install $1! aborting..."
             # exit -1
         fi
     fi
-    ok
 }
 
 function require_brew() {
@@ -63,16 +59,6 @@ function require_npm() {
     if [[ $? != 0 ]]; then
         action "npm install -g $*"
         npm install -g $@
-    fi
-    ok
-}
-
-function require_apm() {
-    running "checking atom plugin: $1"
-    apm list --installed --bare | grep $1@ > /dev/null
-    if [[ $? != 0 ]]; then
-        action "apm install $1"
-        apm install $1
     fi
     ok
 }

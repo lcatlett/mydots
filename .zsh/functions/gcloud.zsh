@@ -10,10 +10,10 @@ alias unset-impersonate='unset_impersonate'
 
 # vclaude: Run Claude Code with Vertex AI
 vclaude() {
-  export CLAUDE_CODE_USE_VERTEX=1
-  export ANTHROPIC_VERTEX_PROJECT_ID="REDACTED-GCP-PROJECT-ID"
-  export CLOUD_ML_REGION="us-east5"
-  
+  # Require explicit project ID — no hardcoded project
+  local project_id="${VCLAUDE_PROJECT_ID:?'Set VCLAUDE_PROJECT_ID to your GCP project (e.g. export VCLAUDE_PROJECT_ID=my-project)'}"
+  local region="${VCLAUDE_REGION:-us-east5}"
+
   if ! command -v claude >/dev/null 2>&1; then
     echo "vclaude: 'claude' not found. Install @anthropic-ai/claude-code." >&2
     return 1
@@ -24,13 +24,6 @@ vclaude() {
     return 1
   fi
 
-  local project_id="${VCLAUDE_PROJECT_ID:-${ANTHROPIC_VERTEX_PROJECT_ID}}"
-  local region="${VCLAUDE_REGION:-${CLOUD_ML_REGION:-global}}"
-
-  if [[ -z "$project_id" ]]; then
-    echo "vclaude: set VCLAUDE_PROJECT_ID or ANTHROPIC_VERTEX_PROJECT_ID." >&2
-    return 1
-  fi
 
   if ! gcloud auth application-default print-access-token >/dev/null 2>&1; then
     echo "vclaude: no ADC available. Run 'gcloud auth login --update-adc'." >&2

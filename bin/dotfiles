@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Purpose: Manage dotfiles — install, update, and sync symlinks
+# Usage: dotfiles [install|update|help]
 
 BIN_NAME=$(basename "$0")
 COMMAND_NAME=$1
@@ -33,7 +35,7 @@ sub_help () {
 
 sub_update () {
     sudo softwareupdate -i -a
-    nvm install --lts --latest-npm # install last lts node instance
+    mise upgrade node # update to latest node version per mise config
     brew update
     brew upgrade
     echo -e "${GREEN}$ARROW Success! Update command finished.${NC}"

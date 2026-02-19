@@ -43,8 +43,7 @@ sudo pmset -a standbydelay 86400;
 running "Disable the sound effects on boot"
 sudo nvram SystemAudioVolume=" ";
 
-running "Disable local Time Machine snapshots"
-sudo tmutil disablelocal;
+# Note: sudo tmutil disablelocal removed in macOS Sierra (2016)
 
 
 running "Set sidebar icon size to medium"
@@ -84,11 +83,9 @@ defaults write com.apple.CrashReporter DialogType -string "none";
 running "Set Help Viewer windows to non-floating mode"
 defaults write com.apple.helpviewer DevMode -bool true;
 
-running "Restart automatically if the computer freezes"
-sudo systemsetup -setrestartfreeze on;
+# Note: sudo systemsetup -setrestartfreeze deprecated in Ventura+
 
-running "Never go into computer sleep mode"
-sudo systemsetup -setcomputersleep Off > /dev/null;
+# Note: sudo systemsetup -setcomputersleep deprecated in Ventura, no-op in Sonoma
 
 
 running "Disable smart quotes as they’re annoying when typing code"
@@ -146,8 +143,7 @@ defaults write com.apple.screensaver askForPasswordDelay -int 0;
 running "Enable subpixel font rendering on non-Apple LCDs"
 defaults write NSGlobalDomain AppleFontSmoothing -int 2;
 
-running "Enable HiDPI display modes (requires restart)"
-sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutionEnabled -bool true;
+# Note: DisplayResolutionEnabled is a no-op on Apple Silicon
 
 ###############################################################################
 # Finder                                                        #
@@ -173,8 +169,7 @@ defaults write com.apple.finder ShowStatusBar -bool true;
 running "Show path bar"
 defaults write com.apple.finder ShowPathbar -bool true;
 
-running "Allow text selection in Quick Look"
-defaults write com.apple.finder QLEnableTextSelection -bool true;
+# Note: QLEnableTextSelection removed — Quick Look text selection built-in since Mojave
 
 running "Display full POSIX path as Finder window title"
 defaults write com.apple.finder _FXShowPosixPathInTitle -bool true;
@@ -205,15 +200,14 @@ running "Use list view in all Finder windows by default"
 # Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`
 defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv";
 
-running "Empty Trash securely by default"
-defaults write com.apple.finder EmptyTrashSecurely -bool true;
+# Note: EmptyTrashSecurely removed in macOS Sierra
 
 running "Enable AirDrop over Ethernet and on unsupported Macs running Lion"
 defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true;
 
 
-# Fix vscode fonts in terminal
-defaults write com.microsoft.VSCode.helper.NP CGFontRenderingFontSmoothingDisabled -bool false
+# Fix vscode fonts in terminal (bundle ID varies by version — verify before running)
+# defaults write com.microsoft.VSCode.helper.NP CGFontRenderingFontSmoothingDisabled -bool false
 
 running "Expand the following File Info panes: “General”, “Open with”, and “Sharing & Permissions”"
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
@@ -244,7 +238,7 @@ defaults write com.apple.terminal StringEncodings -array 4;
 defaults write com.apple.terminal FocusFollowsMouse -bool true
 #defaults write org.x.X11 wm_ffm -bool true;
 running "Installing the custom theme for iTerm (opening file)"
-open "../iterm/lindsey.itermcolors";
+open "$(dirname "$0")/../iterm/lindsey.itermcolors";
 
 running "Don’t display the annoying prompt when quitting iTerm"
 defaults write com.googlecode.iterm2 PromptOnQuit -bool false;
