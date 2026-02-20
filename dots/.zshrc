@@ -115,28 +115,17 @@ unset _mysqlv
 export PATH
 
 
-# --- SSH / GPG agent handling ---
-# Launch GPG agent first (it handles SSH auth)
+# --- GPG agent handling ---
+# GPG agent for commit signing only — SSH auth is handled by macOS launchd agent
+# (SSH config: UseKeychain yes + AddKeysToAgent yes handles key loading automatically)
 if command -v gpgconf >/dev/null 2>&1 && [[ -z "$SSH_CLIENT" ]]; then
     if ! pgrep -u "$USER" gpg-agent >/dev/null; then
         gpgconf --launch gpg-agent >/dev/null 2>&1 &
     fi
     export GPG_TTY=$(tty)
-    export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+    # NOTE: SSH_AUTH_SOCK intentionally NOT overridden here.
+    # Overriding it with the GPG socket breaks --apple-use-keychain and macOS Keychain integration.
 fi
-
-# Load SSH keys in background if none loaded yet — don't block startup
-ssh_agent_init() {
-  if ssh-add -l &>/dev/null; then
-    return  # Keys already loaded
-  fi
-  {
-    ssh-add --apple-use-keychain ~/.ssh/id_rsa
-    ssh-add --apple-use-keychain ~/.ssh/id_rsa_migration
-    ssh-add --apple-use-keychain ~/.ssh/id_rsa_drupalorg
-  } &>/dev/null &
-}
-ssh_agent_init
 
 # --- Bun completion ---
 
