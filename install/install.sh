@@ -8,6 +8,8 @@ DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 # Install brew with packages & casks via Brewfile
 . "$DOTFILES_DIR/install/brew.sh"
 
+mise install
+
 # Bunch of symlinks
 . "$DOTFILES_DIR/install/symlinks.sh"
 
