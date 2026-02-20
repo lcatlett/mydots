@@ -14,3 +14,8 @@ install/brew.bak
 
 # Local tool state — not portable
 .claude/
+
+# Compiled binaries — platform-specific, install via brew/mise/source instead
+bin/dfc
+bin/dutree
+bin/tdu

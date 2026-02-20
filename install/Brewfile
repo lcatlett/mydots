@@ -28,6 +28,9 @@ brew "gmp"
 brew "coreutils"
 brew "libssh2"
 brew "curl"
+brew "dfc"
+# tdu (Top Disk Usage) has no brew/mise package — must compile from source:
+# https://bitbucket.org/josephpaul0/tdu  (Go; go install bitbucket.org/josephpaul0/tdu@latest)
 brew "dumpling"
 brew "ffmpeg"
 brew "fpart"
