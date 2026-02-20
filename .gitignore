@@ -11,3 +11,6 @@ iterm/iTerm2\ State.itermexport
 
 # Stale Homebrew backup
 install/brew.bak
+
+# Local tool state — not portable
+.claude/
