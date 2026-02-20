@@ -21,6 +21,12 @@ ln -sfv "$DOTFILES_DIR/dots/.profile"         ~
 ln -sfv "$DOTFILES_DIR/dots/.editorconfig"    ~
 
 # ---------------------------------------------------------------------------
+# mise — tool manager config
+# ---------------------------------------------------------------------------
+mkdir -p "$HOME/.config/mise"
+ln -sfv "$DOTFILES_DIR/mise/config.toml" "$HOME/.config/mise/config.toml"
+
+# ---------------------------------------------------------------------------
 # bin/ scripts → ~/bin/
 # ---------------------------------------------------------------------------
 mkdir -p ~/bin
