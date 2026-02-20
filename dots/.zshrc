@@ -115,13 +115,13 @@ unset _mysqlv
 export PATH
 
 # --- McFly (defer to first Ctrl+R use) ---
-mcfly-lazy() {
-    bindkey -r '^R'
-    eval "$(mcfly init zsh)"
-    zle mcfly-history-widget
-}
-zle -N mcfly-lazy
-bindkey '^R' mcfly-lazy
+# mcfly-lazy() {
+#     bindkey -r '^R'
+#     eval "$(mcfly init zsh)"
+#     zle mcfly-history-widget
+# }
+# zle -N mcfly-lazy
+# bindkey '^R' mcfly-lazy
 
 
 # --- SSH / GPG agent handling ---

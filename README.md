@@ -168,17 +168,26 @@ curl https://mise.run | sh
 # 3. Clone dotfiles
 git clone https://github.com/lcatlett/mydots ~/dotfiles
 
-# 4. Symlink config files (dots/ → ~/)
-cd ~/dotfiles && bash install/install.sh
-
-# 5. Install all mise tools
-mise install
-
-# 6. Install Homebrew packages
-brew bundle --file=~/dotfiles/install/brew.bak
+# 4. Run full installation (brew, mise, symlinks, macOS defaults)
+~/dotfiles/bin/dotfiles install
 ```
 
-After step 4, `~/.zshrc`, `~/.gitconfig`, `~/.aliases`, etc. will be symlinks into `~/dotfiles/dots/`.
+After step 4, `~/.zshrc`, `~/.gitconfig`, `~/.aliases`, etc. will be symlinks into `~/dotfiles/dots/`, and all `bin/` scripts will be symlinked into `~/bin/`. Open a new shell and use `dotfiles <command>` from anywhere.
+
+## dotfiles CLI
+
+```bash
+dotfiles help          # Show all commands
+dotfiles install       # Full end-to-end install (brew, mise, symlinks, macOS defaults)
+dotfiles update        # Update OS, brew, and mise tool versions
+dotfiles symlinks      # Re-run symlink creation (dots/ → ~/, bin/ → ~/bin/)
+dotfiles clean         # Clean brew caches
+dotfiles brew          # Run brew install only
+dotfiles defaults      # Apply macOS defaults
+dotfiles osxextended   # Apply extended macOS settings
+dotfiles dock          # Configure Dock icons
+dotfiles hosts         # Update /etc/hosts
+```
 
 ---
 
@@ -201,8 +210,10 @@ dotfiles/
 │   ├── gcb             Git branch diff viewer
 │   └── ...
 ├── install/
-│   ├── install.sh      Symlink script
-│   └── brew.bak        Homebrew packages list
+│   ├── install.sh      Full installation orchestrator
+│   ├── symlinks.sh     Symlink dots/ → ~/ and bin/ → ~/bin/
+│   ├── brew.sh         Homebrew bootstrap
+│   └── Brewfile        Homebrew package list
 ├── macos/              macOS defaults and Dock config
 ├── iterm/              iTerm2 profile
 └── editors/            Editor configs

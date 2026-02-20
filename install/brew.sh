@@ -6,6 +6,6 @@ fi
 # Install all packages, casks, and vscode extensions from Brewfile
 brew bundle install --file="$DOTFILES_DIR/install/Brewfile"
 
-brew cleanup
+#brew cleanup
 
 echo "Success! Brew applications are installed."
