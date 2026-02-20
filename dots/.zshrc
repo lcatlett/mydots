@@ -193,9 +193,8 @@ else
   compinit -C
 fi
 
-# --- Activate mise for CLI tools like zoxide, starship ---
+# --- Activate mise (hook-based PATH management for all managed tools) ---
 eval "$(mise activate zsh)"
-unalias npm 2>/dev/null
 
 # --- zoxide (must load after compinit) ---
 eval "$(zoxide init zsh)"
@@ -224,15 +223,6 @@ export PATH
 #export PATH="$BUN_INSTALL/bin:$PATH"
 
 alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
-
-# Fix mise wrapper bugs - use mise exec for reliable execution
-alias npm='mise exec -- npm'
-alias npx='mise exec -- npx'
-alias php='mise exec -- php'
-alias composer='mise exec -- composer'
-alias uv='mise exec -- uv'
-alias uvx='mise exec -- uvx'
-alias bun='mise exec -- bun'
 
 # --- Starship prompt ---
 export STARSHIP_CONFIG=~/.config/starship-minimal.toml
