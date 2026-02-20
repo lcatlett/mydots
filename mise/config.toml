@@ -1,0 +1,65 @@
+# mise global tool configuration
+# Managed by dotfiles — do not edit ~/.config/mise/config.toml directly.
+# Edit ~/dotfiles/mise/config.toml instead.
+#
+# Version pinning policy: tools use "latest" intentionally.
+# This dotfiles repo prioritizes current tools over reproducibility.
+# Reproducible pinned environments are managed per-project via
+# .mise.toml files in project roots (mybox will formalize this).
+
+[tools]
+bun = "latest"
+go = "latest"
+node = "latest"
+"npm:@mermaid-js/mermaid-cli" = "latest"
+"npm:@mermaidchart/cli" = "latest"
+python = "latest"
+"ubi:adwinying/php" = ["8.2", "8.3", "8.4"]
+uv = "latest"
+bat = "latest"
+eza = "latest"
+fd = "latest"
+fzf = "latest"
+jq = "latest"
+delta = "latest"
+hyperfine = "latest"
+dust = "latest"
+duf = "latest"
+glow = "latest"
+starship = "latest"
+zoxide = "latest"
+direnv = "latest"
+act = "latest"
+"github:cli/cli" = "latest"
+git-cliff = "latest"
+shellcheck = "latest"
+hadolint = "latest"
+tmux = "latest"
+gum = "latest"
+cmake = "latest"
+yq = "latest"
+"github:BurntSushi/ripgrep" = "latest"
+gemini-cli = "latest"
+"github:Canop/broot" = "latest"
+"github:fletcher/MultiMarkdown-6" = "latest"
+markdownlint-cli2 = "latest"
+gh = "latest"
+mkcert = "latest"
+pack = "latest"
+tflint = "latest"
+usage = "latest"
+ruby = "latest"
+rclone = "latest"
+"aqua:simeji/jid" = "latest"
+"aqua:GoogleCloudPlatform/berglas" = "latest"
+rust = "latest"
+
+[settings]
+
+[settings.ruby]
+compile = false
+
+[settings.pipx]
+uvx = true
+
+
