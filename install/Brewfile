@@ -10,6 +10,14 @@ tap "koekeishiya/formulae"
 tap "microsoft/git"
 tap "minio/stable"
 tap "sourcegraph/src-cli"
+
+# ------------------------------------------------------------
+# POLICY: Homebrew is for system libraries and GUI apps only.
+# CLI tools and language runtimes are managed by mise.
+# See mise/config.toml for the full tool inventory.
+# Before adding here, check: mise ls-remote <tool>
+# ------------------------------------------------------------
+
 brew "libpng"
 brew "xz"
 brew "zstd"
@@ -41,7 +49,8 @@ brew "gd"
 brew "libiconv"
 brew "git"
 brew "oniguruma"
-brew "git-delta"
+# Managed by mise — see mise/config.toml
+# brew "git-delta"
 brew "git-filter-repo"
 brew "git-sizer"
 brew "unbound"
