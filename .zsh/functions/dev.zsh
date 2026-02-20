@@ -351,26 +351,6 @@ kill-runaway() {
   done
 }
 
-# Universal wrapper for mise-managed tools
-mise_wrap() {
-  local tool="$1"
-  shift
-  if mise which "$tool" > /dev/null 2>&1; then
-    mise exec "$tool" -- "$tool" "$@"
-    local exit_code=$?
-    if [[ $exit_code -ne 0 ]]; then
-      return $exit_code
-    fi
-  else
-    command "$tool" "$@"
-  fi
-}
-
-# Apply the enforcer to your tools
-node() { mise_wrap node "$@"; }
-python() { mise_wrap python "$@"; }
-# npm and php are handled by aliases in .zshrc (aliases take precedence over functions)
-
 # audit-system: Comprehensive memory and process analysis for macOS
 audit-system() {
   # Check for gum dependency
