@@ -2,8 +2,6 @@
 
 Personal dotfiles for macOS (Apple Silicon) — PHP/Drupal web development setup.
 
-![iTerm2 shell](https://raw.githubusercontent.com/lcatlett/mydots/master/screenshot.png)
-
 ---
 
 ## What's in Here
