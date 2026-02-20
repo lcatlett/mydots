@@ -2,6 +2,15 @@ _DOTFILES_RED='\033[0;31m'
 _DOTFILES_GREEN='\033[0;32m'
 _DOTFILES_NC='\033[0m'
 
+# cat: use bat for interactive display, fall back to real cat for pipes/scripts
+cat() {
+  if [[ -t 1 ]] && command -v bat >/dev/null 2>&1; then
+    command bat --theme auto:system --theme-dark default --theme-light GitHub "$@"
+  else
+    command cat "$@"
+  fi
+}
+
 # man() {
 # 	env \
 # 		LESS_TERMCAP_mb=$(printf "\e[1;31m") \

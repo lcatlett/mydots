@@ -66,7 +66,7 @@ alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker 
 
 alias bfg='java -jar ~/bin/bfg.jar'
 
-alias cat="bat --theme auto:system --theme-dark default --theme-light GitHub"
+alias bat='command bat --theme auto:system --theme-dark default --theme-light GitHub'
 
 
 alias bathelp='bat --plain --language=help'
