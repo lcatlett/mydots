@@ -8,6 +8,8 @@ DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 # ---------------------------------------------------------------------------
 # Config files → ~/
 # ---------------------------------------------------------------------------
+# NOTE: dots/.exports is gitignored — secrets live there.
+# On fresh install: cp dots/.exports.template dots/.exports, then fill in values.
 ln -sfv "$DOTFILES_DIR/dots/.exports"         ~
 ln -sfv "$DOTFILES_DIR/dots/.aliases"         ~
 ln -sfv "$DOTFILES_DIR/dots/.gitconfig"       ~

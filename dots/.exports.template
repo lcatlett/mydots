@@ -1,0 +1,54 @@
+# ~/.exports — Environment variables (secrets + preferences)
+#
+# SETUP: Copy this file to dots/.exports and fill in values.
+#        Never commit dots/.exports — it is gitignored.
+#
+#        cp dots/.exports.template dots/.exports
+#
+# After editing, reload with: source ~/.exports  (or open a new shell)
+#
+# NOTE: Do NOT add PATH assignments here. .zshrc is the authoritative
+#       PATH builder. This file is for env vars only.
+
+# =============================================================================
+# Editor
+# =============================================================================
+# Default terminal editor. Common values: "nano", "vim", "code --wait"
+# Required: yes (many tools fall back to vi if unset)
+export EDITOR=""
+
+# =============================================================================
+# Homebrew
+# =============================================================================
+# GitHub personal access token used by Homebrew to avoid API rate limits.
+# Generate at: https://github.com/settings/tokens (no scopes needed)
+# Or retrieve from: macOS Keychain / 1Password
+# Required: no (Homebrew works without it, but may hit rate limits)
+export HOMEBREW_GITHUB_API_TOKEN=""
+
+# =============================================================================
+# PHP / Composer
+# =============================================================================
+# Remove Composer's memory limit (-1 = unlimited). Prevents OOM on large installs.
+# Required: yes (for PHP/Drupal development)
+export COMPOSER_MEMORY_LIMIT="-1"
+
+# Exit on patch failure instead of silently continuing.
+# Required: recommended for Drupal projects using cweagans/composer-patches
+export COMPOSER_EXIT_ON_PATCH_FAILURE="1"
+
+# =============================================================================
+# Docker
+# =============================================================================
+# Increase timeouts for slow Docker operations (large images, slow networks).
+# Required: no (defaults are fine for most use; increase if you see timeouts)
+export DOCKER_CLIENT_TIMEOUT="120"
+export COMPOSE_HTTP_TIMEOUT="120"
+
+# =============================================================================
+# CLI Tool Preferences
+# =============================================================================
+# Theme for bat (cat replacement with syntax highlighting).
+# Run `bat --list-themes` to see options.
+# Required: no (bat uses a sensible default)
+export BAT_THEME=""
