@@ -19,3 +19,6 @@ install/brew.bak
 bin/dfc
 bin/dutree
 bin/tdu
+
+# Local override files — machine-specific config that shouldn't be shared
+*.local
