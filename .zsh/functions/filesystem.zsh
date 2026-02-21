@@ -65,3 +65,26 @@ ram() {
 size() {
   dust -s "$@"
 }
+
+# cat: use bat for interactive display, fall back to real cat for pipes/scripts
+cat() {
+  if [[ -t 1 ]] && command -v bat >/dev/null 2>&1; then
+    command bat --theme auto:system --theme-dark default --theme-light GitHub "$@"
+  else
+    command cat "$@"
+  fi
+}
+
+# ramsi: Remove ANSI escape sequences from a file (in-place)
+# Usage: ramsi <file>
+ramsi() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: ramsi <file>"
+    return 1
+  fi
+  if [[ ! -f "$1" ]]; then
+    echo "ramsi: file not found: $1"
+    return 1
+  fi
+  sed -i '' -E "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" "$1"
+}

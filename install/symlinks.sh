@@ -29,6 +29,14 @@ mkdir -p "$HOME/.config/mise"
 ln -sfv "$DOTFILES_DIR/mise/config.toml" "$HOME/.config/mise/config.toml"
 
 # ---------------------------------------------------------------------------
+# .zsh/functions/ — modular shell functions → ~/.zsh/functions/
+# ---------------------------------------------------------------------------
+mkdir -p "$HOME/.zsh/functions"
+for func_file in "$DOTFILES_DIR/.zsh/functions"/*.zsh; do
+    ln -sfv "$func_file" "$HOME/.zsh/functions/"
+done
+
+# ---------------------------------------------------------------------------
 # bin/ scripts → ~/bin/
 # ---------------------------------------------------------------------------
 mkdir -p ~/bin
