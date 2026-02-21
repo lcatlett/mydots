@@ -183,6 +183,13 @@ Reference plan documents or prior decisions where relevant.
 - After editing install scripts: `bash -n <file>`
 - After editing `symlinks.sh`: run `dotfiles symlinks` in a test context
 
+### Updating the Changelog
+
+After merging to master, regenerate CHANGELOG.md from commit history:
+```bash
+git-cliff --output CHANGELOG.md && git add CHANGELOG.md && git commit -m 'chore: update changelog'
+```
+
 ---
 
 ## What NOT to Do
