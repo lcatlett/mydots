@@ -1,241 +1,200 @@
 # Dotfiles
 
-Personal dotfiles for macOS (Apple Silicon) — PHP/Drupal web development setup.
+Personal macOS dotfiles for Apple Silicon. This repo bootstraps a fresh Mac to a
+working development environment and keeps config files synced via symlinks — no
+magic, no frameworks. Tools are managed with a mise-first philosophy: language
+runtimes and CLI tools go through [mise](https://mise.jdx.dev/), Homebrew is
+reserved for system libraries and GUI apps. Portable enough to re-run on any
+Apple Silicon Mac.
 
 ![Terminal](https://raw.githubusercontent.com/lcatlett/mydots/master/screenshot.png)
 
 ---
 
-## What's in Here
+## Quick Start
 
-| Component | Details |
-|-----------|---------|
-| **Shell** | zsh with modular function files (`~/.zsh/functions/*.zsh`) |
-| **Prompt** | [Starship](https://starship.rs/) — fast, minimal, git-aware |
-| **Tool manager** | [mise](https://mise.jdx.dev/) — replaces nvm, pyenv, rbenv, and most Homebrew CLIs |
-| **Search** | History: [McFly](https://github.com/cantino/mcfly) · Directory: [zoxide](https://github.com/ajeetdsouza/zoxide) |
-| **Git pager** | [delta](https://github.com/dandavison/delta) — syntax-highlighted diffs with side-by-side mode |
-| **Key config files** | `.zshrc`, `.exports`, `.aliases`, `.gitconfig`, `.gitignore_global` |
+```bash
+xcode-select --install
+git clone https://github.com/lcatlett/mydots ~/dotfiles
+~/dotfiles/bin/dotfiles install
+```
+
+This installs Homebrew packages, creates symlinks, and installs mise-managed
+tools. See [BOOTSTRAP.md](BOOTSTRAP.md) for the full step-by-step guide
+(secrets setup, macOS defaults, GPG/SSH keys, troubleshooting).
 
 ---
 
-## Why mise?
+## Repository Structure
 
-Most developers have separate tools for managing different language runtimes:
-- `nvm` or `fnm` for Node.js
-- `pyenv` for Python
-- `rbenv` for Ruby
-- Homebrew for everything else
+```
+dotfiles/
+├── bin/          Scripts → ~/bin/ (includes the `dotfiles` CLI)
+├── dots/         Config files → ~/ (symlinked)
+├── mise/         mise global config → ~/.config/mise/ (symlinked)
+├── install/      Bootstrap scripts (install.sh, symlinks.sh, brew.sh, Brewfile)
+├── macos/        macOS defaults scripts (defaults.sh, extended.sh, dock.sh)
+├── iterm/        iTerm2 color schemes
+└── fonts/        FiraCode, Hack Nerd Font, Inconsolata
+```
 
-**mise replaces all of them.** It's a single polyglot tool version manager that:
+Live config files are symlinks into this repo. Editing `~/.zshrc` **is** editing
+`dots/.zshrc`. Symlinks are managed by `install/symlinks.sh`.
 
-- Installs and switches between language runtimes (Node, Python, Go, PHP, Ruby, etc.)
-- Installs CLI tools the same way (ripgrep, delta, starship, jq, etc.)
-- Supports **per-project versions** via `.mise.toml` or `.tool-versions` in any directory — so `cd my-project` automatically switches to the right Node/Python version
-- Keeps everything in `~/.local/share/mise/installs/` instead of scattered across the system
-- Uses a single config file: `~/.config/mise/config.toml`
+---
+
+## Tool Management
+
+<!-- Source of truth for the brew/mise split: install/Brewfile header comment
+     and mise/config.toml. Update this section if either changes. -->
+
+### mise manages runtimes and CLI tools
+
+[mise](https://mise.jdx.dev/) is a single polyglot tool version manager that
+replaces nvm, pyenv, rbenv, and most Homebrew CLI installs. The global config is
+tracked at `mise/config.toml` in this repo and symlinked to
+`~/.config/mise/config.toml` during setup.
+
+**Language runtimes:** Node.js, Python, Go, PHP (8.2/8.3/8.4), Ruby, Rust, Bun, uv
+
+**CLI tools:** bat, eza, fd, fzf, ripgrep, jq, yq, delta, zoxide, starship,
+direnv, tmux, gum, glow, broot, gh, act, git-cliff, shellcheck, hadolint,
+hyperfine, dust, duf, cmake, mkcert, and more (~55 tools total)
 
 ```bash
-# Common mise commands
-mise ls                        # List installed tools and versions
+mise ls                        # List installed tools
 mise use --global node@latest  # Install latest Node globally
-mise use node@20               # Install Node 20 for current project
-mise install                   # Install all tools defined in nearest config
-mise doctor                    # Diagnose issues
+mise use node@20               # Pin Node 20 for current project
+mise install                   # Install everything from config
 mise outdated                  # Check for updates
 ```
 
-The only things that still use Homebrew are macOS GUI apps, system libraries (openssl, libpq), and tools not available in mise.
+### Homebrew manages system libraries and GUI apps
 
----
+Homebrew is reserved for things mise can't handle — compilation libraries, system
+services, and macOS GUI apps. The full list is in `install/Brewfile`.
 
-## Installed Tools
+**Libraries:** openssl, gnupg + pinentry-mac, imagemagick, mysql-client, curl,
+libffi, libyaml, zlib, and build dependencies
 
-### Language Runtimes (via mise)
+**GUI apps (casks):** iTerm2, Raycast, Sequel Ace, GPG Suite, OrbStack, ngrok
 
-| Tool | Versions | Notes |
-|------|----------|-------|
-| Node.js | latest | Via mise; `npm`/`npx` wrapped with `mise exec` |
-| Python | 3.11, 3.12, 3.13, 3.14 | Multiple versions for compatibility testing |
-| Go | latest | `GOPATH=~/go` |
-| PHP | 8.2, 8.3, 8.4 | Via [adwinying/php](https://github.com/adwinying/php) provider |
-| Bun | latest | JavaScript runtime + package manager |
-| uv | latest | Fast Python package/project manager (replaces pip/venv) |
-
-### Developer CLI Tools (via mise)
-
-| Tool | Purpose |
-|------|---------|
-| [bat](https://github.com/sharkdp/bat) | `cat` with syntax highlighting |
-| [eza](https://github.com/eza-community/eza) | Modern `ls` replacement |
-| [fd](https://github.com/sharkdp/fd) | Fast `find` replacement |
-| [fzf](https://github.com/junegunn/fzf) | Fuzzy finder (used in shell completion) |
-| [jq](https://jqlang.github.io/jq/) | JSON processor |
-| [yq](https://github.com/mikefarah/yq) | YAML/JSON/TOML processor |
-| [ripgrep](https://github.com/BurntSushi/ripgrep) | Fast `grep` replacement (aliased as `rg`) |
-| [delta](https://github.com/dandavison/delta) | Git diff pager with syntax highlighting |
-| [zoxide](https://github.com/ajeetdsouza/zoxide) | Smarter `cd` — jump to frecent directories |
-| [starship](https://starship.rs/) | Fast, customizable shell prompt |
-| [direnv](https://direnv.net/) | Auto-load `.envrc` files per directory |
-| [tmux](https://github.com/tmux/tmux) | Terminal multiplexer |
-| [gum](https://github.com/charmbracelet/gum) | Pretty shell script UI components |
-| [glow](https://github.com/charmbracelet/glow) | Render Markdown in the terminal |
-| [broot](https://github.com/Canop/broot) | Interactive file tree navigator |
-| [gh](https://cli.github.com/) | GitHub CLI |
-| [act](https://github.com/nektos/act) | Run GitHub Actions locally |
-| [git-cliff](https://github.com/orhun/git-cliff) | Changelog generator |
-| [shellcheck](https://www.shellcheck.net/) | Shell script linter |
-| [hadolint](https://github.com/hadrolint/hadolint) | Dockerfile linter |
-| [hyperfine](https://github.com/sharkdp/hyperfine) | Command benchmarking |
-| [dust](https://github.com/bootandy/dust) | Intuitive `du` replacement |
-| [duf](https://github.com/muesli/duf) | Better `df` — disk usage |
-| [cmake](https://cmake.org/) | Build system |
-| [gemini-cli](https://github.com/google-gemini/gemini-cli) | Google Gemini CLI |
-
-### System Packages (via Homebrew)
-
-Homebrew is reserved for things mise can't handle — system libraries, macOS GUI apps, and tools that need deep system integration.
-
-**Libraries / System tools:**
-- `gnupg` + `pinentry-mac` — GPG keys and commit signing
-- `imagemagick` — Image processing
-- `mysql-client` — MySQL CLI (libmysqlclient for PHP extensions)
-- `openssl@3`, `curl` — TLS and HTTP
-- `git` — Git (system version, delta pager configured separately)
-- `rclone` — Cloud storage sync
-- `redis` — Local Redis server
-- `pigz` — Parallel gzip
-- `percona-toolkit` — MySQL analysis tools
-- `mcfly` — Shell history search (requires Homebrew for shell integration)
-
-**GUI applications (Homebrew Cask):**
-- iTerm2 — Terminal
-- Alfred — App launcher
-- Sequel Ace — MySQL GUI
-- GPG Suite — GPG key management UI
-- Google Cloud SDK — `gcloud` CLI
+**Rule of thumb:** before adding to the Brewfile, check `mise ls-remote <tool>`.
+If mise has it, use mise.
 
 ---
 
 ## Shell Architecture
 
-```
-~/.zshrc                        # Main config — sourced for every interactive shell
-~/.exports                      # Environment variables and PATH
-~/.aliases                      # Shell aliases
-~/.zsh/functions/               # Modular function files (auto-sourced)
-    dev.zsh                     # Development helpers (mise wrappers, language tools)
-    filesystem.zsh              # File/directory utilities
-    gcloud.zsh                  # Google Cloud helpers
-    network.zsh                 # Network diagnostics
-~/.zprofile                     # Login shell — mise shims for non-interactive shells
-```
+<!-- Source of truth: dots/.zshrc. Update this section if startup order changes. -->
 
-**Shell startup order:**
-1. `.zshrc` loads `.exports` → `.aliases`
-2. Modular `~/.zsh/functions/*.zsh` files are sourced
-3. GPG agent launches (handles SSH auth via gpg-agent SSH socket)
-4. SSH keys load in the background (non-blocking)
-5. mise activates (adds shims to PATH)
-6. Completions initialize (cached, once per day)
-7. Starship prompt initializes
-
-### PATH Priority
+### Startup order
 
 ```
-~/bin           → Personal scripts (always wins)
-~/.local/bin    → Direct installs
-/opt/homebrew   → Homebrew (Apple Silicon path)
-/usr/bin        → System
-~/.cargo/bin    → Rust
-~/go/bin        → Go binaries
+.zshrc
+  → .exports (env vars — EDITOR, tokens, build flags)
+  → .aliases
+  → ~/.zsh/functions/*.zsh (auto-sourced modular functions)
+  → History config
+  → PATH construction (typeset -U, priority order)
+  → GPG agent + SSH keys (async, non-blocking)
+  → rg/fd/pigz wrappers (override grep/find/gzip)
+  → compinit (cached daily)
+  → mise activate
+  → zoxide init
+  → Starship prompt init
 ```
 
-mise shims are injected at the front of PATH automatically by `eval "$(mise activate zsh)"`.
+Startup target: under 300ms.
+
+### Key files
+
+| File | Purpose |
+|------|---------|
+| `dots/.zshrc` | Main shell config — PATH construction + startup orchestration |
+| `dots/.exports` | Environment variables (EDITOR, tokens, build flags) — **gitignored** |
+| `dots/.aliases` | Shell aliases |
+| `dots/.gitconfig` | Git config + ~30 aliases + delta pager settings |
+| `dots/.gitignore_global` | Global gitignore (applies to all repos) |
+| `install/Brewfile` | Homebrew packages, casks, fonts, VS Code extensions |
+| `install/symlinks.sh` | Defines every managed symlink |
+| `mise/config.toml` | Global mise tool versions |
+| `bin/dotfiles` | CLI entry point (`dotfiles help` for commands) |
+
+### PATH priority
+
+```
+~/.local/share/mise/shims   → mise-managed tools (injected by mise activate)
+~/bin                        → Personal scripts (from this repo)
+~/.local/bin                 → Direct installs
+/opt/homebrew/bin            → Homebrew (Apple Silicon)
+/usr/bin                     → System
+```
+
+### Git config highlights
+
+- **Pager:** delta (syntax-highlighted, side-by-side diffs, VS Code hyperlinks)
+- **Defaults:** `pull.rebase=true`, `fetch.prune=true`, `push.autoSetupRemote=true`
+- **Conflict style:** `zdiff3` (shows base in three-way conflicts)
+- **rerere:** enabled (reuse recorded conflict resolutions)
+- **Signing:** GPG via gpg-agent (also handles SSH auth)
+
+Useful aliases: `git s` (short status), `git wip` (quick savepoint), `git undo`
+(soft reset last commit), `git ahead` (unpushed commits), `git lol` (graph log).
 
 ---
 
-## Installation on a Fresh Mac
+## What's Not Here
 
+This repo does **not** contain — and never will contain:
+
+- **SSH keys** — generate per-machine (`ssh-keygen -t ed25519`)
+- **GPG keys** — generate per-machine (`gpg --full-generate-key`)
+- **secrets** — `dots/.exports` is gitignored; it holds tokens and credentials
+
+A template for `.exports` is provided at `dots/.exports.template`. Copy it to
+`dots/.exports` and fill in your values. See [BOOTSTRAP.md](BOOTSTRAP.md) for
+details.
+
+---
+
+## Making Changes
+
+**Edit shell config** — edit directly in `dots/`; changes are live via symlink:
 ```bash
-# 1. Install Homebrew (Apple Silicon)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
-# 2. Install mise
-curl https://mise.run | sh
-
-# 3. Clone dotfiles
-git clone https://github.com/lcatlett/mydots ~/dotfiles
-
-# 4. Run full installation (brew, mise, symlinks, macOS defaults)
-~/dotfiles/bin/dotfiles install
+source ~/.zshrc   # reload, or open a new shell
 ```
 
-After step 4, `~/.zshrc`, `~/.gitconfig`, `~/.aliases`, etc. will be symlinks into `~/dotfiles/dots/`, and all `bin/` scripts will be symlinked into `~/bin/`. Open a new shell and use `dotfiles <command>` from anywhere.
+**Add a Homebrew package** — add to `install/Brewfile`, then:
+```bash
+brew bundle --file=install/Brewfile
+```
+
+**Add a mise tool:**
+```bash
+mise use --global <tool>@latest
+```
+
+**Add a new dotfile** — add the file to `dots/`, add a `ln -sfv` line to
+`install/symlinks.sh`, then:
+```bash
+dotfiles symlinks
+```
+
+**Add a new script** — add to `bin/`, add the script name to the loop in
+`install/symlinks.sh`, then run `dotfiles symlinks`.
+
+---
 
 ## dotfiles CLI
 
 ```bash
 dotfiles help          # Show all commands
-dotfiles install       # Full end-to-end install (brew, mise, symlinks, macOS defaults)
-dotfiles update        # Update OS, brew, and mise tool versions
-dotfiles symlinks      # Re-run symlink creation (dots/ → ~/, bin/ → ~/bin/)
-dotfiles clean         # Clean brew caches
+dotfiles install       # Full bootstrap (brew, mise, symlinks, macOS defaults)
+dotfiles update        # Update OS, Homebrew, and mise tools
+dotfiles symlinks      # Re-run symlink creation
 dotfiles brew          # Run brew install only
 dotfiles defaults      # Apply macOS defaults
-dotfiles osxextended   # Apply extended macOS settings
-dotfiles dock          # Configure Dock icons
-dotfiles hosts         # Update /etc/hosts
-```
-
----
-
-## Structure
-
-```
-dotfiles/
-├── dots/               Config files symlinked to ~/
-│   ├── .zshrc          Shell config
-│   ├── .exports        Environment variables
-│   ├── .aliases        Aliases
-│   ├── .gitconfig      Git config with aliases and delta pager
-│   ├── .gitignore_global
-│   └── .functions      Legacy monolithic functions (kept for reference)
-├── .zsh/
-│   └── functions/      Modular function files (sourced by .zshrc)
-├── bin/                Personal scripts → ~/bin
-│   ├── dotfiles        Dotfile management
-│   ├── ssh-manager     SSH key/config tool with autocomplete
-│   ├── gcb             Git branch diff viewer
-│   └── ...
-├── install/
-│   ├── install.sh      Full installation orchestrator
-│   ├── symlinks.sh     Symlink dots/ → ~/ and bin/ → ~/bin/
-│   ├── brew.sh         Homebrew bootstrap
-│   └── Brewfile        Homebrew package list
-├── macos/              macOS defaults and Dock config
-├── iterm/              iTerm2 profile
-└── editors/            Editor configs
-```
-
----
-
-## Git Setup
-
-`.gitconfig` includes:
-
-- **delta** as the pager (syntax-highlighted, side-by-side diffs)
-- **Modern defaults**: `init.defaultBranch=main`, `fetch.prune=true`, `pull.rebase=true`, `merge.conflictstyle=zdiff3`
-- **Useful aliases**: `git s` (short status), `git wip` (quick savepoint commit), `git undo` (soft reset last commit), `git ahead` (show unpushed commits), `git squash N` (squash last N commits)
-
-```bash
-# Handy aliases defined in .gitconfig
-git s           # git status --short
-git wip         # stage all + commit "wip: savepoint"
-git undo        # undo last commit (keep changes staged)
-git amend       # amend last commit without editing message
-git ahead       # show commits not yet pushed
-git squash 3    # squash last 3 commits interactively
-git lol         # pretty graph log
+dotfiles dock          # Configure Dock layout
+dotfiles clean         # Clean brew caches
 ```
