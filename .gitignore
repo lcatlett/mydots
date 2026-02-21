@@ -13,7 +13,9 @@ iterm/iTerm2\ State.itermexport
 install/brew.bak
 
 # Local tool state — not portable
-.claude/
+# Ignore .claude/ contents but track slash commands (commands/ dir)
+.claude/*
+!.claude/commands/
 
 # Compiled binaries — platform-specific, install via brew/mise/source instead
 bin/dfc
