@@ -1,0 +1,8 @@
+# Default shell for files without shebangs
+shell=bash
+
+# Don't follow sourced files — they depend on runtime context
+disable=SC1091
+
+# Unused variables are often exported for use by sourced scripts
+disable=SC2034
