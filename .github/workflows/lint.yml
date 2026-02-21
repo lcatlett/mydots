@@ -1,0 +1,39 @@
+name: Lint shell scripts
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on .sh files
+        run: |
+          find . -name '*.sh' -not -path './.git/*' -print0 \
+            | xargs -0 shellcheck --severity=warning
+
+      - name: Syntax-check .sh files with bash -n
+        run: |
+          find . -name '*.sh' -not -path './.git/*' -print0 \
+            | xargs -0 -I {} bash -n {}
+
+  zsh-syntax:
+    name: Zsh syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Syntax-check .zshrc
+        run: zsh -n dots/.zshrc
