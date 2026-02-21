@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Set this to your machine's hostname before running
 COMPUTER_NAME="${COMPUTER_NAME:-my-macbook}"
 

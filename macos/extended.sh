@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
@@ -26,7 +27,7 @@ sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
 sudo defaults write /Library/Preferences/com.apple.alf stealthenabled -int 1
 
 
-# Disable the “Are you sure you want to open this application?” dialog
+# Disable the 'Are you sure you want to open this application?' dialog
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 
@@ -64,10 +65,10 @@ defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true;
 running "Automatically quit printer app once the print jobs complete"
 defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true;
 
-running "Disable the “Are you sure you want to open this application?” dialog"
+running "Disable the 'Are you sure you want to open this application?' dialog"
 defaults write com.apple.LaunchServices LSQuarantine -bool false;
 
-running "Remove duplicates in the “Open With” menu (also see 'lscleanup' alias)"
+running "Remove duplicates in the 'Open With' menu (also see 'lscleanup' alias)"
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user;
 
 running "Display ASCII control characters using caret notation in standard text views"
@@ -209,7 +210,7 @@ defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true;
 # Fix vscode fonts in terminal (bundle ID varies by version — verify before running)
 # defaults write com.microsoft.VSCode.helper.NP CGFontRenderingFontSmoothingDisabled -bool false
 
-running "Expand the following File Info panes: “General”, “Open with”, and “Sharing & Permissions”"
+running "Expand the following File Info panes: 'General', 'Open with', and 'Sharing & Permissions'"
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
   General -bool true \
   OpenWith -bool true \
@@ -233,7 +234,7 @@ defaults write com.apple.terminal StringEncodings -array 4;
 # 	defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}";
 # fi;
 
-#running "Enable “focus follows mouse” for Terminal.app and all X11 apps"
+#running "Enable 'focus follows mouse' for Terminal.app and all X11 apps"
 # i.e. hover over a window and start `typing in it without clicking first
 defaults write com.apple.terminal FocusFollowsMouse -bool true
 #defaults write org.x.X11 wm_ffm -bool true;
