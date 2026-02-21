@@ -28,6 +28,20 @@ time_starttransfer:  %{time_starttransfer}\n\
 }
 
 # httpDebug: Function to download a web page and show info on what took time
-httpDebug() { 
+httpDebug() {
   /usr/bin/curl "$@" -o /dev/null -w "dns: %{time_namelookup} connect: %{time_connect} pretransfer: %{time_pretransfer} starttransfer: %{time_starttransfer} total: %{time_total}\\n"
+}
+
+# curlhammer: Hammer a service with curl N times and report HTTP status
+# Usage: curlhammer <url> <count>
+curlhammer() {
+  if [[ -z "$1" || -z "$2" ]]; then
+    echo "Usage: curlhammer <url> <count>"
+    return 1
+  fi
+  echo "Hammering $1 with $2 curls..."
+  for i in {1.."$2"}; do
+    curl -k -s -D - "$1" -o /dev/null | grep 'HTTP/1.1' | sed 's/HTTP\/1.1 //'
+  done
+  echo "Done."
 }
