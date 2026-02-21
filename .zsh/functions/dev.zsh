@@ -94,6 +94,58 @@ timezsh() {
   for _ in $(seq 1 10); do /usr/bin/time "$shell" -i -c exit; done
 }
 
+# my_ps: List processes owned by current user
+my_ps() { ps "$@" -u "$USER" -o pid,%cpu,%mem,start,time,bsdtime,command; }
+
+# killport: Kill process(es) listening on a TCP port
+# Usage: killport <port> [--dry-run] [--force] [--help]
+killport() {
+  if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]] || [[ -z "$1" ]]; then
+    echo "Usage: killport <port> [OPTIONS]"
+    echo ""
+    echo "Kill the process listening on a TCP port"
+    echo ""
+    echo "Options:"
+    echo "  --dry-run, -n  Show what would be killed without killing"
+    echo "  --force, -f    Use SIGKILL (-9) instead of SIGTERM"
+    echo "  --help, -h     Show this help message"
+    return 0
+  fi
+
+  local port=""
+  local dry_run=false
+  local signal="-TERM"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run|-n) dry_run=true; shift ;;
+      --force|-f)   signal="-9"; shift ;;
+      --help|-h)    killport --help; return 0 ;;
+      -*) echo "Unknown option: $1"; return 1 ;;
+      *)  port="$1"; shift ;;
+    esac
+  done
+
+  if [[ -z "$port" ]]; then
+    echo "Error: No port specified"
+    return 1
+  fi
+
+  local pids
+  pids=$(lsof -ti tcp:"$port" 2>/dev/null)
+  if [[ -z "$pids" ]]; then
+    echo "No process found listening on port $port"
+    return 0
+  fi
+
+  if $dry_run; then
+    echo "[dry-run] Would kill PID(s) $pids (port $port)"
+  else
+    echo "Killing PID(s) $pids (port $port)"
+    kill $signal ${=pids}
+  fi
+}
+
 # killmysql: Kill all MySQL processes
 killmysql() {
   if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
