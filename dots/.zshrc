@@ -232,3 +232,5 @@ eval "$(starship init zsh)"
 # Suppress Node.js deprecation warnings (e.g. punycode)
 export NODE_OPTIONS="--no-deprecation"
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+
+eval "$(atuin init zsh)"
