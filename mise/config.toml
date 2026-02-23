@@ -53,6 +53,7 @@ rclone = "latest"
 "aqua:simeji/jid" = "latest"
 "aqua:GoogleCloudPlatform/berglas" = "latest"
 rust = "latest"
+atuin = "latest"
 
 [settings]
 
