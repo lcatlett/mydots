@@ -20,5 +20,8 @@ bin/dfc
 bin/dutree
 bin/tdu
 
+# Runtime reports — generated, not tracked
+DRIFT-REPORT.md
+
 # Local override files — machine-specific config that shouldn't be shared
 *.local
