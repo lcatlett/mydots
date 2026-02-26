@@ -51,6 +51,7 @@ dotfiles/
 ├── dots/         Config files → ~/
 ├── install/      Bootstrap scripts (install.sh, symlinks.sh, brew.sh, Brewfile)
 ├── macos/        macOS defaults scripts (defaults.sh, extended.sh, dock.sh)
+├── tests/        Drift detection and validation (validate.sh)
 ├── iterm/        iTerm2 color schemes + profile
 └── fonts/        FiraCode, Hack Nerd Font, Inconsolata
 ```
@@ -91,6 +92,7 @@ Startup performance target: under 300ms. Don't add blocking calls to `.zshrc`.
 | `install/Brewfile` | All Homebrew packages, casks, VS Code extensions |
 | `install/symlinks.sh` | Defines every managed symlink |
 | `bin/dotfiles` | Main CLI entry point |
+| `tests/validate.sh` | Drift detection suite (6 checks: startup time, secrets, Brewfile, symlinks, SSH perms, deprecated formulae) |
 
 ---
 
@@ -134,6 +136,12 @@ dotfiles symlinks
 ```bash
 audit-system   # or: symlink-audit, mise-audit, syscheck
 ```
+
+### Running drift detection
+```bash
+bash tests/validate.sh
+```
+Checks shell startup time, secrets in tracked files, Brewfile consistency, symlink integrity, SSH permissions, and deprecated Homebrew entries. Exit 0 = all green.
 
 ---
 

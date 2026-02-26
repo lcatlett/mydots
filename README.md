@@ -34,6 +34,7 @@ dotfiles/
 ├── mise/         mise global config → ~/.config/mise/ (symlinked)
 ├── install/      Bootstrap scripts (install.sh, symlinks.sh, brew.sh, Brewfile)
 ├── macos/        macOS defaults scripts (defaults.sh, extended.sh, dock.sh)
+├── tests/        Drift detection and validation suite
 ├── iterm/        iTerm2 color schemes
 └── fonts/        FiraCode, Hack Nerd Font, Inconsolata
 ```
@@ -183,6 +184,12 @@ dotfiles symlinks
 
 **Add a new script** — add to `bin/`, add the script name to the loop in
 `install/symlinks.sh`, then run `dotfiles symlinks`.
+
+**Run drift detection** — checks for config drift (broken symlinks, wrong
+permissions, stale Brewfile entries, secrets in tracked files):
+```bash
+bash tests/validate.sh
+```
 
 ---
 
