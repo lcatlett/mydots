@@ -92,7 +92,7 @@ Startup performance target: under 300ms. Don't add blocking calls to `.zshrc`.
 | `install/Brewfile` | All Homebrew packages, casks, VS Code extensions |
 | `install/symlinks.sh` | Defines every managed symlink |
 | `bin/dotfiles` | Main CLI entry point |
-| `tests/validate.sh` | Drift detection suite (6 checks: startup time, secrets, Brewfile, symlinks, SSH perms, deprecated formulae) |
+| `tests/validate.sh` | Drift detection suite (7 checks: startup time, secrets, Brewfile, symlinks, SSH perms, deprecated formulae, mise audit) |
 
 ---
 
