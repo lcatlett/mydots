@@ -196,6 +196,23 @@ test_brew_no_deprecated() {
 }
 
 # ---------------------------------------------------------------------------
+# Test 7: Mise audit (doctor, PATH conflicts, Homebrew overlaps)
+# ---------------------------------------------------------------------------
+test_mise_audit() {
+  local audit_script="$DOTFILES_DIR/bin/mise-audit"
+  if [[ ! -x "$audit_script" ]]; then
+    echo "bin/mise-audit not found or not executable"
+    return 1
+  fi
+  if ! command -v mise &>/dev/null; then
+    echo "mise not found"
+    return 1
+  fi
+  # mise-audit exits with issue count (0 = clean)
+  bash "$audit_script" 2>&1
+}
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 echo ""
@@ -219,6 +236,12 @@ if command -v brew &>/dev/null; then
   run_test "No deprecated brew entries"    test_brew_no_deprecated
 else
   skip_test "No deprecated brew entries"   "brew not installed"
+fi
+
+if command -v mise &>/dev/null; then
+  run_test "Mise audit"                    test_mise_audit
+else
+  skip_test "Mise audit"                   "mise not installed"
 fi
 
 echo ""
