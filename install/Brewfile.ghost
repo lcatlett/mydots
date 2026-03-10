@@ -1,0 +1,14 @@
+# =============================================================================
+# Brewfile.ghost — Ghost-specific packages
+# =============================================================================
+# Mac Studio M1 Max — headless AI lab / compute node.
+# No GUI casks or VS Code extensions (accessed via Screen Sharing + Remote-SSH).
+
+# --- AI / ML ---
+brew "ollama"
+
+# --- Containers ---
+cask "orbstack"
+
+# --- CLI tools (headless admin) ---
+cask "claude-code"
