@@ -137,6 +137,132 @@ local high_cpu_procs=$(echo "$ps_cache" | awk -v thresh="$cpu_threshold" '$3 >= 
 local duplicate_procs=$(echo "$ps_cache" | awk '{print $6}' | sort | uniq -c | sort -rn | awk '$1 > 3 {print $0}' | head -10)
 
 # ═══════════════════════════════════════════════════════════════════════════
+# CHROME DIAGNOSTICS
+# ═══════════════════════════════════════════════════════════════════════════
+
+local chrome_running=false
+local chrome_total_mem=0 chrome_total_count=0
+local chrome_renderer_count=0 chrome_renderer_mem=0
+local chrome_gpu_mem=0 chrome_plugin_mem=0 chrome_utility_mem=0
+local chrome_tab_info="" chrome_tab_count=0
+
+if echo "$ps_cache" | grep -q "Google Chrome"; then
+  chrome_running=true
+
+  # Process breakdown
+  local cr_stats=$(echo "$ps_cache" | awk '
+    /Chrome Helper \(Renderer\)/ {rc++; rm+=$2}
+    /Chrome Helper \(GPU\)/      {gm+=$2}
+    /Chrome Helper \(Plugin\)/   {pm+=$2}
+    /Chrome Helper$/             {um+=$2}
+    /Google Chrome/              {tc++; tm+=$2}
+    END {printf "%d %d %d %d %d %d", tc+0, int(tm/1024), rc+0, int(rm/1024), int(gm/1024), int(pm/1024)}
+  ')
+  read chrome_total_count chrome_total_mem chrome_renderer_count chrome_renderer_mem chrome_gpu_mem chrome_plugin_mem <<< "$cr_stats"
+
+  # Top Chrome renderers by memory
+  local chrome_top_renderers=$(echo "$ps_cache" | awk '/Chrome Helper \(Renderer\)/ {printf "%d %d\n", $1, int($2/1024)}' | sort -k2 -rn | head -5)
+
+  # Try to get actual tab titles/URLs via AppleScript (only if Chrome is responsive)
+  chrome_tab_info=$(osascript 2>/dev/null <<'APPLESCRIPT'
+    set output to ""
+    tell application "System Events"
+      if not (exists process "Google Chrome") then return "NOT_RUNNING"
+    end tell
+    try
+      tell application "Google Chrome"
+        repeat with w in every window
+          repeat with t in every tab of w
+            set tabTitle to title of t
+            set tabUrl to URL of t
+            -- Truncate long titles
+            if length of tabTitle > 45 then
+              set tabTitle to text 1 thru 45 of tabTitle & "..."
+            end if
+            -- Extract domain from URL
+            set tabDomain to tabUrl
+            try
+              set AppleScript's text item delimiters to "/"
+              set tabDomain to text item 3 of tabUrl
+              set AppleScript's text item delimiters to ""
+            end try
+            set output to output & tabTitle & "\t" & tabDomain & linefeed
+          end repeat
+        end repeat
+      end tell
+      return output
+    on error
+      return "UNRESPONSIVE"
+    end try
+APPLESCRIPT
+  )
+
+  if [[ "$chrome_tab_info" == "NOT_RUNNING" || "$chrome_tab_info" == "UNRESPONSIVE" || -z "$chrome_tab_info" ]]; then
+    chrome_tab_info=""
+  else
+    chrome_tab_count=$(echo "$chrome_tab_info" | grep -c . 2>/dev/null || echo 0)
+  fi
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
+# VS CODE DIAGNOSTICS
+# ═══════════════════════════════════════════════════════════════════════════
+
+local vscode_running=false
+local vscode_total_mem=0 vscode_total_count=0
+local vscode_plugin_count=0 vscode_plugin_mem=0
+local vscode_renderer_mem=0 vscode_gpu_mem=0
+local vscode_ext_list="" vscode_ext_count=0
+local vscode_top_plugins=""
+
+if echo "$ps_cache" | grep -q "Code Helper"; then
+  vscode_running=true
+
+  local vs_stats=$(echo "$ps_cache" | awk '
+    /Code Helper \(Plugin\)/   {pc++; pm+=$2}
+    /Code Helper \(Renderer\)/ {rm+=$2}
+    /Code Helper \(GPU\)/      {gm+=$2}
+    /Code Helper|Visual Studio Code|Electron/ {tc++; tm+=$2}
+    END {printf "%d %d %d %d %d %d", tc+0, int(tm/1024), pc+0, int(pm/1024), int(rm/1024), int(gm/1024)}
+  ')
+  read vscode_total_count vscode_total_mem vscode_plugin_count vscode_plugin_mem vscode_renderer_mem vscode_gpu_mem <<< "$vs_stats"
+
+  # Top plugin host processes
+  vscode_top_plugins=$(echo "$ps_cache" | awk '/Code Helper \(Plugin\)/ {printf "%d %d\n", $1, int($2/1024)}' | sort -k2 -rn | head -5)
+
+  # Get installed extensions list (with versions)
+  if command -v code &>/dev/null; then
+    vscode_ext_list=$(code --list-extensions --show-versions 2>/dev/null)
+    vscode_ext_count=$(echo "$vscode_ext_list" | grep -c . 2>/dev/null || echo 0)
+  fi
+
+  # Parse extension host logs for activation times (most recent session)
+  local latest_log_dir=$(ls -td ~/Library/Application\ Support/Code/logs/*/ 2>/dev/null | head -1)
+  local vscode_slow_extensions=""
+  if [[ -n "$latest_log_dir" ]]; then
+    # Find exthost log and extract slow activation entries
+    local exthost_log=$(find "$latest_log_dir" -path "*/exthost*" -name "*.log" 2>/dev/null | head -1)
+    if [[ -n "$exthost_log" ]]; then
+      # Extensions that took >100ms to activate
+      vscode_slow_extensions=$(grep -o 'Extension.*activated.*in [0-9]*ms' "$exthost_log" 2>/dev/null | \
+        awk -F'[ ]' '{
+          # Extract extension name and activation time
+          for(i=1;i<=NF;i++) {
+            if($i ~ /activated/) {
+              for(j=i+1;j<=NF;j++) {
+                if($j ~ /^[0-9]+ms$/) {
+                  gsub(/ms/,"",$j);
+                  if($j+0 > 100) print $j+0 "ms " $2
+                }
+              }
+            }
+          }
+        }' | sort -rn | head -10)
+    fi
+  fi
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
 # HELPER: Parse process line efficiently (no subshells)
 # ═══════════════════════════════════════════════════════════════════════════
 _parse_proc() {
@@ -213,6 +339,23 @@ $mem_json
   "top_cpu_processes": [
 $cpu_json
   ],
+  "chrome": {
+    "running": $chrome_running,
+    "total_memory_mb": $chrome_total_mem,
+    "total_processes": $chrome_total_count,
+    "renderer_count": $chrome_renderer_count,
+    "renderer_memory_mb": $chrome_renderer_mem,
+    "gpu_memory_mb": $chrome_gpu_mem,
+    "tab_count": $chrome_tab_count
+  },
+  "vscode": {
+    "running": $vscode_running,
+    "total_memory_mb": $vscode_total_mem,
+    "total_processes": $vscode_total_count,
+    "extension_host_count": $vscode_plugin_count,
+    "extension_host_memory_mb": $vscode_plugin_mem,
+    "installed_extensions": $vscode_ext_count
+  },
   "issues": [],
   "recommendations": []
 }
@@ -306,6 +449,94 @@ echo -e "$cpu_csv" | env ${gum_env:-} gum table --print --border rounded --borde
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════
+# CHROME DIAGNOSTICS DISPLAY
+# ═══════════════════════════════════════════════════════════════════════════
+
+if $chrome_running; then
+  local chrome_content="Total: ${chrome_total_mem}MB across ${chrome_total_count} processes"
+  chrome_content+=$(printf "\nRenderers (tabs): %d procs, %dMB  |  GPU: %dMB  |  Plugins: %dMB" \
+    "$chrome_renderer_count" "$chrome_renderer_mem" "$chrome_gpu_mem" "$chrome_plugin_mem")
+
+  if [[ -n "$chrome_tab_info" ]]; then
+    chrome_content+="\n"
+    # Build tab table: TITLE, DOMAIN
+    local tab_csv="TITLE,DOMAIN"
+    tab_csv+="\n$(echo "$chrome_tab_info" | awk -F'\t' 'NF>=2 {
+      title=$1; domain=$2;
+      gsub(/,/, " ", title); gsub(/,/, " ", domain);
+      if (length(title) > 45) title=substr(title,1,42)"...";
+      if (length(domain) > 35) domain=substr(domain,1,32)"...";
+      printf "%s,%s\n", title, domain
+    }')"
+    chrome_content+="\n$(echo -e "$tab_csv" | env ${gum_env:-} gum table --print --border normal --border.foreground 3)"
+  elif (( chrome_renderer_count > 0 )); then
+    chrome_content+="\n\n(Chrome unresponsive to AppleScript — tab names unavailable)"
+    chrome_content+="\nHeaviest renderer processes:"
+    while IFS=' ' read -r pid mem; do
+      [[ -z "$pid" ]] && continue
+      chrome_content+=$(printf "\n  PID %-8d %dMB" "$pid" "$mem")
+    done <<< "$chrome_top_renderers"
+  fi
+
+  env ${gum_env:-} gum style --border rounded --border-foreground 3 --padding "0 1" --width 78 \
+    "$(env ${gum_env:-} gum style --bold --foreground 3 'CHROME DIAGNOSTICS')" \
+    "$(echo -e "$chrome_content")"
+  echo ""
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
+# VS CODE DIAGNOSTICS DISPLAY
+# ═══════════════════════════════════════════════════════════════════════════
+
+if $vscode_running; then
+  local vscode_content="Total: ${vscode_total_mem}MB across ${vscode_total_count} processes"
+  vscode_content+=$(printf "\nExtension hosts: %d procs, %dMB  |  Renderers: %dMB  |  GPU: %dMB" \
+    "$vscode_plugin_count" "$vscode_plugin_mem" "$vscode_renderer_mem" "$vscode_gpu_mem")
+
+  if (( vscode_ext_count > 0 )); then
+    vscode_content+="\nInstalled extensions: ${vscode_ext_count}"
+  fi
+
+  # Show heaviest extension host processes
+  if [[ -n "$vscode_top_plugins" ]]; then
+    vscode_content+="\n\nHeaviest extension hosts:"
+    while IFS=' ' read -r pid mem; do
+      [[ -z "$pid" ]] && continue
+      vscode_content+=$(printf "\n  PID %-8d %dMB" "$pid" "$mem")
+    done <<< "$vscode_top_plugins"
+  fi
+
+  # Show slow-activating extensions from logs
+  if [[ -n "$vscode_slow_extensions" ]]; then
+    vscode_content+="\n\nSlow-activating extensions (>100ms, from logs):"
+    while read -r line; do
+      [[ -z "$line" ]] && continue
+      vscode_content+="\n  $line"
+    done <<< "$vscode_slow_extensions"
+  fi
+
+  # Show all installed extensions grouped
+  if [[ -n "$vscode_ext_list" ]]; then
+    vscode_content+="\n\nInstalled extensions:"
+    local ext_csv="EXTENSION,VERSION"
+    ext_csv+="\n$(echo "$vscode_ext_list" | awk -F'@' '{
+      ext=$1; ver=$2;
+      if (length(ext) > 45) ext=substr(ext,1,42)"...";
+      printf "%s,%s\n", ext, ver
+    }' | head -30)"
+    if (( vscode_ext_count > 30 )); then
+      ext_csv+="\n...and $((vscode_ext_count - 30)) more,"
+    fi
+    vscode_content+="\n$(echo -e "$ext_csv" | env ${gum_env:-} gum table --print --border normal --border.foreground 5)"
+  fi
+
+  env ${gum_env:-} gum style --border rounded --border-foreground 5 --padding "0 1" --width 78 \
+    "$(env ${gum_env:-} gum style --bold --foreground 5 'VS CODE DIAGNOSTICS')" \
+    "$(echo -e "$vscode_content")"
+  echo ""
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
 # DETECTED ISSUES
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -321,6 +552,40 @@ fi
 # Check swap usage
 if (( ${swap_used%.*} > 1000 )); then
   issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') High swap usage: ${swap_used%.*}MB\n"
+fi
+
+# Check Chrome
+if $chrome_running; then
+  if (( chrome_total_mem > 2000 )); then
+    issues+="$(env ${gum_env:-} gum style --foreground 1 --bold '[CRITICAL]') Chrome using ${chrome_total_mem}MB"
+    (( chrome_tab_count > 0 )) && issues+=" (${chrome_tab_count} tabs)"
+    (( chrome_tab_count == 0 && chrome_renderer_count > 0 )) && issues+=" (~${chrome_renderer_count} tabs)"
+    issues+="\n"
+  elif (( chrome_total_mem > 1000 )); then
+    issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') Chrome using ${chrome_total_mem}MB"
+    (( chrome_tab_count > 0 )) && issues+=" (${chrome_tab_count} tabs)"
+    issues+="\n"
+  fi
+  if (( chrome_renderer_count > 20 )); then
+    issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') ${chrome_renderer_count} Chrome renderer processes — excessive tab count\n"
+  fi
+fi
+
+# Check VS Code
+if $vscode_running; then
+  if (( vscode_total_mem > 3000 )); then
+    issues+="$(env ${gum_env:-} gum style --foreground 1 --bold '[CRITICAL]') VS Code using ${vscode_total_mem}MB (${vscode_plugin_count} extension hosts, ${vscode_ext_count} extensions)\n"
+  elif (( vscode_total_mem > 1500 )); then
+    issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') VS Code using ${vscode_total_mem}MB (${vscode_plugin_count} extension hosts, ${vscode_ext_count} extensions)\n"
+  fi
+  if (( vscode_ext_count > 40 )); then
+    issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') ${vscode_ext_count} VS Code extensions installed — likely too many\n"
+  fi
+  # Check for individual heavy extension hosts (>500MB)
+  local heavy_ext=$(echo "$ps_cache" | awk '/Code Helper \(Plugin\)/ && $2/1024 > 500 {printf "PID %d (%dMB) ", $1, $2/1024}')
+  if [[ -n "$heavy_ext" ]]; then
+    issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') Heavy VS Code extension host(s): ${heavy_ext}\n"
+  fi
 fi
 
 # Check zombies
@@ -361,12 +626,58 @@ echo ""
 local recs=""
 local rec_count=0
 
-# Check for VS Code processes
-local code_mem=$(echo "$ps_cache" | awk '/Code|Electron/ {sum+=$2} END {printf "%.0f", sum/1024}')
-if [[ -n "$code_mem" ]] && (( code_mem > 500 )); then
+# Chrome recommendations
+if $chrome_running && (( chrome_total_mem > 500 )); then
   (( rec_count++ ))
-  recs+="${rec_count}. Restart VS Code to recover ~${code_mem}MB\n"
-  recs+="   Command: kill-code --dry-run\n\n"
+  recs+="${rec_count}. Chrome: ${chrome_total_mem}MB"
+  (( chrome_tab_count > 0 )) && recs+=" across ${chrome_tab_count} tabs"
+  (( chrome_tab_count == 0 && chrome_renderer_count > 0 )) && recs+=" (~${chrome_renderer_count} tabs)"
+  recs+="\n"
+  if (( chrome_renderer_count > 15 )); then
+    recs+="   Close unused tabs — open the discards page to see per-tab memory:\n"
+    recs+="   Command: open -a 'Google Chrome' 'chrome://discards'\n"
+  fi
+  if (( chrome_total_mem > 1500 )); then
+    # Suggest killing heaviest renderer
+    local heaviest_cr_pid=$(echo "$chrome_top_renderers" | head -1 | awk '{print $1}')
+    local heaviest_cr_mem=$(echo "$chrome_top_renderers" | head -1 | awk '{print $2}')
+    if [[ -n "$heaviest_cr_pid" ]] && (( heaviest_cr_mem > 150 )); then
+      recs+="   Kill heaviest tab renderer:\n"
+      recs+="   Command: kill ${heaviest_cr_pid}  # ${heaviest_cr_mem}MB — tab will show 'Aw Snap'\n"
+    fi
+    recs+="   Or restart Chrome entirely:\n"
+    recs+="   Command: osascript -e 'tell application \"Google Chrome\" to quit' && sleep 2 && open -a 'Google Chrome'\n"
+  fi
+  recs+="\n"
+fi
+
+# VS Code recommendations
+if $vscode_running && (( vscode_total_mem > 500 )); then
+  (( rec_count++ ))
+  recs+="${rec_count}. VS Code: ${vscode_total_mem}MB (${vscode_plugin_count} extension hosts, ${vscode_ext_count} extensions)\n"
+  if (( vscode_ext_count > 30 )); then
+    recs+="   Too many extensions (${vscode_ext_count}) — list and audit:\n"
+    recs+="   Command: code --list-extensions --show-versions\n"
+    recs+="   Uninstall unused extensions:\n"
+    recs+="   Command: code --uninstall-extension <publisher.extension>\n"
+  fi
+  # Suggest killing heaviest extension host
+  local heaviest_vs_pid=$(echo "$vscode_top_plugins" | head -1 | awk '{print $1}')
+  local heaviest_vs_mem=$(echo "$vscode_top_plugins" | head -1 | awk '{print $2}')
+  if [[ -n "$heaviest_vs_pid" ]] && (( heaviest_vs_mem > 300 )); then
+    recs+="   Kill heaviest extension host (will auto-restart):\n"
+    recs+="   Command: kill ${heaviest_vs_pid}  # ${heaviest_vs_mem}MB\n"
+  fi
+  if (( vscode_total_mem > 2000 )); then
+    recs+="   Restart VS Code without extensions to isolate the problem:\n"
+    recs+="   Command: code --disable-extensions\n"
+    recs+="   Or restart all VS Code processes:\n"
+    recs+="   Command: kill-code --dry-run\n"
+  else
+    recs+="   Restart VS Code to reclaim memory:\n"
+    recs+="   Command: kill-code --dry-run\n"
+  fi
+  recs+="\n"
 fi
 
 # Check for node processes

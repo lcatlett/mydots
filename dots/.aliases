@@ -64,20 +64,11 @@ alias recent-branches="git for-each-ref --sort=-committerdate --count=10 --forma
 
 alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)'
 
-alias bfg='java -jar ~/bin/bfg.jar'
 
 alias bat='command bat --theme auto:system --theme-dark default --theme-light GitHub'
 
 
-alias bathelp='bat --plain --language=help'
-
-#alias -h='-h 2>&1 | bat --language=help --style=plain'
-#alias --help='--help 2>&1 | bat --language=help --style=plain'
-
-# alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
-# alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
-
-
+alias chrome-debug="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=\"$HOME/.chrome-debug-profile\" > /dev/null 2>&1 &"
 
 
 

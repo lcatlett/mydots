@@ -71,7 +71,6 @@ path+=(
   "/sbin"
 )
 
-
 # --- Priority 5: Language-specific tools ---
 # Cargo/Rust
 path+=("$HOME/.cargo/bin")
@@ -114,7 +113,6 @@ unset _mysqlv
 
 export PATH
 
-
 # --- GPG agent handling ---
 # GPG agent for commit signing only — SSH auth is handled by macOS launchd agent
 # (SSH config: UseKeychain yes + AddKeysToAgent yes handles key loading automatically)
@@ -129,10 +127,8 @@ fi
 
 # --- Bun completion ---
 
-
 # --- Platform.sh Nestlé CLI configuration ---
 #[[ -f "$HOME/.platform-nestle-cli/shell-config.rc" ]] && source "$HOME/.platform-nestle-cli/shell-config.rc"
-
 
 # --- Performance tool aliases (rg/fd/pigz wrappers) ---
 if command -v rg >/dev/null 2>&1; then
@@ -199,7 +195,6 @@ eval "$(mise activate zsh)"
 # --- zoxide (must load after compinit) ---
 eval "$(zoxide init zsh)"
 
-
 # --- Zsh completion cache configuration ---
 export ZSH_CACHE_DIR="$HOME/.zsh/cache"
 [[ -d "$ZSH_CACHE_DIR" ]] || mkdir -p "$ZSH_CACHE_DIR"
@@ -228,9 +223,29 @@ alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scri
 export STARSHIP_CONFIG=~/.config/starship-minimal.toml
 eval "$(starship init zsh)"
 
-
 # Suppress Node.js deprecation warnings (e.g. punycode)
 export NODE_OPTIONS="--no-deprecation"
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 eval "$(atuin init zsh)"
+
+# --- Host-specific config ---
+case "$(hostname -s)" in
+  bos-mpotu)
+    alias ghost="ssh lindsey@ghost.local"
+    # CC-Viewer Auto-Inject
+    # Antigravity
+    path+=("/Users/lcatlett/.antigravity/antigravity/bin")
+    ;;
+  ghost)
+    # Ghost-specific config goes here
+    ;;
+esac
+
+# SummonAI Kit CLI
+export PATH="$PATH:/Users/lcatlett/.summonaikit/bin"
+
+# Pilot Shell
+export PATH="$HOME/.pilot/bin:$HOME/.bun/bin:$PATH"
+alias pilot="$HOME/.pilot/bin/pilot"
+alias ccp="$HOME/.pilot/bin/pilot"
