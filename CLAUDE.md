@@ -89,7 +89,9 @@ Startup performance target: under 300ms. Don't add blocking calls to `.zshrc`.
 | `dots/.aliases` | Shell aliases |
 | `dots/.gitconfig` | Git config + ~30 aliases + delta pager settings |
 | `dots/.gitignore_global` | Global gitignore (applies to all repos) |
-| `install/Brewfile` | All Homebrew packages, casks, VS Code extensions |
+| `install/Brewfile` | Common Homebrew packages (both machines) |
+| `install/Brewfile.laptop` | Laptop-specific: GUI casks, VS Code extensions, PHP/Drupal taps |
+| `install/Brewfile.ghost` | Ghost-specific: ollama, orbstack, headless tools |
 | `install/symlinks.sh` | Defines every managed symlink |
 | `bin/dotfiles` | Main CLI entry point |
 | `tests/validate.sh` | Drift detection suite (7 checks: startup time, secrets, Brewfile, symlinks, SSH perms, deprecated formulae, mise audit) |
@@ -116,9 +118,14 @@ source ~/.zshrc   # or open new shell
 ```
 
 ### Adding a Homebrew package
-Add to `install/Brewfile`, then:
+Add to the appropriate Brewfile:
+- `install/Brewfile` — shared packages (both machines)
+- `install/Brewfile.laptop` — laptop-only (GUI casks, VS Code, PHP/Drupal)
+- `install/Brewfile.ghost` — ghost-only (AI/compute tools)
+
+Then run:
 ```bash
-brew bundle --file=install/Brewfile
+bash install/brew.sh   # auto-detects hostname, installs common + host-specific
 ```
 
 ### Adding a mise tool
