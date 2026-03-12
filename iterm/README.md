@@ -13,10 +13,9 @@ Color scheme files (`.itermcolors`) for iTerm2.
 
 | File | Description |
 |------|-------------|
-| `lindsey.itermcolors` | Primary color scheme |
-| `lindsey2.itermcolors` | Alternate variant |
-| `profile2.itermcolors` | Secondary profile scheme |
-| `another.itermcolors` | Additional theme |
+| `lindsey-ghost.itermcolors` | Primary color scheme |
+| `lindsey-ghost-dark.itermcolors` | Alternate dark variant |
+
 
 ## What's Not Tracked
 
