@@ -232,7 +232,16 @@ eval "$(atuin init zsh)"
 # --- Host-specific config ---
 case "$(hostname -s)" in
   bos-mpotu)
-    alias ghost="ssh lindsey@ghost.local"
+    # SSH to ghost with visual theme indicator (amber bg = remote session)
+    ghost() {
+      printf '\e]11;#1c1008\e\\' # bg → dark amber
+      printf '\e]10;#e0d0b8\e\\' # fg → warm cream
+      printf '\e]12;#ff8c00\e\\' # cursor → orange
+      ssh lindsey@ghost.local "$@"
+      printf '\e]11;#0c2732\e\\' # bg → restore lindsey teal
+      printf '\e]10;#b1cbcd\e\\' # fg → restore
+      printf '\e]12;#e66c2c\e\\' # cursor → restore
+    }
     # CC-Viewer Auto-Inject
     # Antigravity
     path+=("/Users/lcatlett/.antigravity/antigravity/bin")
@@ -245,7 +254,3 @@ esac
 # SummonAI Kit CLI
 export PATH="$PATH:/Users/lcatlett/.summonaikit/bin"
 
-# Pilot Shell
-export PATH="$HOME/.pilot/bin:$HOME/.bun/bin:$PATH"
-alias pilot="$HOME/.pilot/bin/pilot"
-alias ccp="$HOME/.pilot/bin/pilot"
