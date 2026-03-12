@@ -8,6 +8,9 @@ oh-my-zsh/.DS_Store
 # iTerm2 personal state — contains saved paths, window arrangements, machine-specific data
 iterm/com.googlecode.iterm2.plist
 iterm/iTerm2\ State.itermexport
+iterm/*.json
+iterm/*.conf
+iterm/script.py
 
 # Stale Homebrew backup
 install/brew.bak
@@ -25,3 +28,7 @@ DRIFT-REPORT.md
 
 # Local override files — machine-specific config that shouldn't be shared
 *.local
+
+# Session artifacts
+HANDOFF.md
+nlm-docs.md
