@@ -218,7 +218,7 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 
 
 ###############################################################################
-# Terminal and iTerm2                                                        #
+# Terminal — Ghostty (primary) / iTerm2 (fallback)                           #
 ###############################################################################
 
 # running "Only use UTF-8 in Terminal.app"
@@ -238,32 +238,37 @@ defaults write com.apple.terminal StringEncodings -array 4;
 # i.e. hover over a window and start `typing in it without clicking first
 defaults write com.apple.terminal FocusFollowsMouse -bool true
 #defaults write org.x.X11 wm_ffm -bool true;
-running "Installing the custom theme for iTerm (opening file)"
-open "$(dirname "$0")/../iterm/lindsey.itermcolors";
+# --- Ghostty (primary terminal) ---
+# Config managed via dotfiles: dots/ghostty/config + dots/ghostty/themes/
+# Symlinked to ~/.config/ghostty/ by install/symlinks.sh
 
-running "Don’t display the annoying prompt when quitting iTerm"
-defaults write com.googlecode.iterm2 PromptOnQuit -bool false;
-running "hide tab title bars"
-defaults write com.googlecode.iterm2 HideTab -bool true;
-running "set system-wide hotkey to show/hide iterm with ^\`"
-defaults write com.googlecode.iterm2 Hotkey -bool true;
-running "hide pane titles in split panes"
-defaults write com.googlecode.iterm2 ShowPaneTitles -bool false;
-running "animate split-terminal dimming"
-defaults write com.googlecode.iterm2 AnimateDimming -bool true;
-defaults write com.googlecode.iterm2 HotkeyChar -int 96;
-defaults write com.googlecode.iterm2 HotkeyCode -int 50;
-defaults write com.googlecode.iterm2 FocusFollowsMouse -int 1;
-defaults write com.googlecode.iterm2 HotkeyModifiers -int 262401;
-running "Make iTerm2 load new tabs in the same directory"
-/usr/libexec/PlistBuddy -c "set \"New Bookmarks\":0:\"Custom Directory\" Recycle" ~/Library/Preferences/com.googlecode.iterm2.plist
-running "setting fonts"
-defaults write com.googlecode.iterm2 "Normal Font" -string "Hack-Regular 14";
-defaults write com.googlecode.iterm2 "Non Ascii Font" -string "RobotoMonoForPowerline-Regular 14";
-ok
-running "reading iterm settings"
-defaults read -app iTerm > /dev/null 2>&1;
-ok
+# --- iTerm2 (fallback terminal) ---
+# running "Installing the custom theme for iTerm (opening file)"
+# open "$(dirname "$0")/../iterm/lindsey.itermcolors";
+#
+# running "Don’t display the annoying prompt when quitting iTerm"
+# defaults write com.googlecode.iterm2 PromptOnQuit -bool false;
+# running "hide tab title bars"
+# defaults write com.googlecode.iterm2 HideTab -bool true;
+# running "set system-wide hotkey to show/hide iterm with ^\`"
+# defaults write com.googlecode.iterm2 Hotkey -bool true;
+# running "hide pane titles in split panes"
+# defaults write com.googlecode.iterm2 ShowPaneTitles -bool false;
+# running "animate split-terminal dimming"
+# defaults write com.googlecode.iterm2 AnimateDimming -bool true;
+# defaults write com.googlecode.iterm2 HotkeyChar -int 96;
+# defaults write com.googlecode.iterm2 HotkeyCode -int 50;
+# defaults write com.googlecode.iterm2 FocusFollowsMouse -int 1;
+# defaults write com.googlecode.iterm2 HotkeyModifiers -int 262401;
+# running "Make iTerm2 load new tabs in the same directory"
+# /usr/libexec/PlistBuddy -c "set \"New Bookmarks\":0:\"Custom Directory\" Recycle" ~/Library/Preferences/com.googlecode.iterm2.plist
+# running "setting fonts"
+# defaults write com.googlecode.iterm2 "Normal Font" -string "Hack-Regular 14";
+# defaults write com.googlecode.iterm2 "Non Ascii Font" -string "RobotoMonoForPowerline-Regular 14";
+# ok
+# running "reading iterm settings"
+# defaults read -app iTerm > /dev/null 2>&1;
+# ok
 
 ###############################################################################
 # Editors                                                        #

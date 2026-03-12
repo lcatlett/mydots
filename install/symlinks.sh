@@ -29,6 +29,13 @@ mkdir -p "$HOME/.config/mise"
 ln -sfv "$DOTFILES_DIR/mise/config.toml" "$HOME/.config/mise/config.toml"
 
 # ---------------------------------------------------------------------------
+# ghostty — terminal config
+# ---------------------------------------------------------------------------
+mkdir -p "$HOME/.config/ghostty"
+ln -sfv "$DOTFILES_DIR/dots/ghostty/config" "$HOME/.config/ghostty/config"
+ln -sfn "$DOTFILES_DIR/dots/ghostty/themes" "$HOME/.config/ghostty/themes"
+
+# ---------------------------------------------------------------------------
 # .zsh/functions/ — modular shell functions → ~/.zsh/functions/
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.zsh/functions"

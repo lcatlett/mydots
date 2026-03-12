@@ -1,0 +1,18 @@
+   # Ghostty config
+   # Docs: ghostty +show-config --default --docs
+
+   font-family = "FiraCode Nerd Font"
+   font-size = 14
+
+   # tmux compatibility
+   term = xterm-256color
+
+   # Window
+   window-padding-x = 8
+   window-padding-y = 8
+   macos-titlebar-style = transparent
+
+   # Shell integration
+   shell-integration = zsh
+
+   theme = "lindsey"

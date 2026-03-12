@@ -52,7 +52,8 @@ dotfiles/
 ├── install/      Bootstrap scripts (install.sh, symlinks.sh, brew.sh, Brewfile)
 ├── macos/        macOS defaults scripts (defaults.sh, extended.sh, dock.sh)
 ├── tests/        Drift detection and validation (validate.sh)
-├── iterm/        iTerm2 color schemes + profile
+├── dots/ghostty/ Ghostty terminal config + themes → ~/.config/ghostty/
+├── iterm/        iTerm2 color schemes (fallback)
 └── fonts/        FiraCode, Hack Nerd Font, Inconsolata
 ```
 
