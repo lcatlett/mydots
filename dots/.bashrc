@@ -12,7 +12,3 @@ unset file;
 
 alias claude-mem='bun "/Users/lcatlett/.claude/plugins/cache/thedotmack/claude-mem/10.5.2/scripts/worker-service.cjs"'
 
-# Pilot Shell
-export PATH="$HOME/.pilot/bin:$HOME/.bun/bin:$PATH"
-alias pilot="$HOME/.pilot/bin/pilot"
-alias ccp="$HOME/.pilot/bin/pilot"
