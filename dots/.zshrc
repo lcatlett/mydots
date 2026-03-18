@@ -109,8 +109,6 @@ unset _mysqlv
 #export PNPM_HOME="$HOME/Library/pnpm"
 #path+=("$PNPM_HOME")
 
-# Bun
-
 export PATH
 
 # --- GPG agent handling ---
@@ -125,10 +123,7 @@ if command -v gpgconf >/dev/null 2>&1 && [[ -z "$SSH_CLIENT" ]]; then
     # Overriding it with the GPG socket breaks --apple-use-keychain and macOS Keychain integration.
 fi
 
-# --- Bun completion ---
 
-# --- Platform.sh Nestlé CLI configuration ---
-#[[ -f "$HOME/.platform-nestle-cli/shell-config.rc" ]] && source "$HOME/.platform-nestle-cli/shell-config.rc"
 
 # --- Performance tool aliases (rg/fd/pigz wrappers) ---
 if command -v rg >/dev/null 2>&1; then
@@ -204,18 +199,8 @@ export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
 typeset -U path
 export PATH
 
-# --- Claude Code (runs in tmux to work around macOS PTY bug) ---
-#alias claude='claude-safe'
-#alias cc='claude-safe'
-# Direct access to raw claude if needed (will have TUI issues outside tmux)
-#alias claude-raw='/opt/homebrew/bin/claude'
-
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-
-# bun
-#export BUN_INSTALL="$HOME/.bun"
-#export PATH="$BUN_INSTALL/bin:$PATH"
 
 alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
 
@@ -242,12 +227,12 @@ case "$(hostname -s)" in
       printf '\e]10;#b1cbcd\e\\' # fg → restore
       printf '\e]12;#e66c2c\e\\' # cursor → restore
     }
-    # CC-Viewer Auto-Inject
-    # Antigravity
-    path+=("/Users/lcatlett/.antigravity/antigravity/bin")
     ;;
   ghost)
     # Ghost-specific config goes here
+
+    # add high contrast border to terminal window to indicate remote session
+    
     ;;
 esac
 

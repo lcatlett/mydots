@@ -29,7 +29,6 @@ brew "dos2unix"
 # --- GUI apps ---
 cask "bloom"
 cask "claude-code"
-cask "entire"
 cask "ghostty"
 cask "gpg-suite"
 cask "iterm2"
@@ -44,106 +43,59 @@ cask "syntax-highlight"
 cask "visual-studio-code"
 
 # --- VS Code extensions ---
-vscode "agsoft.claude-history-viewer"
-vscode "ankitcode.firefly"
-vscode "anthropic.claude-code"
-vscode "aykutsarac.jsoncrack-vscode"
-vscode "bbeversdorf.drupal-check"
-vscode "beardedbear.beardedtheme"
-vscode "benjaminbenais.copilot-theme"
-vscode "biati.ddev-manager"
-vscode "bierner.github-markdown-preview"
-vscode "bierner.markdown-checkbox"
-vscode "bierner.markdown-emoji"
-vscode "bierner.markdown-footnotes"
-vscode "bierner.markdown-mermaid"
-vscode "bierner.markdown-preview-github-styles"
-vscode "bierner.markdown-yaml-preamble"
-vscode "charliermarsh.ruff"
-vscode "christian-kohler.npm-intellisense"
-vscode "codeviz.codeviz"
-vscode "codevizai.codevizai"
-vscode "cweijan.dbclient-jdbc"
-vscode "cweijan.vscode-mysql-client2"
-vscode "dandric.vscode-jq"
-vscode "davidanson.vscode-markdownlint"
-vscode "daylerees.rainglow"
-vscode "dbaeumer.vscode-eslint"
-vscode "dbcode.dbcode"
-vscode "deepmyst.mysti"
-vscode "diruuu.claude-code-sidebar"
-vscode "donjayamanne.githistory"
-vscode "drewipson.claude-code-config"
-vscode "dustypomerleau.rust-syntax"
-vscode "esbenp.prettier-vscode"
-vscode "fastly.vscode-fastly-vcl"
-vscode "foxundermoon.shell-format"
-vscode "github.copilot-chat"
-vscode "github.github-vscode-theme"
-vscode "github.vscode-github-actions"
-vscode "github.vscode-pull-request-github"
-vscode "golang.go"
-vscode "google.gemini-cli-vscode-ide-companion"
-vscode "google.geminicodeassist"
-vscode "hs7.git-diff"
-vscode "hverlin.mise-vscode"
-vscode "ibm.output-colorizer"
-vscode "ikappas.composer"
-vscode "iliazeus.vscode-ansi"
-vscode "jdinhlife.gruvbox"
-vscode "jerriepelser.copy-markdown-as-html"
-vscode "joelalejandro.nrql-language"
-vscode "johnpapa.vscode-peacock"
-vscode "jpegg-dev.claude-code-settings-helper"
-vscode "jq-syntax-highlighting.jq-syntax-highlighting"
-vscode "kilocode.kilo-code"
-vscode "kingleo.unzip"
-vscode "linda-cheung.content-menu-item-refresh"
-vscode "lumirelle.shell-format-rev"
-vscode "m-tech.theme-m-tech-vscode"
-vscode "mbehr1.vsc-lfs"
-vscode "mechatroner.rainbow-csv"
-vscode "memorylovers.sortable-explorer"
-vscode "mermaidchart.vscode-mermaid-chart"
-vscode "ms-python.debugpy"
-vscode "ms-python.python"
-vscode "ms-python.vscode-pylance"
-vscode "ms-python.vscode-python-envs"
-vscode "ms-vscode-remote.remote-containers"
-vscode "ms-vscode-remote.remote-ssh"
-vscode "ms-vscode-remote.remote-ssh-edit"
-vscode "ms-vscode.copilot-mermaid-diagram"
-vscode "ms-vscode.extension-test-runner"
-vscode "ms-vscode.remote-explorer"
-vscode "ms-vscode.vscode-websearchforcopilot"
-vscode "mtxr.sqltools"
-vscode "patbenatar.advanced-new-file"
-vscode "phoihos.csv-to-md-table"
-vscode "pkief.material-icon-theme"
-vscode "pombadev.pbbs"
-vscode "pomber.git-file-history"
-vscode "ranathedev.smart-index-updater"
-vscode "redhat.vscode-xml"
-vscode "redis.redis-for-vscode"
-vscode "rooveterinaryinc.roo-cline"
-vscode "rust-lang.rust-analyzer"
-vscode "sahilkumardev.villan-theam"
-vscode "samuelcolvin.jinjahtml"
-vscode "skezu.ai-rules-converter"
-vscode "sleistner.vscode-fileutils"
-vscode "stanislav.vscode-drupal"
-vscode "stumpworks.claude-restarter"
-vscode "tamasfe.even-better-toml"
-vscode "thomas-baumgaertner.vcl"
-vscode "timonwong.shellcheck"
-vscode "tomsaunders.vscode-workspace-explorer"
-vscode "vsls-contrib.gistfs"
-vscode "vstirbu.vscode-mermaid-preview"
-vscode "vxplain.vxplain"
-vscode "waderyan.gitblame"
-vscode "xdebug.php-debug"
-vscode "xdebug.php-pack"
-vscode "yzhang.markdown-all-in-one"
-vscode "zainchen.json"
-vscode "ziyasal.vscode-open-in-github"
-vscode "zobo.php-intellisense"
+anthropic.claude-code
+augment.vscode-augment
+biati.ddev-manager
+charliermarsh.ruff
+christian-kohler.npm-intellisense
+codeviz.codeviz
+dandric.vscode-jq
+davidanson.vscode-markdownlint
+dbaeumer.vscode-eslint
+detachhead.basedpyright
+drewipson.claude-code-config
+dustypomerleau.rust-syntax
+esbenp.prettier-vscode
+fastly.vscode-fastly-vcl
+foxundermoon.shell-format
+github.copilot-chat
+github.github-vscode-theme
+github.vscode-github-actions
+golang.go
+hverlin.mise-vscode
+ikappas.composer
+joelalejandro.nrql-language
+johnpapa.vscode-peacock
+jq-syntax-highlighting.jq-syntax-highlighting
+kaleidoscope-app.vscode-ksdiff
+kilocode.kilo-code
+mbehr1.vsc-lfs
+mechatroner.rainbow-csv
+mehyaa.workspace-storage-cleanup
+mermaidchart.vscode-mermaid-chart
+ms-python.debugpy
+ms-python.python
+ms-python.vscode-pylance
+ms-python.vscode-python-envs
+ms-vscode-remote.remote-ssh
+ms-vscode-remote.remote-ssh-edit
+ms-vscode.extension-test-runner
+ms-vscode.vscode-websearchforcopilot
+mtxr.sqltools
+patbenatar.advanced-new-file
+pkief.material-icon-theme
+redhat.vscode-xml
+redhat.vscode-yaml
+rust-lang.rust-analyzer
+samuelcolvin.jinjahtml
+sleistner.vscode-fileutils
+stanislav.vscode-drupal
+tamasfe.even-better-toml
+thomas-baumgaertner.vcl
+timonwong.shellcheck
+waderyan.gitblame
+xdebug.php-debug
+xdebug.php-pack
+yzhang.markdown-all-in-one
+zainchen.json
+zobo.php-intellisense
