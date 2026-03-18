@@ -47,7 +47,7 @@ alias cwd="pwd && pwd | pbcopy && echo 'Copied to clipboard 📁'"
 
 # Kill all the tabs in Chrome to free up memory
 # [C] explained: http://www.commandlinefu.com/commands/view/402/exclude-grep-from-your-grepped-output-of-ps-alias-included-in-description
-alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v extension-process | tr -s ' ' | cut -d ' ' -f2 | xargs kill"
+alias kill-chrome="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v extension-process | tr -s ' ' | cut -d ' ' -f2 | xargs kill"
 
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec ${SHELL} -l"
@@ -67,6 +67,7 @@ alias nuke-all-containers='docker stop $(docker ps -a -q) && docker rm $(docker 
 
 alias bat='command bat --theme auto:system --theme-dark default --theme-light GitHub'
 
+alias yolo='claude --dangerously-skip-permissions'
 
 alias chrome-debug="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=\"$HOME/.chrome-debug-profile\" > /dev/null 2>&1 &"
 
