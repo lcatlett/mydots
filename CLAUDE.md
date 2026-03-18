@@ -16,12 +16,6 @@ Live config files are symlinks into this repo. Editing `~/.zshrc` *is* editing `
 
 ## Key Conventions
 
-### Tool Manager: mise-first
-- **Always prefer mise** for language runtimes and CLI tools
-- Check `mise ls-remote <tool>` before reaching for Homebrew
-- Homebrew is reserved for: system libraries, GUI apps, tools not in mise
-- When suggesting new tool installs, default to `mise use --global <tool>@latest`
-
 ### Symlink Pattern
 - `dots/` → `~/` (config files)
 - `bin/` → `~/bin/` (scripts)
@@ -59,91 +53,16 @@ dotfiles/
 
 ---
 
-## Shell Startup Order
-
-```
-.zshrc
-  → .exports (env vars)
-  → .aliases
-  → ~/.zsh/functions/*.zsh (auto-sourced)
-  → History config
-  → PATH construction (typeset -U, priority order)
-  → GPG agent + SSH keys (async, non-blocking)
-  → rg/fd/pigz wrappers (override grep/find/gzip)
-  → compinit (cached daily)
-  → mise activate
-  → zoxide init
-  → Starship prompt init
-  → mise exec aliases (npm, npx, php, composer, uv, bun)
-```
-
-Startup performance target: under 300ms. Don't add blocking calls to `.zshrc`.
-
----
-
-## Important Files
-
-| File | Purpose |
-|------|---------|
-| `dots/.zshrc` | Main shell config — PATH + startup orchestration |
-| `dots/.exports` | Env vars (EDITOR, tokens, build vars) |
-| `dots/.aliases` | Shell aliases |
-| `dots/.gitconfig` | Git config + ~30 aliases + delta pager settings |
-| `dots/.gitignore_global` | Global gitignore (applies to all repos) |
-| `install/Brewfile` | Common Homebrew packages (both machines) |
-| `install/Brewfile.laptop` | Laptop-specific: GUI casks, VS Code extensions, PHP/Drupal taps |
-| `install/Brewfile.ghost` | Ghost-specific: ollama, orbstack, headless tools |
-| `install/symlinks.sh` | Defines every managed symlink |
-| `bin/dotfiles` | Main CLI entry point |
-| `tests/validate.sh` | Drift detection suite (7 checks: startup time, secrets, Brewfile, symlinks, SSH perms, deprecated formulae, mise audit) |
-
----
-
-## Git Config Highlights
-
-- **Pager**: delta (side-by-side diffs, vscode hyperlinks, line numbers)
-- **Conflict style**: `zdiff3` (shows base in conflicts)
-- **rerere**: enabled (reuse recorded conflict resolutions)
-- **Defaults**: `pull.rebase=true`, `fetch.prune=true`, `push.autoSetupRemote=true`
-- **Signing**: GPG via gpg-agent (gpg-agent also handles SSH auth)
+@.claude/docs/reference.md
 
 ---
 
 ## Making Changes
 
-### Editing shell config
-Edit directly in `dots/` — changes are live immediately since they're symlinked.
-```bash
-# After editing dots/.zshrc:
-source ~/.zshrc   # or open new shell
-```
+Edit `dots/` directly (symlinked live). Brewfile changes: add to appropriate file, run `bash install/brew.sh`.
+Mise tools: `mise use --global <tool>@latest`. Symlinks: `dotfiles symlinks`.
 
-### Adding a Homebrew package
-Add to the appropriate Brewfile:
-- `install/Brewfile` — shared packages (both machines)
-- `install/Brewfile.laptop` — laptop-only (GUI casks, VS Code, PHP/Drupal)
-- `install/Brewfile.ghost` — ghost-only (AI/compute tools)
-
-Then run:
-```bash
-bash install/brew.sh   # auto-detects hostname, installs common + host-specific
-```
-
-### Adding a mise tool
-```bash
-mise use --global <tool>@latest
-# Document in README.md Installed Tools table
-```
-
-### Re-running symlinks
-```bash
-dotfiles symlinks
-```
-
-### Full system audit
-```bash
-audit-system   # or: symlink-audit, mise-audit, syscheck
-```
+@.claude/docs/workflows.md
 
 ### Running drift detection
 ```bash
@@ -156,55 +75,10 @@ Checks shell startup time, secrets in tracked files, Brewfile consistency, symli
 ## Git Discipline
 
 **Non-negotiable: all changes require a feature branch. Never commit directly to master.**
+Conventional commits, kebab-case branch names (fix/, feat/, chore/, docs/).
+Test before committing: `zsh -n` for shell files, `bash -n` for install scripts.
 
-### Branch Conventions
-
-| Prefix | Use |
-|--------|-----|
-| `fix/` | Bug fixes (e.g., `fix/ssh-gpg-agent-conflict`) |
-| `feat/` | New capabilities (e.g., `feat/mise-config-tracked`) |
-| `chore/` | Maintenance, cleanup, removal of dead code |
-| `docs/` | Documentation-only changes |
-
-Branch names: kebab-case, descriptive, under 50 characters.
-
-### Commit Message Format
-
-[Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-type(scope): short description (imperative mood, under 72 chars)
-
-Longer body explaining WHY (not what — the diff shows what).
-Reference plan documents or prior decisions where relevant.
-```
-
-- **Types**: `fix`, `feat`, `chore`, `docs`, `refactor`, `test`, `ci`
-- **Scope**: the file or area changed (`zshrc`, `brewfile`, `mise`, `install`, `bin`)
-- **Body**: required for any non-trivial change
-
-### Process
-
-1. `git checkout -b <prefix>/<descriptive-name>`
-2. Make the smallest focused change that accomplishes the goal
-3. `git diff` — review before staging
-4. `git add -p` — stage interactively when possible
-5. `git commit` — write a conventional commit message with body
-6. `git push -u origin <branch-name>`
-7. Merge to master only after verifying the change works in a live shell
-
-### Test Before Committing
-
-- After editing any `.zsh` / `.zshrc` file: `zsh -n <file>` (syntax check)
-- After editing install scripts: `bash -n <file>`
-- After editing `symlinks.sh`: run `dotfiles symlinks` in a test context
-
-### Updating the Changelog
-
-After merging to master, regenerate CHANGELOG.md from commit history:
-```bash
-git-cliff --output CHANGELOG.md && git add CHANGELOG.md && git commit -m 'chore: update changelog'
-```
+@.claude/docs/git-discipline.md
 
 ---
 
