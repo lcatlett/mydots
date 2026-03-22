@@ -96,7 +96,13 @@ test_brewfile_consistency() {
     echo "brew not found"
     return 1
   fi
-  brew bundle check --file="$DOTFILES_DIR/install/Brewfile" 2>&1
+  local errors=0
+  brew bundle check --file="$DOTFILES_DIR/install/Brewfile" 2>&1 || errors=$((errors + 1))
+  local host_brewfile="$DOTFILES_DIR/install/Brewfile.$(hostname -s)"
+  if [[ -f "$host_brewfile" ]]; then
+    brew bundle check --file="$host_brewfile" 2>&1 || errors=$((errors + 1))
+  fi
+  return "$errors"
 }
 
 # ---------------------------------------------------------------------------
@@ -124,6 +130,31 @@ test_dotfiles_sync() {
       fi
     fi
   done
+
+  # ghostty config
+  local ghostty_config_link="$HOME/.config/ghostty/config"
+  local ghostty_config_expected="$DOTFILES_DIR/dots/ghostty/config"
+  if [[ ! -L "$ghostty_config_link" ]]; then
+    errors+=("ghostty/config: not a symlink")
+  else
+    local ghostty_config_target
+    ghostty_config_target=$(readlink "$ghostty_config_link")
+    if [[ "$ghostty_config_target" != "$ghostty_config_expected" ]]; then
+      errors+=("ghostty/config: points to '$ghostty_config_target', expected '$ghostty_config_expected'")
+    fi
+  fi
+
+  local ghostty_themes_link="$HOME/.config/ghostty/themes"
+  local ghostty_themes_expected="$DOTFILES_DIR/dots/ghostty/themes"
+  if [[ ! -L "$ghostty_themes_link" ]]; then
+    errors+=("ghostty/themes: not a symlink")
+  else
+    local ghostty_themes_target
+    ghostty_themes_target=$(readlink "$ghostty_themes_link")
+    if [[ "$ghostty_themes_target" != "$ghostty_themes_expected" ]]; then
+      errors+=("ghostty/themes: points to '$ghostty_themes_target', expected '$ghostty_themes_expected'")
+    fi
+  fi
 
   # mise config
   local mise_link="$HOME/.config/mise/config.toml"
@@ -184,19 +215,78 @@ test_brew_no_deprecated() {
     echo "brew not found"
     return 1
   fi
-  local output
-  output=$(brew bundle check --verbose --file="$DOTFILES_DIR/install/Brewfile" 2>&1)
-  # Check for deprecation warnings
-  if echo "$output" | grep -qi 'deprecated\|disabled'; then
-    echo "Deprecated entries found:"
-    echo "$output" | grep -i 'deprecated\|disabled'
-    return 1
-  fi
-  return 0
+  local errors=0
+  local brewfiles=("$DOTFILES_DIR/install/Brewfile")
+  local host_brewfile="$DOTFILES_DIR/install/Brewfile.$(hostname -s)"
+  [[ -f "$host_brewfile" ]] && brewfiles+=("$host_brewfile")
+
+  for bf in "${brewfiles[@]}"; do
+    local output
+    output=$(brew bundle check --verbose --file="$bf" 2>&1)
+    if echo "$output" | grep -qi 'deprecated\|disabled'; then
+      echo "Deprecated entries in $(basename "$bf"):"
+      echo "$output" | grep -i 'deprecated\|disabled'
+      errors=$((errors + 1))
+    fi
+  done
+  return "$errors"
 }
 
 # ---------------------------------------------------------------------------
-# Test 7: Mise audit (doctor, PATH conflicts, Homebrew overlaps)
+# Test 7: VS Code extensions sync (laptop only)
+# ---------------------------------------------------------------------------
+test_vscode_extensions() {
+  local laptop_brewfile="$DOTFILES_DIR/install/Brewfile.laptop"
+  if [[ ! -f "$laptop_brewfile" ]]; then
+    echo "Brewfile.laptop not found"
+    return 1
+  fi
+  if ! command -v code &>/dev/null; then
+    echo "code CLI not found"
+    return 1
+  fi
+
+  # Extract extension IDs from Brewfile.laptop (vscode "publisher.name" lines)
+  local expected_exts
+  expected_exts=$(grep -E '^vscode "' "$laptop_brewfile" | sed 's/vscode "//; s/"//' | tr '[:upper:]' '[:lower:]' | sort)
+
+  # Installed extensions (lowercased — code outputs mixed case)
+  local installed_exts
+  installed_exts=$(code --list-extensions 2>/dev/null | tr '[:upper:]' '[:lower:]' | sort)
+
+  local missing=()
+  local extra=()
+
+  while IFS= read -r ext; do
+    [[ -z "$ext" ]] && continue
+    if ! echo "$installed_exts" | grep -qi "^${ext}$"; then
+      missing+=("$ext")
+    fi
+  done <<< "$expected_exts"
+
+  while IFS= read -r ext; do
+    [[ -z "$ext" ]] && continue
+    if ! echo "$expected_exts" | grep -qi "^${ext}$"; then
+      extra+=("$ext")
+    fi
+  done <<< "$installed_exts"
+
+  local errors=0
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "Extensions in Brewfile.laptop but NOT installed:"
+    printf '  %s\n' "${missing[@]}"
+    errors=$((errors + 1))
+  fi
+  if [[ ${#extra[@]} -gt 0 ]]; then
+    echo "Extensions installed but NOT in Brewfile.laptop:"
+    printf '  %s\n' "${extra[@]}"
+    errors=$((errors + 1))
+  fi
+  return "$errors"
+}
+
+# ---------------------------------------------------------------------------
+# Test 8: Mise audit (doctor, PATH conflicts, Homebrew overlaps)
 # ---------------------------------------------------------------------------
 test_mise_audit() {
   local audit_script="$DOTFILES_DIR/bin/mise-audit"
@@ -236,6 +326,12 @@ if command -v brew &>/dev/null; then
   run_test "No deprecated brew entries"    test_brew_no_deprecated
 else
   skip_test "No deprecated brew entries"   "brew not installed"
+fi
+
+if command -v code &>/dev/null && [[ -f "$DOTFILES_DIR/install/Brewfile.laptop" ]]; then
+  run_test "VS Code extensions sync"       test_vscode_extensions
+else
+  skip_test "VS Code extensions sync"      "code CLI or Brewfile.laptop not found"
 fi
 
 if command -v mise &>/dev/null; then

@@ -10,7 +10,8 @@
 [tools]
 bun = "latest"
 go = "latest"
-node = "latest"
+node = "22"
+"npm:wrangler" = "latest"
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
 python = "latest"
@@ -54,6 +55,7 @@ rclone = "latest"
 "aqua:GoogleCloudPlatform/berglas" = "latest"
 rust = "latest"
 atuin = "latest"
+"go:golang.org/x/tools/gopls" = "latest"
 
 [settings]
 
