@@ -98,7 +98,8 @@ test_brewfile_consistency() {
   fi
   local errors=0
   brew bundle check --file="$DOTFILES_DIR/install/Brewfile" 2>&1 || errors=$((errors + 1))
-  local host_brewfile="$DOTFILES_DIR/install/Brewfile.$(hostname -s)"
+  local host_brewfile
+  host_brewfile="$DOTFILES_DIR/install/Brewfile.$(hostname -s)"
   if [[ -f "$host_brewfile" ]]; then
     brew bundle check --file="$host_brewfile" 2>&1 || errors=$((errors + 1))
   fi
@@ -187,7 +188,7 @@ test_ssh_permissions() {
     local config_perms
     config_perms=$(stat -f '%A' "$HOME/.ssh/config")
     if [[ "$config_perms" != "600" ]]; then
-      errors+=("~/.ssh/config is $config_perms (expected 600)")
+      errors+=("$HOME/.ssh/config is $config_perms (expected 600)")
     fi
   fi
 
@@ -215,9 +216,10 @@ test_brew_no_deprecated() {
     echo "brew not found"
     return 1
   fi
-  local errors=0
+  local err_count=0
   local brewfiles=("$DOTFILES_DIR/install/Brewfile")
-  local host_brewfile="$DOTFILES_DIR/install/Brewfile.$(hostname -s)"
+  local host_brewfile
+  host_brewfile="$DOTFILES_DIR/install/Brewfile.$(hostname -s)"
   [[ -f "$host_brewfile" ]] && brewfiles+=("$host_brewfile")
 
   for bf in "${brewfiles[@]}"; do
@@ -226,10 +228,10 @@ test_brew_no_deprecated() {
     if echo "$output" | grep -qi 'deprecated\|disabled'; then
       echo "Deprecated entries in $(basename "$bf"):"
       echo "$output" | grep -i 'deprecated\|disabled'
-      errors=$((errors + 1))
+      err_count=$((err_count + 1))
     fi
   done
-  return "$errors"
+  return "$err_count"
 }
 
 # ---------------------------------------------------------------------------
@@ -271,18 +273,18 @@ test_vscode_extensions() {
     fi
   done <<< "$installed_exts"
 
-  local errors=0
+  local err_count=0
   if [[ ${#missing[@]} -gt 0 ]]; then
     echo "Extensions in Brewfile.laptop but NOT installed:"
     printf '  %s\n' "${missing[@]}"
-    errors=$((errors + 1))
+    err_count=$((err_count + 1))
   fi
   if [[ ${#extra[@]} -gt 0 ]]; then
     echo "Extensions installed but NOT in Brewfile.laptop:"
     printf '  %s\n' "${extra[@]}"
-    errors=$((errors + 1))
+    err_count=$((err_count + 1))
   fi
-  return "$errors"
+  return "$err_count"
 }
 
 # ---------------------------------------------------------------------------
