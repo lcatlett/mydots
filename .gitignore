@@ -16,7 +16,9 @@ iterm/script.py
 install/brew.bak
 
 # Local tool state — not portable
-.claude/
+.claude/*
+# But track context docs referenced by CLAUDE.md
+!.claude/docs/
 
 # Compiled binaries — platform-specific, install via brew/mise/source instead
 bin/dfc
