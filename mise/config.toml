@@ -14,7 +14,9 @@ node = "22"
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
 python = "latest"
-"github:adwinying/php" = ["8.2", "8.3", "8.4"]
+# Pinned: static-php.dev bulk downloads broken from ~Feb 2026
+# https://github.com/adwinying/php — last good releases before 404s
+"github:adwinying/php" = ["8.2.28", "8.3.29", "8.4.17"]
 uv = "latest"
 bat = "latest"
 eza = "latest"
