@@ -37,9 +37,13 @@ print_status() {
     esac
 }
 
+ARCH=$(uname -m)
+CHIP=$(system_profiler SPHardwareDataType 2>/dev/null | grep "Chip" | awk -F': ' '{print $2}')
+
 echo "=========================================="
 echo "  Mise Configuration Audit"
 echo "  $(date)"
+echo "  Arch: ${ARCH} / ${CHIP:-unknown}"
 echo "=========================================="
 echo ""
 
@@ -143,6 +147,25 @@ if [[ "$PRUNABLE" =~ ^[0-9]+$ ]] && [[ "$PRUNABLE" -gt 0 ]]; then
     if [[ "$VERBOSE" == "1" ]]; then
         mise prune --dry-run 2>&1 | grep "uninstall"
     fi
+fi
+
+# Check 7: Missing tool installations
+echo "Checking for missing tools..."
+MISSING_TOOLS=$(mise ls 2>/dev/null | grep "(missing)" || true)
+if [[ -n "$MISSING_TOOLS" ]]; then
+    MISSING_COUNT=$(echo "$MISSING_TOOLS" | wc -l | tr -d ' ')
+    print_status warn "$MISSING_COUNT missing tool(s)"
+    while IFS= read -r line; do
+        TOOL_NAME=$(echo "$line" | awk '{print $1}')
+        TOOL_VER=$(echo "$line" | awk '{print $2}')
+        print_status warn "${TOOL_NAME}@${TOOL_VER} is missing (arch: ${ARCH}/${CHIP:-unknown} — may be a prebuilt binary availability issue)"
+    done <<< "$MISSING_TOOLS"
+    log_issue "MISE_UNAVAILABLE" "Missing tool installations detected" \
+        "Architecture: ${ARCH}/${CHIP:-unknown}" \
+        "Tools: $(echo "$MISSING_TOOLS" | awk '{print $1"@"$2}' | tr '\n' ', ')"
+    ISSUES_FOUND=$((ISSUES_FOUND + MISSING_COUNT))
+else
+    print_status ok "All tools installed"
 fi
 
 echo ""
