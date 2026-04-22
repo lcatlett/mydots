@@ -10,7 +10,7 @@
 [tools]
 bun = "latest"
 go = "latest"
-node = "22"
+node = "22.22.2"
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
 python = "latest"

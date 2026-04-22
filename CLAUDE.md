@@ -84,7 +84,7 @@ Test before committing: `zsh -n` for shell files, `bash -n` for install scripts.
 
 ## What NOT to Do
 
-- Don't add `PATH` assignments to `.exports` — `.zshrc` owns PATH
+- Don't add public `PATH` assignments to `.exports` — `.zshrc` owns PATH, however for wip and private PATH assignments, use `.exports` eg bifrost setup.
 - Don't install language runtimes or CLIs via Homebrew if mise has them
 - Don't source blocking commands in `.zshrc` (gpg, ssh-add are already async)
 - Don't commit secrets — `dots/.gitconfig` had a token removed from history via `git filter-repo`
