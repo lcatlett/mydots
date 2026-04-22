@@ -67,3 +67,9 @@ for script in \
 do
     ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
 done
+
+# ---------------------------------------------------------------------------
+# External tools → ~/bin/ (guarded; only linked if the target exists)
+# ---------------------------------------------------------------------------
+[[ -x "$HOME/projects/dev-tools/claude-sync/claude-sync" ]] && \
+    ln -sfn "$HOME/projects/dev-tools/claude-sync/claude-sync" "$HOME/bin/claude-sync"
