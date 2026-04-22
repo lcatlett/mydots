@@ -102,12 +102,15 @@ unset _mysqlv
 
 # Work tools
 [[ -d "$HOME/scripts/tasks/bin" ]] && path+=("$HOME/scripts/tasks/bin")
-#path+=("$HOME/.platform-nestle-cli/bin")
 
 # --- Priority 6: Package managers (LAST - cannot shadow above) ---
 # PNPM - APPENDED not prepended
 #export PNPM_HOME="$HOME/Library/pnpm"
 #path+=("$PNPM_HOME")
+
+# Bun - APPENDED not prepended
+export BUN_INSTALL="$HOME/.bun"
+[[ -d "$BUN_INSTALL/bin" ]] && path+=("$BUN_INSTALL/bin")
 
 export PATH
 
@@ -176,12 +179,18 @@ if [[ -d "$HOME/.local/share/zsh" ]]; then
 fi
 fpath=("$HOME/.zsh-complete" $fpath)
 
+# --- Zsh completion cache configuration ---
+export ZSH_CACHE_DIR="$HOME/.zsh/cache"
+[[ -d "$ZSH_CACHE_DIR" ]] || mkdir -p "$ZSH_CACHE_DIR"
+export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
+
+# compinit: -u skips insecure-dir check (Homebrew/OrbStack group-writable fpath dirs).
+# Rebuild cache only when dump is missing or older than 24h; otherwise use -C fast path.
 autoload -Uz compinit
-# Only rebuild cache once per day
-if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
-  compinit
+if [[ -n $ZSH_COMPDUMP(#qN.mh-24) ]]; then
+  compinit -u -C -d "$ZSH_COMPDUMP"
 else
-  compinit -C
+  compinit -u -d "$ZSH_COMPDUMP"
 fi
 
 # --- Activate mise (hook-based PATH management for all managed tools) ---
@@ -190,19 +199,8 @@ eval "$(mise activate zsh)"
 # --- zoxide (must load after compinit) ---
 eval "$(zoxide init zsh)"
 
-# --- Zsh completion cache configuration ---
-export ZSH_CACHE_DIR="$HOME/.zsh/cache"
-[[ -d "$ZSH_CACHE_DIR" ]] || mkdir -p "$ZSH_CACHE_DIR"
-export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
-
-# --- Final PATH export and deduplication ---
-typeset -U path
-export PATH
-
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-
-alias claude-mem='bun "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
 
 # --- Starship prompt ---
 export STARSHIP_CONFIG=~/.config/starship-minimal.toml
@@ -213,6 +211,10 @@ export NODE_OPTIONS="--no-deprecation"
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 eval "$(atuin init zsh)"
+# Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
+# Must come AFTER atuin init which clobbers zsh's paste handler
+autoload -Uz bracketed-paste-magic
+zle -N bracketed-paste bracketed-paste-magic
 
 # --- Host-specific config ---
 case "$(hostname -s)" in
@@ -222,7 +224,7 @@ case "$(hostname -s)" in
       printf '\e]11;#1c1008\e\\' # bg → dark amber
       printf '\e]10;#e0d0b8\e\\' # fg → warm cream
       printf '\e]12;#ff8c00\e\\' # cursor → orange
-      ssh lindsey@ghost.local "$@"
+      ssh lcatlett@ghost.local "$@"
       printf '\e]11;#0c2732\e\\' # bg → restore lindsey teal
       printf '\e]10;#b1cbcd\e\\' # fg → restore
       printf '\e]12;#e66c2c\e\\' # cursor → restore
@@ -230,12 +232,6 @@ case "$(hostname -s)" in
     ;;
   ghost)
     # Ghost-specific config goes here
-
     # add high contrast border to terminal window to indicate remote session
-    
     ;;
 esac
-
-# SummonAI Kit CLI
-export PATH="$PATH:/Users/lcatlett/.summonaikit/bin"
-
