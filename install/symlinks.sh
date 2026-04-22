@@ -19,6 +19,7 @@ ln -sfv "$DOTFILES_DIR/dots/.inputrc"         ~
 ln -sfv "$DOTFILES_DIR/dots/.bash_profile"    ~
 ln -sfv "$DOTFILES_DIR/dots/.bashrc"          ~
 ln -sfv "$DOTFILES_DIR/dots/.zshrc"           ~
+ln -sfv "$DOTFILES_DIR/dots/.zshenv"          ~
 ln -sfv "$DOTFILES_DIR/dots/.profile"         ~
 ln -sfv "$DOTFILES_DIR/dots/.editorconfig"    ~
 
@@ -40,7 +41,7 @@ ln -sfn "$DOTFILES_DIR/dots/ghostty/themes" "$HOME/.config/ghostty/themes"
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.zsh/functions"
 for func_file in "$DOTFILES_DIR/.zsh/functions"/*.zsh; do
-    ln -sfv "$func_file" "$HOME/.zsh/functions/"
+    ln -sfv "$func_file" "$HOME/.zsh/functions"
 done
 
 # ---------------------------------------------------------------------------
@@ -64,5 +65,5 @@ for script in \
     symlink-audit \
     syscheck
 do
-    ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin/
+    ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
 done
