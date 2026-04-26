@@ -1,11 +1,7 @@
-# Claude Code — ephemeral session state (checkpoints, observations)
-.session-state/
-
-# GitHub Copilot instructions (editor-specific, not shared)
-.github/copilot-instructions.md
+.DS_Store
 
 # VS Code local MCP config (contains user-specific paths)
 .vscode/mcp.json
 
-# memsearch session memory
-.memsearch/
+
+**/.claude/settings.local.json
