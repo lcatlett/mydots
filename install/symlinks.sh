@@ -3,25 +3,24 @@
 # Run via: dotfiles symlinks  OR  bash install/install.sh
 
 export DOTFILES_DIR
-DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
 
 # ---------------------------------------------------------------------------
 # Config files → ~/
 # ---------------------------------------------------------------------------
 # NOTE: dots/.exports is gitignored — secrets live there.
 # On fresh install: cp dots/.exports.template dots/.exports, then fill in values.
-ln -sfv "$DOTFILES_DIR/dots/.exports"         ~
-ln -sfv "$DOTFILES_DIR/dots/.aliases"         ~
-ln -sfv "$DOTFILES_DIR/dots/.gitconfig"       ~
-ln -sfv "$DOTFILES_DIR/dots/.gitignore"       ~
+ln -sfv "$DOTFILES_DIR/dots/.exports" ~
+ln -sfv "$DOTFILES_DIR/dots/.aliases" ~
+ln -sfv "$DOTFILES_DIR/dots/.gitconfig" ~
 ln -sfv "$DOTFILES_DIR/dots/.gitignore_global" ~
-ln -sfv "$DOTFILES_DIR/dots/.inputrc"         ~
-ln -sfv "$DOTFILES_DIR/dots/.bash_profile"    ~
-ln -sfv "$DOTFILES_DIR/dots/.bashrc"          ~
-ln -sfv "$DOTFILES_DIR/dots/.zshrc"           ~
-ln -sfv "$DOTFILES_DIR/dots/.zshenv"          ~
-ln -sfv "$DOTFILES_DIR/dots/.profile"         ~
-ln -sfv "$DOTFILES_DIR/dots/.editorconfig"    ~
+ln -sfv "$DOTFILES_DIR/dots/.inputrc" ~
+ln -sfv "$DOTFILES_DIR/dots/.bash_profile" ~
+ln -sfv "$DOTFILES_DIR/dots/.bashrc" ~
+ln -sfv "$DOTFILES_DIR/dots/.zshrc" ~
+ln -sfv "$DOTFILES_DIR/dots/.zshenv" ~
+ln -sfv "$DOTFILES_DIR/dots/.profile" ~
+ln -sfv "$DOTFILES_DIR/dots/.editorconfig" ~
 
 # ---------------------------------------------------------------------------
 # mise — tool manager config
@@ -41,7 +40,7 @@ ln -sfn "$DOTFILES_DIR/dots/ghostty/themes" "$HOME/.config/ghostty/themes"
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.zsh/functions"
 for func_file in "$DOTFILES_DIR/.zsh/functions"/*.zsh; do
-    ln -sfv "$func_file" "$HOME/.zsh/functions"
+  ln -sfv "$func_file" "$HOME/.zsh/functions"
 done
 
 # ---------------------------------------------------------------------------
@@ -50,26 +49,25 @@ done
 mkdir -p ~/bin
 
 for script in \
-    audit-system \
-    claude-safe \
-    code \
-    dotfiles \
-    dusage \
-    gcb \
-    hurl \
-    image2svg \
-    kill-claude \
-    mise-audit \
-    rename-commit \
-    ssh-manager \
-    symlink-audit \
-    syscheck
-do
-    ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
+  audit-system \
+  claude-safe \
+  code \
+  dotfiles \
+  dusage \
+  gcb \
+  hurl \
+  image2svg \
+  kill-claude \
+  mise-audit \
+  rename-commit \
+  ssh-manager \
+  symlink-audit \
+  syscheck; do
+  ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
 done
 
 # ---------------------------------------------------------------------------
 # External tools → ~/bin/ (guarded; only linked if the target exists)
 # ---------------------------------------------------------------------------
-[[ -x "$HOME/projects/dev-tools/claude-sync/claude-sync" ]] && \
-    ln -sfn "$HOME/projects/dev-tools/claude-sync/claude-sync" "$HOME/bin/claude-sync"
+[[ -x "$HOME/projects/dev-tools/claude-sync/claude-sync" ]] &&
+  ln -sfn "$HOME/projects/dev-tools/claude-sync/claude-sync" "$HOME/bin/claude-sync"

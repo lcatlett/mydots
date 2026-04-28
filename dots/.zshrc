@@ -3,8 +3,8 @@
 
 # --- Interactive TTY safety tweaks (only when interactive) ---
 if [[ -o interactive ]] && [[ -t 0 ]]; then
-  stty -tostop 2>/dev/null      # Don't stop bg jobs on output
-  stty susp undef 2>/dev/null   # Disable ^Z suspend
+  stty -tostop 2>/dev/null    # Don't stop bg jobs on output
+  stty susp undef 2>/dev/null # Disable ^Z suspend
 fi
 
 # --- Load modular config files if present ---
@@ -25,12 +25,12 @@ fi
 HISTSIZE=50000
 SAVEHIST=50000
 HISTFILE=~/.zsh_history
-setopt inc_append_history
-setopt share_history
-setopt extended_history        # Save timestamp
-setopt hist_ignore_dups        # Don't save duplicates
-setopt hist_ignore_space       # Ignore commands starting with space
-setopt hist_reduce_blanks      # Remove extra blanks
+setopt share_history          # share_history implies inc_append_history
+setopt extended_history       # Save timestamp + duration
+setopt hist_ignore_all_dups   # Remove older duplicate anywhere in history (not just consecutive)
+setopt hist_ignore_space      # Ignore commands starting with space
+setopt hist_reduce_blanks     # Remove extra blanks
+setopt hist_expire_dups_first # Expire duplicates first when history is full
 
 # ==============================================================================
 # PATH CONSTRUCTION - SINGLE AUTHORITATIVE LOCATION
@@ -52,15 +52,18 @@ path=(
   "$HOME/.local/bin"
 )
 
+# --- Priority 2.5: Mise shims (before Homebrew so mise-managed tools always win) ---
+# Shims here cover: initial shell load before `mise activate` runs, non-interactive
+# subshells, and scripts. `mise activate` will prepend installs/ paths at first prompt.
+[[ -d "$HOME/.local/share/mise/shims" ]] && path+=("$HOME/.local/share/mise/shims")
+
 # --- Priority 3: Homebrew ---
 path+=(
   "/opt/homebrew/bin"
   "/opt/homebrew/sbin"
   "/usr/local/bin"
   "/opt/homebrew/opt/curl/bin"
-  "/usr/local/opt/curl/bin"
   "/opt/homebrew/opt/openssl@3/bin"
-  "/usr/local/opt/openssl@3/bin"
 )
 
 # --- Priority 4: System paths ---
@@ -88,14 +91,14 @@ export COMPOSER_MEMORY_LIMIT=-1
 #   "/opt/homebrew/opt/php@8.1/bin"
 #   "/opt/homebrew/opt/php@8.1/sbin"
 #   "/opt/homebrew/opt/php@8.3/bin"
-#   "/opt/homebrew/opt/php@8.3/sbin"
+#   "/opt/homebrew/opt/php@8.3/sbin"o
 # )
 
 # Database clients — guard against non-existent paths
 for _mysqlv in 8.4 8.0; do
-  [[ -d "/opt/homebrew/opt/mysql@${_mysqlv}/bin" ]] && \
+  [[ -d "/opt/homebrew/opt/mysql@${_mysqlv}/bin" ]] &&
     path+=("/opt/homebrew/opt/mysql@${_mysqlv}/bin")
-  [[ -d "/opt/homebrew/opt/mysql-client@${_mysqlv}/bin" ]] && \
+  [[ -d "/opt/homebrew/opt/mysql-client@${_mysqlv}/bin" ]] &&
     path+=("/opt/homebrew/opt/mysql-client@${_mysqlv}/bin")
 done
 unset _mysqlv
@@ -103,14 +106,18 @@ unset _mysqlv
 # Work tools
 [[ -d "$HOME/scripts/tasks/bin" ]] && path+=("$HOME/scripts/tasks/bin")
 
+if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
+  source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
+fi
+
 # --- Priority 6: Package managers (LAST - cannot shadow above) ---
 # PNPM - APPENDED not prepended
 #export PNPM_HOME="$HOME/Library/pnpm"
 #path+=("$PNPM_HOME")
 
-# Bun - APPENDED not prepended
+# Bun — managed by mise; BUN_INSTALL is kept for bun's own use (completions, etc.)
+# but the binary path is NOT added to PATH — mise shims handle resolution.
 export BUN_INSTALL="$HOME/.bun"
-[[ -d "$BUN_INSTALL/bin" ]] && path+=("$BUN_INSTALL/bin")
 
 export PATH
 
@@ -118,15 +125,13 @@ export PATH
 # GPG agent for commit signing only — SSH auth is handled by macOS launchd agent
 # (SSH config: UseKeychain yes + AddKeysToAgent yes handles key loading automatically)
 if command -v gpgconf >/dev/null 2>&1 && [[ -z "$SSH_CLIENT" ]]; then
-    if ! pgrep -u "$USER" gpg-agent >/dev/null; then
-        gpgconf --launch gpg-agent >/dev/null 2>&1 &
-    fi
-    export GPG_TTY=$(tty)
-    # NOTE: SSH_AUTH_SOCK intentionally NOT overridden here.
-    # Overriding it with the GPG socket breaks --apple-use-keychain and macOS Keychain integration.
+  if ! pgrep -u "$USER" gpg-agent >/dev/null; then
+    gpgconf --launch gpg-agent >/dev/null 2>&1 &
+  fi
+  export GPG_TTY=$(tty)
+  # NOTE: SSH_AUTH_SOCK intentionally NOT overridden here.
+  # Overriding it with the GPG socket breaks --apple-use-keychain and macOS Keychain integration.
 fi
-
-
 
 # --- Performance tool aliases (rg/fd/pigz wrappers) ---
 if command -v rg >/dev/null 2>&1; then
@@ -135,9 +140,9 @@ if command -v rg >/dev/null 2>&1; then
     local fixed=0
     for arg in "$@"; do
       case "$arg" in
-        -E) ;;
-        -F) fixed=1 ;;
-        *)  args+=("$arg") ;;
+      -E) ;; # rg uses extended regex by default; -E is a no-op and unsupported flag
+      -F) fixed=1 ;;
+      *) args+=("$arg") ;;
       esac
     done
     if [[ $fixed -eq 1 ]]; then
@@ -166,9 +171,9 @@ if command -v fd >/dev/null 2>&1; then
 fi
 
 if command -v pigz >/dev/null 2>&1; then
-  gzip()   { command pigz "$@"; }
+  gzip() { command pigz "$@"; }
   gunzip() { command pigz -d "$@"; }
-  zcat()   { command pigz -dc "$@"; }
+  zcat() { command pigz -dc "$@"; }
   alias oldgzip='command gzip'
   alias oldzcat='command zcat'
 fi
@@ -196,6 +201,11 @@ fi
 # --- Activate mise (hook-based PATH management for all managed tools) ---
 eval "$(mise activate zsh)"
 
+# McFly initialization
+if command -v mcfly &>/dev/null; then
+  eval "$(mcfly init zsh)"
+fi
+
 # --- zoxide (must load after compinit) ---
 eval "$(zoxide init zsh)"
 
@@ -206,11 +216,12 @@ eval "$(zoxide init zsh)"
 export STARSHIP_CONFIG=~/.config/starship-minimal.toml
 eval "$(starship init zsh)"
 
-# Suppress Node.js deprecation warnings (e.g. punycode)
+# Suppress punycode deprecation noise from legacy npm packages.
+# Scoped to --no-deprecation rather than blanket silencing so real warnings surface.
+# Remove once upstream packages (e.g. inflight, glob) ship Node 22-compatible versions.
 export NODE_OPTIONS="--no-deprecation"
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
-eval "$(atuin init zsh)"
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
 # Must come AFTER atuin init which clobbers zsh's paste handler
 autoload -Uz bracketed-paste-magic
@@ -218,20 +229,20 @@ zle -N bracketed-paste bracketed-paste-magic
 
 # --- Host-specific config ---
 case "$(hostname -s)" in
-  bos-mpotu)
-    # SSH to ghost with visual theme indicator (amber bg = remote session)
-    ghost() {
-      printf '\e]11;#1c1008\e\\' # bg → dark amber
-      printf '\e]10;#e0d0b8\e\\' # fg → warm cream
-      printf '\e]12;#ff8c00\e\\' # cursor → orange
-      ssh lcatlett@ghost.local "$@"
-      printf '\e]11;#0c2732\e\\' # bg → restore lindsey teal
-      printf '\e]10;#b1cbcd\e\\' # fg → restore
-      printf '\e]12;#e66c2c\e\\' # cursor → restore
-    }
-    ;;
-  ghost)
-    # Ghost-specific config goes here
-    # add high contrast border to terminal window to indicate remote session
-    ;;
+bos-mpotu)
+  # SSH to ghost with visual theme indicator (amber bg = remote session)
+  ghost() {
+    printf '\e]11;#1c1008\e\\' # bg → dark amber
+    printf '\e]10;#e0d0b8\e\\' # fg → warm cream
+    printf '\e]12;#ff8c00\e\\' # cursor → orange
+    ssh lcatlett@ghost.local "$@"
+    printf '\e]11;#0c2732\e\\' # bg → restore lindsey teal
+    printf '\e]10;#b1cbcd\e\\' # fg → restore
+    printf '\e]12;#e66c2c\e\\' # cursor → restore
+  }
+  ;;
+ghost)
+  # Ghost-specific config goes here
+  # add high contrast border to terminal window to indicate remote session
+  ;;
 esac

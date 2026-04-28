@@ -13,7 +13,7 @@ go = "latest"
 node = "22.22.2"
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
-python = "latest"
+python = "3.12"
 "github:lcatlett/php" = ["8.2", "8.3", "8.4"]
 uv = "latest"
 bat = "latest"
@@ -53,8 +53,8 @@ rclone = "latest"
 "aqua:simeji/jid" = "latest"
 "aqua:GoogleCloudPlatform/berglas" = "latest"
 rust = "latest"
-atuin = "latest"
 "go:golang.org/x/tools/gopls" = "latest"
+"cargo:mcfly" = "latest"
 
 [settings]
 
