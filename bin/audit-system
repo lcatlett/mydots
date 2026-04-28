@@ -117,6 +117,10 @@ read swap_total swap_used swap_free <<< "${swap_stats:-0 0 0}"
 # Single ps call for all process data - cache it
 local ps_cache=$(ps -axo pid=,rss=,pcpu=,user=,stat=,comm= 2>/dev/null)
 
+# Full args for node and Claude/MCP process identification (comm= only gives binary name)
+local node_args_cache=$(ps -axo pid=,rss=,pcpu=,ppid=,args= 2>/dev/null | grep -E '/node( |$)|bin/node' | grep -v grep)
+local claude_args_cache=$(ps -axo pid=,rss=,pcpu=,ppid=,args= 2>/dev/null | grep -iE '(claude|mcp-server|@modelcontextprotocol)' | grep -v grep)
+
 # Get counts from cached data
 local total_procs=$(echo "$ps_cache" | wc -l | tr -d ' ')
 local zombie_count=$(echo "$ps_cache" | awk '$5 ~ /Z/ {count++} END {print count+0}')
@@ -261,30 +265,6 @@ if echo "$ps_cache" | grep -q "Code Helper"; then
     fi
   fi
 fi
-
-# ═══════════════════════════════════════════════════════════════════════════
-# HELPER: Parse process line efficiently (no subshells)
-# ═══════════════════════════════════════════════════════════════════════════
-_parse_proc() {
-  # Input: line from ps output
-  # Sets: _pid, _rss, _cpu, _user, _cmd, _mem_mb
-  local line="$1"
-  _pid=${line%% *}; line=${line#* }
-  line=${line##[[:space:]]}
-  _rss=${line%% *}; line=${line#* }
-  line=${line##[[:space:]]}
-  _cpu=${line%% *}; line=${line#* }
-  line=${line##[[:space:]]}
-  _user=${line%% *}; line=${line#* }
-  line=${line##[[:space:]]}
-  # Skip stat field
-  line=${line#* }
-  line=${line##[[:space:]]}
-  _cmd=${line}
-  _cmd=${_cmd##[[:space:]]}
-  _cmd=${_cmd%%[[:space:]]}
-  _mem_mb=$(( ${_rss:-0} / 1024 ))
-}
 
 # ═══════════════════════════════════════════════════════════════════════════
 # GENERATE OUTPUT
@@ -537,6 +517,109 @@ if $vscode_running; then
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════
+# NODE DIAGNOSTICS
+# ═══════════════════════════════════════════════════════════════════════════
+
+if [[ -n "$node_args_cache" ]]; then
+  local node_total_count=$(echo "$node_args_cache" | wc -l | tr -d ' ')
+  local node_total_mem=$(echo "$node_args_cache" | awk '{sum+=$2} END {printf "%d", sum/1024}')
+
+  # Group by binary path origin
+  local node_homebrew=$(echo "$node_args_cache" | grep '/opt/homebrew')
+  local node_mise_shim=$(echo "$node_args_cache" | grep '/.local/share/mise/shims/')
+  local node_mise_hardcoded=$(echo "$node_args_cache" | grep '/.local/share/mise/installs/')
+  local node_other=$(echo "$node_args_cache" | grep -v '/opt/homebrew' | grep -v '/.local/share/mise')
+
+  # shared awk formatter: pid ppid script — reused across all groups
+  _node_proc_lines() {
+    awk '{
+      pid=$1; ppid=$4;
+      args=$0; gsub(/^[^ ]+ +[^ ]+ +[^ ]+ +[^ ]+ +/, "", args);
+      n=split(args, parts, " ");
+      bin=parts[1]; script=(n>1 ? parts[2] : "(no args)");
+      nb=split(bin, bparts, "/"); short_bin=bparts[nb];
+      ns=split(script, sparts, "/"); short_script=sparts[ns];
+      if (length(short_script) > 40) short_script=substr(short_script,1,37)"...";
+      printf "  PID %-7d ppid=%-7d %-10s %s\n", pid, ppid, short_bin, short_script
+    }'
+  }
+
+  local node_content="Total: ${node_total_mem}MB across ${node_total_count} processes"
+
+  if [[ -n "$node_homebrew" ]]; then
+    local hb_count=$(echo "$node_homebrew" | wc -l | tr -d ' ')
+    local hb_mem=$(echo "$node_homebrew" | awk '{sum+=$2} END {printf "%d", sum/1024}')
+    node_content+="\n$(gum style --foreground 1 --bold '[ERROR]') Homebrew node: ${hb_count} proc(s), ${hb_mem}MB"
+    node_content+="\n$(echo "$node_homebrew" | _node_proc_lines)"
+  fi
+
+  if [[ -n "$node_mise_hardcoded" ]]; then
+    local hc_count=$(echo "$node_mise_hardcoded" | wc -l | tr -d ' ')
+    local hc_mem=$(echo "$node_mise_hardcoded" | awk '{sum+=$2} END {printf "%d", sum/1024}')
+    node_content+="\n$(gum style --foreground 3 --bold '[WARN]') Hardcoded mise installs path: ${hc_count} proc(s), ${hc_mem}MB"
+    node_content+="\n  (bypasses mise version resolution — config should use shims/ not installs/)"
+    node_content+="\n$(echo "$node_mise_hardcoded" | _node_proc_lines)"
+  fi
+
+  if [[ -n "$node_mise_shim" ]]; then
+    local ms_count=$(echo "$node_mise_shim" | wc -l | tr -d ' ')
+    local ms_mem=$(echo "$node_mise_shim" | awk '{sum+=$2} END {printf "%d", sum/1024}')
+    node_content+="\n$(gum style --foreground 2 '[OK]') mise shim: ${ms_count} proc(s), ${ms_mem}MB"
+    node_content+="\n$(echo "$node_mise_shim" | _node_proc_lines)"
+  fi
+
+  if [[ -n "$node_other" ]]; then
+    local ot_count=$(echo "$node_other" | wc -l | tr -d ' ')
+    local ot_mem=$(echo "$node_other" | awk '{sum+=$2} END {printf "%d", sum/1024}')
+    node_content+="\n$(gum style --foreground 4 '[INFO]') Other/system node: ${ot_count} proc(s), ${ot_mem}MB"
+    node_content+="\n$(echo "$node_other" | _node_proc_lines)"
+  fi
+
+  env ${gum_env:-} gum style --border rounded --border-foreground 3 --padding "0 1" --width 78 \
+    "$(env ${gum_env:-} gum style --bold --foreground 3 'NODE DIAGNOSTICS')" \
+    "$(echo -e "$node_content")"
+  echo ""
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CLAUDE CODE DIAGNOSTICS
+# ═══════════════════════════════════════════════════════════════════════════
+
+local claude_procs=$(echo "$ps_cache" | grep -i 'claude\|mcp')
+if [[ -n "$claude_procs" ]] || [[ -n "$claude_args_cache" ]]; then
+  local claude_total_count=$(echo "$claude_procs" | grep -c . 2>/dev/null || echo 0)
+  local claude_total_mem=$(echo "$claude_procs" | awk '{sum+=$2} END {printf "%d", sum/1024}')
+
+  local claude_content="Total: ${claude_total_mem}MB across ${claude_total_count} processes"
+
+  # MCP servers with node binary details
+  if [[ -n "$claude_args_cache" ]]; then
+    local mcp_count=$(echo "$claude_args_cache" | wc -l | tr -d ' ')
+    claude_content+="\n\nMCP / Claude node processes (${mcp_count}):"
+    claude_content+="\n$(echo "$claude_args_cache" | awk '{
+      pid=$1; rss=$2; ppid=$4;
+      args=$0; gsub(/^[^ ]+ +[^ ]+ +[^ ]+ +[^ ]+ +/, "", args);
+      n=split(args, parts, " ");
+      bin=parts[1]; script=(n>1 ? parts[2] : "");
+      nb=split(bin, bparts, "/"); short_bin=bparts[nb];
+      # flag homebrew node
+      origin="mise";
+      if (bin ~ /opt\/homebrew/) origin="[HOMEBREW]";
+      else if (bin ~ /\.local\/share\/mise/) origin="mise";
+      ns=split(script, sparts, "/"); short_script=sparts[ns];
+      if (length(short_script) > 35) short_script=substr(short_script,1,32)"...";
+      mem_mb=int(rss/1024);
+      printf "  PID %-7d ppid=%-7d %dMB  %-12s %s\n", pid, ppid, mem_mb, origin, short_script
+    }')"
+  fi
+
+  env ${gum_env:-} gum style --border rounded --border-foreground 5 --padding "0 1" --width 78 \
+    "$(env ${gum_env:-} gum style --bold --foreground 5 'CLAUDE CODE DIAGNOSTICS')" \
+    "$(echo -e "$claude_content")"
+  echo ""
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
 # DETECTED ISSUES
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -586,6 +669,18 @@ if $vscode_running; then
   if [[ -n "$heavy_ext" ]]; then
     issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') Heavy VS Code extension host(s): ${heavy_ext}\n"
   fi
+fi
+
+# Check for Homebrew node (unexpected when mise is the runtime manager)
+if [[ -n "$node_args_cache" ]] && echo "$node_args_cache" | grep -q '/opt/homebrew'; then
+  local hb_node_count=$(echo "$node_args_cache" | grep -c '/opt/homebrew')
+  issues+="$(env ${gum_env:-} gum style --foreground 1 --bold '[ERROR]') ${hb_node_count} process(es) using Homebrew node — expected mise shim. See NODE DIAGNOSTICS.\n"
+fi
+
+# Check for hardcoded mise installs path (bypasses version resolution)
+if [[ -n "$node_args_cache" ]] && echo "$node_args_cache" | grep -q '/.local/share/mise/installs/'; then
+  local hc_node_count=$(echo "$node_args_cache" | grep -c '/.local/share/mise/installs/')
+  issues+="$(env ${gum_env:-} gum style --foreground 3 '[WARNING]') ${hc_node_count} process(es) using hardcoded mise installs/ path — config should reference mise shims/ instead. See NODE DIAGNOSTICS.\n"
 fi
 
 # Check zombies
@@ -706,11 +801,12 @@ if [[ -n "$high_mem_procs" ]]; then
     pid=$1; rss=$2; cmd=$6;
     mem_mb=int(rss/1024);
     n=split(cmd, parts, "/");
-    short_cmd=parts[n];
-    if (length(short_cmd) > 20) short_cmd=substr(short_cmd,1,17)"...";
+    full_cmd=parts[n];
+    display_cmd=full_cmd;
+    if (length(display_cmd) > 20) display_cmd=substr(display_cmd,1,17)"...";
     start_count++;
-    printf "%d. Kill %s (PID %d) to recover ~%dMB\\n", start_count, short_cmd, pid, mem_mb;
-    printf "   Command: kill-runaway %s --dry-run\\n\\n", short_cmd;
+    printf "%d. Kill %s (PID %d) to recover ~%dMB\\n", start_count, display_cmd, pid, mem_mb;
+    printf "   Command: kill-runaway %s --dry-run\\n\\n", full_cmd;
   }')
   recs+="$high_mem_recs"
   rec_count=$((rec_count + $(echo "$high_mem_procs" | head -3 | wc -l)))

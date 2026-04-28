@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # mise-audit - Audit mise configuration and log issues
 # Location: ~/bin/mise-audit
 # Usage: mise-audit [--fix]
@@ -166,6 +166,78 @@ if [[ -n "$MISSING_TOOLS" ]]; then
     ISSUES_FOUND=$((ISSUES_FOUND + MISSING_COUNT))
 else
     print_status ok "All tools installed"
+fi
+
+# Check 8: Scan config files for hardcoded runtime paths
+echo "Scanning config files for hardcoded runtime paths..."
+
+# Patterns that indicate bypassing mise shim resolution
+HARDCODED_PATTERNS=(
+  '\.local/share/mise/installs/'   # mise installs/ instead of shims/
+  '/opt/homebrew/Cellar/'          # hardcoded homebrew cellar path
+  '/opt/homebrew/bin/node'
+  '/opt/homebrew/bin/python'
+  '/opt/homebrew/bin/ruby'
+  '/opt/homebrew/bin/go'
+  '/opt/homebrew/bin/php'
+)
+
+# Config locations to scan
+SCAN_DIRS=(
+  "${HOME}/.claude"
+  "${HOME}/.config"
+  "${HOME}/dotfiles"
+)
+SCAN_FILES=(
+  "${HOME}/.zshrc"
+  "${HOME}/.zprofile"
+  "${HOME}/.bashrc"
+  "${HOME}/.bash_profile"
+  "${HOME}/.profile"
+)
+
+HARDCODED_HITS=""
+
+for dir in "${SCAN_DIRS[@]}"; do
+  [[ -d "$dir" ]] || continue
+  for pattern in "${HARDCODED_PATTERNS[@]}"; do
+    results=$(grep -rEl "$pattern" "$dir" \
+      --include="*.json" --include="*.toml" --include="*.yaml" \
+      --include="*.yml" --include="*.sh" --include="*.zsh" \
+      --include="*.bash" --include="*.env" --include="*.conf" \
+      --exclude-dir=".git" --exclude-dir="node_modules" \
+      --exclude-dir="cache" 2>/dev/null || true)
+    if [[ -n "$results" ]]; then
+      while IFS= read -r file; do
+        # get the matching lines with context
+        matches=$(grep -n "$pattern" "$file" 2>/dev/null | head -3 | sed 's/^/    /')
+        HARDCODED_HITS+="  ${file}\n${matches}\n"
+      done <<< "$results"
+    fi
+  done
+done
+
+for file in "${SCAN_FILES[@]}"; do
+  [[ -f "$file" ]] || continue
+  for pattern in "${HARDCODED_PATTERNS[@]}"; do
+    matches=$(grep -n "$pattern" "$file" 2>/dev/null | head -3 || true)
+    if [[ -n "$matches" ]]; then
+      HARDCODED_HITS+="  ${file}\n$(echo "$matches" | sed 's/^/    /')\n"
+    fi
+  done
+done
+
+# Deduplicate hits by file
+if [[ -n "$HARDCODED_HITS" ]]; then
+  UNIQUE_FILES=$(echo -e "$HARDCODED_HITS" | grep -E '^\s+/' | grep -v '^\s\{4\}' | sort -u | wc -l | tr -d ' ')
+  print_status error "Hardcoded runtime paths found in ${UNIQUE_FILES} file(s):"
+  echo -e "$HARDCODED_HITS"
+  log_issue "PATH_CONFLICT" "Hardcoded runtime paths bypass mise shim resolution" \
+    "Files: $(echo -e "$HARDCODED_HITS" | grep -E '^\s+[^ ]' | sort -u | tr '\n' ' ')" \
+    "Fix: replace installs/ paths with ~/.local/share/mise/shims/<tool>"
+  ISSUES_FOUND=$((ISSUES_FOUND + 1))
+else
+  print_status ok "No hardcoded runtime paths found in config files"
 fi
 
 echo ""
