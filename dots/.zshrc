@@ -64,6 +64,7 @@ path+=(
   "/usr/local/bin"
   "/opt/homebrew/opt/curl/bin"
   "/opt/homebrew/opt/openssl@3/bin"
+  "/opt/homebrew/opt/grep/libexec/gnubin"
 )
 
 # --- Priority 4: System paths ---
