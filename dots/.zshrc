@@ -56,7 +56,6 @@ path=(
 # Shims here cover: initial shell load before `mise activate` runs, non-interactive
 # subshells, and scripts. `mise activate` will prepend installs/ paths at first prompt.
 [[ -d "$HOME/.local/share/mise/shims" ]] && path+=("$HOME/.local/share/mise/shims")
-
 # --- Priority 3: Homebrew ---
 path+=(
   "/opt/homebrew/bin"
@@ -64,6 +63,7 @@ path+=(
   "/usr/local/bin"
   "/opt/homebrew/opt/curl/bin"
   "/opt/homebrew/opt/openssl@3/bin"
+  "/opt/homebrew/opt/grep/libexec/gnubin"
 )
 
 # --- Priority 4: System paths ---
