@@ -148,12 +148,13 @@ gpg --list-secret-keys --keyid-format=long
 git config --global user.signingkey <KEY_ID>
 ```
 
-### iTerm2 profile
+### Terminal (Ghostty)
 
-Import the color scheme and profile from `iterm/`:
+Ghostty is the active terminal. It is installed via `Brewfile.laptop` and configured via
+symlinks from `dots/ghostty/`. After running `dotfiles symlinks`, Ghostty will use the
+correct theme (`lindsey`) and font settings automatically.
 
-1. Open iTerm2 > Settings > Profiles > Colors > Color Presets > Import
-2. Select the `.itermcolors` file from `~/dotfiles/iterm/`
+The `iterm/` directory is retained for reference but iTerm2 is no longer the primary terminal.
 
 ### 1Password or secrets manager
 
