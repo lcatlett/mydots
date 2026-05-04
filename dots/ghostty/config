@@ -2,14 +2,14 @@
    # Docs: ghostty +show-config --default --docs
 
    font-family = "FiraCode Nerd Font"
-   font-size = 14
+   font-size = 15
 
    # tmux compatibility
    term = xterm-256color
 
    # Window
-   window-padding-x = 8
-   window-padding-y = 8
+   window-padding-x = 10
+   window-padding-y = 10
    macos-titlebar-style = transparent
 
    # Shell integration

@@ -1,0 +1,29 @@
+
+background = #0a0a0a
+foreground = #00ff00
+cursor-color = #ff00ff
+
+unfocused-split-opacity = 0.4
+unfocused-split-fill = #001a4d
+
+split-divider-color = #ff00ff
+
+selection-background = #0047ff
+selection-foreground = #ffffff
+
+palette = 0=#000000
+palette = 1=#ff0055
+palette = 2=#00ff66
+palette = 3=#ffee00
+palette = 4=#0099ff
+palette = 5=#ff00ff
+palette = 6=#00ffee
+palette = 7=#ffffff
+palette = 8=#444444
+palette = 9=#ff3366
+palette = 10=#33ff99
+palette = 11=#ffff66
+palette = 12=#33bbff
+palette = 13=#ff33ff
+palette = 14=#66ffff
+palette = 15=#ffffff
