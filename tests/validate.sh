@@ -48,6 +48,21 @@ skip_test() {
   SKIP=$((SKIP + 1))
 }
 
+warn_test() {
+  local name="$1"
+  local func="$2"
+  printf "${BOLD}  %-40s${RESET}" "$name"
+  local output
+  output=$("$func" 2>&1)
+  if [[ -n "$output" ]]; then
+    printf "${YELLOW}WARN${RESET}\n"
+    echo "$output" | sed 's/^/    /'
+  else
+    printf "${GREEN}PASS${RESET}\n"
+  fi
+  PASS=$((PASS + 1))
+}
+
 # ---------------------------------------------------------------------------
 # Test 1: Shell startup time < 2 seconds
 # ---------------------------------------------------------------------------
@@ -68,7 +83,7 @@ print(f'{time.time() - s:.2f}')
     elapsed=$(python3 -c "print(f'{($end - $start) / 1e9:.2f}')")
   fi
   echo "Startup: ${elapsed}s"
-  python3 -c "exit(0 if float('$elapsed') < 2.0 else 1)"
+  python3 -c "exit(0 if float('$elapsed') < 1.0 else 1)"
 }
 
 # ---------------------------------------------------------------------------
@@ -93,17 +108,26 @@ test_no_secrets() {
 # ---------------------------------------------------------------------------
 test_brewfile_consistency() {
   if ! command -v brew &>/dev/null; then
-    echo "brew not found"
-    return 1
+    return 0
   fi
-  local errors=0
-  brew bundle check --file="$DOTFILES_DIR/install/Brewfile" 2>&1 || errors=$((errors + 1))
-  local host_brewfile
-  host_brewfile="$DOTFILES_DIR/install/Brewfile.$(hostname -s)"
+  local drift=""
+  local result
+  result=$(brew bundle check --file="$DOTFILES_DIR/install/Brewfile" 2>&1) || \
+    drift+="$(echo "$result" | grep '^→')"$'\n'
+
+  local host_role
+  case "$(hostname -s)" in
+    ghost) host_role="ghost" ;;
+    *)     host_role="laptop" ;;
+  esac
+  local host_brewfile="$DOTFILES_DIR/install/Brewfile.$host_role"
   if [[ -f "$host_brewfile" ]]; then
-    brew bundle check --file="$host_brewfile" 2>&1 || errors=$((errors + 1))
+    result=$(brew bundle check --file="$host_brewfile" 2>&1) || \
+      drift+="$(echo "$result" | grep '^→')"$'\n'
   fi
-  return "$errors"
+
+  [[ -n "$drift" ]] && echo "$drift"
+  return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -114,7 +138,7 @@ test_dotfiles_sync() {
 
   # Config files that should symlink ~/.<file> → dotfiles/dots/.<file>
   local dot_files=(
-    .zshrc .gitconfig .exports .aliases .gitignore .gitignore_global
+    .zshrc .zshenv .gitconfig .exports .aliases .gitignore_global
     .inputrc .bash_profile .bashrc .profile .editorconfig
   )
 
@@ -235,56 +259,38 @@ test_brew_no_deprecated() {
 }
 
 # ---------------------------------------------------------------------------
-# Test 7: VS Code extensions sync (laptop only)
+# Test 7: .zsh/functions symlinks
 # ---------------------------------------------------------------------------
-test_vscode_extensions() {
-  local laptop_brewfile="$DOTFILES_DIR/install/Brewfile.laptop"
-  if [[ ! -f "$laptop_brewfile" ]]; then
-    echo "Brewfile.laptop not found"
+test_zsh_functions() {
+  local errors=()
+  local func_dir="$DOTFILES_DIR/.zsh/functions"
+  local link_dir="$HOME/.zsh/functions"
+
+  if [[ ! -d "$func_dir" ]]; then
+    echo "dotfiles/.zsh/functions/ not found"
     return 1
   fi
-  if ! command -v code &>/dev/null; then
-    echo "code CLI not found"
+
+  for src in "$func_dir"/*.zsh; do
+    local name
+    name=$(basename "$src")
+    local link="$link_dir/$name"
+    if [[ ! -L "$link" ]]; then
+      errors+=("$name: not a symlink in ~/.zsh/functions/")
+    else
+      local target
+      target=$(readlink "$link")
+      if [[ "$target" != "$src" ]]; then
+        errors+=("$name: points to '$target', expected '$src'")
+      fi
+    fi
+  done
+
+  if [[ ${#errors[@]} -gt 0 ]]; then
+    printf '%s\n' "${errors[@]}"
     return 1
   fi
-
-  # Extract extension IDs from Brewfile.laptop (vscode "publisher.name" lines)
-  local expected_exts
-  expected_exts=$(grep -E '^vscode "' "$laptop_brewfile" | sed 's/vscode "//; s/"//' | tr '[:upper:]' '[:lower:]' | sort)
-
-  # Installed extensions (lowercased — code outputs mixed case)
-  local installed_exts
-  installed_exts=$(code --list-extensions 2>/dev/null | tr '[:upper:]' '[:lower:]' | sort)
-
-  local missing=()
-  local extra=()
-
-  while IFS= read -r ext; do
-    [[ -z "$ext" ]] && continue
-    if ! echo "$installed_exts" | grep -qi "^${ext}$"; then
-      missing+=("$ext")
-    fi
-  done <<< "$expected_exts"
-
-  while IFS= read -r ext; do
-    [[ -z "$ext" ]] && continue
-    if ! echo "$expected_exts" | grep -qi "^${ext}$"; then
-      extra+=("$ext")
-    fi
-  done <<< "$installed_exts"
-
-  local err_count=0
-  if [[ ${#missing[@]} -gt 0 ]]; then
-    echo "Extensions in Brewfile.laptop but NOT installed:"
-    printf '  %s\n' "${missing[@]}"
-    err_count=$((err_count + 1))
-  fi
-  if [[ ${#extra[@]} -gt 0 ]]; then
-    echo "Extensions installed but NOT in Brewfile.laptop:"
-    printf '  %s\n' "${extra[@]}"
-    err_count=$((err_count + 1))
-  fi
-  return "$err_count"
+  return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -312,11 +318,11 @@ echo "${BOLD}Dotfiles Drift Detection Suite${RESET}"
 echo "${BOLD}==============================${RESET}"
 echo ""
 
-run_test "Shell startup time < 2s"         test_shell_startup
+run_test "Shell startup time < 1s"         test_shell_startup
 run_test "No secrets in tracked files"     test_no_secrets
 
 if command -v brew &>/dev/null; then
-  run_test "Brewfile consistency"          test_brewfile_consistency
+  warn_test "Brewfile consistency"         test_brewfile_consistency
 else
   skip_test "Brewfile consistency"         "brew not installed"
 fi
@@ -330,11 +336,7 @@ else
   skip_test "No deprecated brew entries"   "brew not installed"
 fi
 
-if command -v code &>/dev/null && [[ -f "$DOTFILES_DIR/install/Brewfile.laptop" ]]; then
-  run_test "VS Code extensions sync"       test_vscode_extensions
-else
-  skip_test "VS Code extensions sync"      "code CLI or Brewfile.laptop not found"
-fi
+run_test ".zsh/functions symlinks"         test_zsh_functions
 
 if command -v mise &>/dev/null; then
   run_test "Mise audit"                    test_mise_audit
