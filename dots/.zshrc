@@ -8,10 +8,9 @@ if [[ -o interactive ]] && [[ -t 0 ]]; then
 fi
 
 # --- Load modular config files if present ---
-for file in ~/.{exports,aliases}; do
-  [[ -r "$file" && -f "$file" ]] && source "$file"
-done
-unset file
+# .exports is sourced from .zshenv so non-interactive shells (hooks, Remote-SSH
+# command mode, launchd) can see env vars. Aliases stay here — interactive-only.
+[[ -r ~/.aliases && -f ~/.aliases ]] && source ~/.aliases
 
 # --- Load modular function files ---
 if [[ -d "$HOME/.zsh/functions" ]]; then
@@ -47,9 +46,16 @@ setopt hist_expire_dups_first # Expire duplicates first when history is full
 typeset -U path
 
 # --- Priority 1-2: Your overrides and direct installs ---
+#
+# --- Activate mise (hook-based PATH management for all managed tools) ---
+eval "$(mise activate zsh)"
+
 path=(
   "$HOME/bin"
   "$HOME/.local/bin"
+  "$HOME/"
+  "$HOME/.bifrost/bin"
+
 )
 
 # --- Priority 2.5: Mise shims (before Homebrew so mise-managed tools always win) ---
@@ -118,9 +124,9 @@ fi
 
 # Bun — managed by mise; BUN_INSTALL is kept for bun's own use (completions, etc.)
 # but the binary path is NOT added to PATH — mise shims handle resolution.
-export BUN_INSTALL="$HOME/.bun"
+# export BUN_INSTALL="$HOME/.bun"
 
-export PATH
+# export PATH
 
 # --- GPG agent handling ---
 # GPG agent for commit signing only — SSH auth is handled by macOS launchd agent
@@ -199,9 +205,6 @@ else
   compinit -u -d "$ZSH_COMPDUMP"
 fi
 
-# --- Activate mise (hook-based PATH management for all managed tools) ---
-eval "$(mise activate zsh)"
-
 # McFly initialization
 if command -v mcfly &>/dev/null; then
   eval "$(mcfly init zsh)"
@@ -224,7 +227,6 @@ export NODE_OPTIONS="--no-deprecation"
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
-# Must come AFTER atuin init which clobbers zsh's paste handler
 autoload -Uz bracketed-paste-magic
 zle -N bracketed-paste bracketed-paste-magic
 
