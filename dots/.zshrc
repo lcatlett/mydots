@@ -46,16 +46,10 @@ setopt hist_expire_dups_first # Expire duplicates first when history is full
 typeset -U path
 
 # --- Priority 1-2: Your overrides and direct installs ---
-#
-# --- Activate mise (hook-based PATH management for all managed tools) ---
-eval "$(mise activate zsh)"
-
 path=(
   "$HOME/bin"
   "$HOME/.local/bin"
-  "$HOME/"
   "$HOME/.bifrost/bin"
-
 )
 
 # --- Priority 2.5: Mise shims (before Homebrew so mise-managed tools always win) ---
@@ -83,14 +77,13 @@ path+=(
 
 # --- Priority 5: Language-specific tools ---
 # Cargo/Rust
-path+=("$HOME/.cargo/bin")
+[[ -d "$HOME/.cargo/bin" ]] && path+=("$HOME/.cargo/bin")
 
 # Go
 export GOPATH="$HOME/go"
 path+=("$GOPATH/bin")
 
 # Composer
-export COMPOSER_MEMORY_LIMIT=-1
 # path+=("$HOME/.composer/vendor/bin")
 
 # # PHP versions
@@ -98,7 +91,7 @@ export COMPOSER_MEMORY_LIMIT=-1
 #   "/opt/homebrew/opt/php@8.1/bin"
 #   "/opt/homebrew/opt/php@8.1/sbin"
 #   "/opt/homebrew/opt/php@8.3/bin"
-#   "/opt/homebrew/opt/php@8.3/sbin"o
+#   "/opt/homebrew/opt/php@8.3/sbin"
 # )
 
 # Database clients — guard against non-existent paths
@@ -189,7 +182,7 @@ fi
 if [[ -d "$HOME/.local/share/zsh" ]]; then
   fpath+=("$HOME/.local/share/zsh")
 fi
-fpath=("$HOME/.zsh-complete" $fpath)
+[[ -d "$HOME/.zsh-complete" ]] && fpath=("$HOME/.zsh-complete" $fpath)
 
 # --- Zsh completion cache configuration ---
 export ZSH_CACHE_DIR="$HOME/.zsh/cache"
@@ -210,14 +203,15 @@ if command -v mcfly &>/dev/null; then
   eval "$(mcfly init zsh)"
 fi
 
-# --- zoxide (must load after compinit) ---
+# --- mise + zoxide (must load after compinit) ---
+eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # --- Starship prompt ---
-export STARSHIP_CONFIG=~/.config/starship-minimal.toml
+export STARSHIP_CONFIG=~/.claude/starship-rtfi.toml
 eval "$(starship init zsh)"
 
 # Suppress punycode deprecation noise from legacy npm packages.

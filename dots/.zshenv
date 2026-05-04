@@ -2,7 +2,7 @@
 # non-interactive shells that source .zshenv but not .zshrc.
 [[ -d "$HOME/.local/share/mise/shims" ]] && export PATH="$HOME/.local/share/mise/shims:$PATH"
 [[ -d /opt/homebrew/bin ]] && export PATH="/opt/homebrew/bin:$PATH"
-export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
+export PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
 
 # Secrets and env vars must be visible to non-interactive shells (hooks,
 # Remote-SSH command mode, launchd, subprocess `zsh -c`). Source from .zshenv,
