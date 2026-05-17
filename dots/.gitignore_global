@@ -44,3 +44,7 @@ Thumbs.db
 
 # Always track empty directories
 !.gitkeep
+
+.rtfm/
+
+**/memory/memory.db

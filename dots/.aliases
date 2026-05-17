@@ -72,3 +72,7 @@ alias yolo='claude --dangerously-skip-permissions'
 alias chrome-debug="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=\"$HOME/.chrome-debug-profile\" > /dev/null 2>&1 &"
 
 alias chrome-akamai="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=\"$HOME/.notebooklm-mcp-cli/chrome-profiles/akamai\" > /dev/null 2>&1 &"
+
+
+
+alias chrome-ai="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=\"$HOME/.notebooklm-mcp-cli/chrome-profiles/ai-tools\" > /dev/null 2>&1 &"
