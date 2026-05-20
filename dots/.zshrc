@@ -64,7 +64,13 @@ path+=(
     "/usr/local/bin"
     "/opt/homebrew/opt/curl/bin"
     "/opt/homebrew/opt/openssl@3/bin"
-    "/opt/homebrew/opt/grep/libexec/gnubin"
+    # GNU utility overrides (makes macOS behave like Linux)
+    "/opt/homebrew/opt/coreutils/libexec/gnubin" # date, ls, cp, mv, sort, tail, etc.
+    "/opt/homebrew/opt/grep/libexec/gnubin"      # grep, egrep, fgrep
+    "/opt/homebrew/opt/gnu-sed/libexec/gnubin"   # sed
+    "/opt/homebrew/opt/findutils/libexec/gnubin" # find, xargs
+    "/opt/homebrew/opt/gawk/libexec/gnubin"      # awk
+    "/opt/homebrew/opt/make/libexec/gnubin"      # make
 )
 
 # --- Priority 4: System paths ---

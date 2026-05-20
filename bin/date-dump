@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# An overly obvious reference for most commonly requested bash timestamps
+cat <<EOD
+        Format/result           |       Command              |          Output
+--------------------------------+----------------------------+------------------------------
+hh:mm:ss_MM-DD-YYYY             | date +%T_%m-%d-%Y          | $(date +%T_%m-%d-%Y)
+hhmmss-MMDDYYYY                 | date +%H%M%S-%m%d%Y        | $(date +%H%M%S-%m%d%Y)
+hhmmss-MMDDYYYY (UTC version)   | date -u +%H%M%S-%m%d%YZ    | $(date -u +%H%M%S-%m%d%YZ)
+hhmmss-MMDDYYYY (with local TZ) | date +%H%M%S-%m%d%Y%Z      | $(date +%H%M%S-%m%d%Y%Z)
+hhmmssMMDDYYYY                  | date +%H%M%S%m%d%Y         | $(date +%H%M%S%m%d%Y)
+hhmmssMMDDYYYYnnnnnnnnn         | date +%H%M%S%m%d%Y%N       | $(date +%H%M%S%m%d%Y%N)
+hhmmss-MMDDYY                   | date +%H%M%S-%m%d%y        | $(date +%H%M%S-%m%d%y)
+Seconds since UNIX epoch:       | date +%s                   | $(date +%s)
+Nanoseconds only:               | date +%N                   | $(date +%N)
+Nanoseconds since UNIX epoch:   | date +%s%N                 | $(date +%s%N)
+Z-notation UTC timestamp        | date -u +%FT%TZ            | $(date -u +%FT%TZ)
+Z-notation UTC timestamp + ms   | date -u +%FT%T.%3NZ        | $(date -u +%FT%T.%3NZ)
+ISO8601 UTC timestamp           | date -u +%FT%T%Z           | $(date -u +%FT%T%Z)
+ISO8601 UTC timestamp + ms      | date -u +%FT%T.%3N%Z       | $(date -u +%FT%T.%3N%Z)
+ISO8601 Local TZ timestamp      | date +%FT%T%Z              | $(date +%FT%T%Z)
+YYYY-MM-DD (Short day)          | date +%F\(%a\)             | $(date +%F\(%a\))
+YYYY-MM-DD (Long day)           | date +%F\(%A\)             | $(date +%F\(%A\))
+EOD

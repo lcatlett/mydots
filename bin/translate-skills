@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""
+translate-skills — translate non-English markdown skill files to English in-place.
+
+Usage:
+  translate-skills [skills-dir]
+
+Defaults to a `skills/` directory in the current working directory.
+Only files containing CJK or other non-ASCII script characters are processed.
+Code blocks (``` fences) are protected and not sent to the translation API.
+"""
+
+import re
+import sys
+import time
+from pathlib import Path
+
+try:
+    from deep_translator import GoogleTranslator
+except ImportError:
+    print("Error: deep-translator is not installed. Run: pip3 install deep-translator")
+    sys.exit(1)
+
+MAX_CHARS = 4500  # Google Translate per-request limit
+CJK_RE = re.compile(r'[一-鿿぀-ヿ가-힯؀-ۿЀ-ӿ]')
+FENCE_RE = re.compile(r'(```[\s\S]*?```)', re.MULTILINE)
+PLACEHOLDER = "CODEBLOCK{}PLACEHOLDER"
+
+
+def has_non_english(text: str) -> bool:
+    return bool(CJK_RE.search(text))
+
+
+def protect_code_blocks(text: str) -> tuple[str, list[str]]:
+    """Replace code fences with safe placeholders; return modified text and saved blocks."""
+    blocks: list[str] = []
+
+    def replacer(m: re.Match) -> str:
+        blocks.append(m.group(0))
+        return PLACEHOLDER.format(len(blocks) - 1)
+
+    return FENCE_RE.sub(replacer, text), blocks
+
+
+def restore_code_blocks(text: str, blocks: list[str]) -> str:
+    for i, block in enumerate(blocks):
+        text = text.replace(PLACEHOLDER.format(i), block)
+    return text
+
+
+def translate_text(text: str) -> str:
+    """Translate text paragraph by paragraph to stay within API limits."""
+    if not text.strip():
+        return text
+
+    translator = GoogleTranslator(source="auto", target="en")
+    parts: list[str] = []
+
+    for para in text.split("\n\n"):
+        if not para.strip():
+            parts.append(para)
+            continue
+        try:
+            parts.append(translator.translate(para) or para)
+        except Exception:
+            parts.append(para)  # keep original on error
+        time.sleep(0.3)  # be polite to the free API
+
+    return "\n\n".join(parts)
+
+
+def translate_file(path: Path) -> bool:
+    content = path.read_text(encoding="utf-8")
+    if not has_non_english(content):
+        return False
+
+    protected, blocks = protect_code_blocks(content)
+    translated = translate_text(protected)
+    restored = restore_code_blocks(translated, blocks)
+
+    path.write_text(restored, encoding="utf-8")
+    return True
+
+
+def main() -> None:
+    skills_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd() / "skills"
+
+    if not skills_dir.exists():
+        print(f"Error: directory not found: {skills_dir}")
+        sys.exit(1)
+
+    md_files = list(skills_dir.rglob("*.md"))
+    if not md_files:
+        print(f"No .md files found in {skills_dir}")
+        sys.exit(0)
+
+    translated = 0
+    skipped = 0
+
+    for path in sorted(md_files):
+        rel = path.relative_to(skills_dir.parent)
+        try:
+            if translate_file(path):
+                print(f"  translated  {rel}")
+                translated += 1
+            else:
+                skipped += 1
+        except Exception as e:
+            print(f"  error       {rel}: {e}")
+
+    print(f"\nDone: {translated} translated, {skipped} skipped (already English)")
+
+
+if __name__ == "__main__":
+    main()

@@ -76,3 +76,15 @@ alias chrome-akamai="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chr
 
 
 alias chrome-ai="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=\"$HOME/.notebooklm-mcp-cli/chrome-profiles/ai-tools\" > /dev/null 2>&1 &"
+
+# ==============================================================================
+# Date & Time (Because nobody should memorize strftime)
+# ==============================================================================
+alias now='date -Iseconds'               # 2026-05-20T10:22:06-04:00
+alias today='date -Idate'                # 2026-05-20
+alias timestamp='date +%s'               # 1779286926 (UNIX epoch)
+alias filedate='date +%H%M%S-%m%d%Y'     # 102206-05202026 (YUS format)
+alias utcnow='date -u -Iseconds'         # 2026-05-20T14:22:06+00:00
+
+# Quick timestamp for backups/logs (e.g., cp file.txt "file_$(ts).txt")
+alias ts='date +%s'
