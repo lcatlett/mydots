@@ -64,6 +64,8 @@ for script in \
   ssh-manager \
   symlink-audit \
   translate-skills \
+  claude-migrate-session \
+  claude-search-resume \
   syscheck; do
   ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
 done
