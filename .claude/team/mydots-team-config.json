@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "generatedBy": "ecc-tools",
+  "profile": "research",
+  "sharedSkills": [
+    ".claude/skills/mydots/SKILL.md",
+    ".agents/skills/mydots/SKILL.md"
+  ],
+  "commandFiles": [
+    ".claude/commands/feature-development.md",
+    ".claude/commands/shell-function-migration-and-symlink-management.md",
+    ".claude/commands/drift-detection-validation-suite-update.md"
+  ],
+  "updatedAt": "2026-05-26T16:42:48.954Z"
+}
