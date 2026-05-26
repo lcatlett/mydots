@@ -1,114 +1,392 @@
 #!/usr/bin/env python3
 """
-translate-skills — translate non-English markdown skill files to English in-place.
+translate-skills — translate non-English markdown to English in-place.
+
+A general-purpose tool: point it at any repo or directory. It finds markdown
+files containing CJK / Cyrillic / Arabic / Hangul / Kana script, translates
+them to English (including inside ``` code fences), and writes them back.
 
 Usage:
-  translate-skills [skills-dir]
+  translate-skills [path]              translate markdown under path (default: ./)
+  translate-skills --list [path]       report-only: list files that WOULD be
+                                       translated, with sizes and a blast-radius
+                                       section flagging fenced command literals
+                                       whose translation may break examples
+  translate-skills --dry-run [path]    show per-file segment counts, write nothing
+  translate-skills --jobs N [path]     concurrent files (default 4)
+  translate-skills --force [path]      re-translate even if already stamped
+  translate-skills -q / --quiet        suppress the per-file progress lines
 
-Defaults to a `skills/` directory in the current working directory.
-Only files containing CJK or other non-ASCII script characters are processed.
-Code blocks (``` fences) are protected and not sent to the translation API.
+Skipped automatically:
+  - Intentional locale variants: *.<locale>.md and any path under /<locale>/
+    (zh, zh-CN, zh-TW, ja, ko, ar, ru, fr, de, es, pt, it, ...)
+  - Vendor / build dirs: node_modules, dist, build, vendor, .git
+  - Glob patterns listed in a .translateignore file in the target directory
+  - Files already translated by this tool (idempotency stamp), unless --force
+
+Only the segments that actually contain non-English script are sent to the
+translation API; surrounding markdown structure is preserved verbatim.
 """
 
+from __future__ import annotations
+
+import argparse
+import fnmatch
 import re
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
 from pathlib import Path
 
 try:
     from deep_translator import GoogleTranslator
+    from deep_translator.exceptions import TranslationNotFound, RequestError
 except ImportError:
-    print("Error: deep-translator is not installed. Run: pip3 install deep-translator")
-    sys.exit(1)
+    sys.exit("Error: deep-translator is not installed. Run: pip3 install deep-translator")
 
-MAX_CHARS = 4500  # Google Translate per-request limit
-CJK_RE = re.compile(r'[一-鿿぀-ヿ가-힯؀-ۿЀ-ӿ]')
-FENCE_RE = re.compile(r'(```[\s\S]*?```)', re.MULTILINE)
-PLACEHOLDER = "CODEBLOCK{}PLACEHOLDER"
+try:
+    from tqdm import tqdm
+    HAVE_TQDM = True
+except ImportError:
+    HAVE_TQDM = False
+
+# --- detection ---------------------------------------------------------------
+
+MAX_CHARS = 4500  # Google Translate per-request char limit
+# CJK ideographs, Kana, Hangul, Arabic, Cyrillic — the scripts we treat as
+# "non-English and worth translating".
+NON_EN_RE = re.compile(r"[一-鿿぀-ヿ가-힯؀-ۿЀ-ӿ]")
+
+FENCE_RE = re.compile(r"(```[\s\S]*?```)", re.MULTILINE)
+# A command-arg string literal that contains non-English script, e.g.
+#   --collection "默认收藏夹"   or   search "机械键盘"
+# Constrained to a single line (no newlines) so we don't swallow whole blocks
+# when quotes happen to span lines.
+RISKY_ARG_RE = re.compile(r'["\']([^"\'\n]*[一-鿿぀-ヿ가-힯][^"\'\n]*)["\']')
+
+STAMP = "<!-- translated-by: translate-skills/v2 -->"
+
+# Locale tokens that mark a file/path as an *intentional* non-English variant.
+LOCALES = {
+    "zh", "zh-cn", "zh-tw", "zh-hans", "zh-hant", "ja", "jp", "ko", "kr",
+    "ar", "ru", "fr", "de", "es", "pt", "pt-br", "it", "nl", "pl", "tr",
+    "vi", "th", "id", "hi", "fa", "he", "uk", "cs", "sv",
+}
+VENDOR_DIRS = {"node_modules", "dist", "build", "vendor", ".git", ".next", "out", "target"}
 
 
 def has_non_english(text: str) -> bool:
-    return bool(CJK_RE.search(text))
+    return bool(NON_EN_RE.search(text))
 
 
-def protect_code_blocks(text: str) -> tuple[str, list[str]]:
-    """Replace code fences with safe placeholders; return modified text and saved blocks."""
-    blocks: list[str] = []
+def is_locale_variant(rel: Path) -> bool:
+    """True for intentional locale files like README.zh-CN.md or docs/zh/index.md.
 
-    def replacer(m: re.Match) -> str:
-        blocks.append(m.group(0))
-        return PLACEHOLDER.format(len(blocks) - 1)
-
-    return FENCE_RE.sub(replacer, text), blocks
-
-
-def restore_code_blocks(text: str, blocks: list[str]) -> str:
-    for i, block in enumerate(blocks):
-        text = text.replace(PLACEHOLDER.format(i), block)
-    return text
+    `rel` must be relative to the scan root — checking absolute parts would match
+    ancestor dirs (e.g. a repo living under a path segment named `de` or `it`).
+    """
+    # path segment is a bare locale dir:  zh/...  docs/ja/...
+    if any(part.lower() in LOCALES for part in rel.parts):
+        return True
+    # filename ends with a locale suffix:  README.zh-CN.md  guide.ja.md
+    stems = rel.name.lower().removesuffix(".md").split(".")
+    return len(stems) > 1 and stems[-1] in LOCALES
 
 
-def translate_text(text: str) -> str:
-    """Translate text paragraph by paragraph to stay within API limits."""
-    if not text.strip():
-        return text
-
-    translator = GoogleTranslator(source="auto", target="en")
-    parts: list[str] = []
-
-    for para in text.split("\n\n"):
-        if not para.strip():
-            parts.append(para)
-            continue
-        try:
-            parts.append(translator.translate(para) or para)
-        except Exception:
-            parts.append(para)  # keep original on error
-        time.sleep(0.3)  # be polite to the free API
-
-    return "\n\n".join(parts)
+def load_ignore_patterns(root: Path) -> list[str]:
+    f = root / ".translateignore"
+    if not f.is_file():
+        return []
+    return [
+        line.strip()
+        for line in f.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
 
 
-def translate_file(path: Path) -> bool:
-    content = path.read_text(encoding="utf-8")
+def is_ignored(rel: str, patterns: list[str]) -> bool:
+    return any(fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(rel, f"*/{pat}") for pat in patterns)
+
+
+# --- translation -------------------------------------------------------------
+
+def _chunk(segments: list[str]) -> list[list[str]]:
+    """Group segments into batches that stay under the per-request char budget."""
+    batches, cur, size = [], [], 0
+    for seg in segments:
+        if cur and size + len(seg) > MAX_CHARS:
+            batches.append(cur)
+            cur, size = [], 0
+        cur.append(seg)
+        size += len(seg)
+    if cur:
+        batches.append(cur)
+    return batches
+
+
+def tokenize(text: str) -> list[tuple[bool, str]]:
+    """Split into (translatable, text) tokens, line by line.
+
+    Separators (newlines, fence delimiters, all-ASCII lines) are emitted as
+    non-translatable tokens so they survive byte-for-byte. Only lines that
+    actually contain non-English script are marked translatable, and the
+    translatable payload NEVER contains a newline — the API treats whitespace
+    as disposable, so keeping line breaks out of the payload is what guarantees
+    structure is preserved exactly.
+    """
+    tokens: list[tuple[bool, str]] = []
+    for i, line in enumerate(text.split("\n")):
+        if i:
+            tokens.append((False, "\n"))
+        if line.strip().startswith("```") or not has_non_english(line):
+            tokens.append((False, line))
+        else:
+            tokens.append((True, line))
+    return tokens
+
+
+def translate_content(content: str, translator: GoogleTranslator) -> str:
+    tokens = tokenize(content)
+    idx = [i for i, (tr, _) in enumerate(tokens) if tr]
+    if not idx:
+        return content
+
+    payload = [tokens[i][1] for i in idx]
+    translated: list[str] = []
+    for batch in _chunk(payload):
+        for attempt in range(4):
+            try:
+                result = translator.translate_batch(batch)
+                # batch_translate can return None entries on partial failure
+                translated.extend(t if t else orig for t, orig in zip(result, batch))
+                break
+            except Exception:  # noqa: BLE001  (network/throttle/parse — all retryable)
+                if attempt == 3:
+                    translated.extend(batch)  # give up: keep originals
+                    break
+                time.sleep(2 ** attempt)  # 1, 2, 4s backoff on throttle
+
+    out = [t for _, t in tokens]
+    for pos, t in zip(idx, translated):
+        # restore leading whitespace the API may have trimmed (e.g. indented
+        # code comments / list items) so indentation is preserved
+        original = tokens[pos][1]
+        lead = original[: len(original) - len(original.lstrip())]
+        out[pos] = lead + t.lstrip() if t else original
+    return "".join(out)
+
+
+# --- file processing ---------------------------------------------------------
+
+@dataclass
+class FileReport:
+    path: Path
+    rel: str
+    bytes_: int
+    nonzh_lines: int
+    risky_args: list[str] = field(default_factory=list)
+    already: bool = False
+
+
+def analyze(path: Path, root: Path) -> FileReport | None:
+    content = path.read_text(encoding="utf-8", errors="replace")
     if not has_non_english(content):
-        return False
+        return None
+    rel = str(path.relative_to(root))
+    lines = [ln for ln in content.splitlines() if has_non_english(ln)]
+    risky = []
+    for m in FENCE_RE.finditer(content):
+        risky.extend(RISKY_ARG_RE.findall(m.group(0)))
+    return FileReport(
+        path=path,
+        rel=rel,
+        bytes_=len(content.encode("utf-8")),
+        nonzh_lines=len(lines),
+        risky_args=risky,
+        already=STAMP in content,
+    )
 
-    protected, blocks = protect_code_blocks(content)
-    translated = translate_text(protected)
-    restored = restore_code_blocks(translated, blocks)
 
-    path.write_text(restored, encoding="utf-8")
-    return True
+def _strip_stamp(text: str) -> str:
+    """Remove any prior stamp (and the blank line carrying it) wherever it sits."""
+    return re.sub(rf"\n*{re.escape(STAMP)}\n?", "", text)
 
+
+def translate_file(report: FileReport, force: bool) -> str:
+    """Return a status: 'translated' | 'stamped-skip'.
+
+    The idempotency stamp is appended at END of file, not the top, so it never
+    displaces YAML frontmatter (SKILL.md requires `---` on line 1).
+    """
+    content = report.path.read_text(encoding="utf-8", errors="replace")
+    if STAMP in content and not force:
+        return "stamped-skip"
+    body = _strip_stamp(content)
+    translator = GoogleTranslator(source="auto", target="en")
+    out = translate_content(body, translator)
+    if not out.endswith("\n"):
+        out += "\n"
+    report.path.write_text(f"{out}\n{STAMP}\n", encoding="utf-8")
+    return "translated"
+
+
+# --- discovery ---------------------------------------------------------------
+
+def discover(root: Path) -> tuple[list[Path], list[Path]]:
+    """Return (candidate files, skipped-locale files)."""
+    ignore = load_ignore_patterns(root)
+    candidates, locale_skipped = [], []
+    for path in sorted(root.rglob("*.md")):
+        rel_path = path.relative_to(root)
+        # check vendor/locale against the path RELATIVE to root, never the
+        # absolute path (ancestor dirs must not influence the decision)
+        if any(part in VENDOR_DIRS for part in rel_path.parts):
+            continue
+        rel = str(rel_path)
+        if is_ignored(rel, ignore):
+            continue
+        if is_locale_variant(rel_path):
+            locale_skipped.append(path)
+            continue
+        candidates.append(path)
+    return candidates, locale_skipped
+
+
+# --- commands ----------------------------------------------------------------
+
+def human(n: int) -> str:
+    return f"{n/1024:.1f} KB" if n >= 1024 else f"{n} B"
+
+
+def cmd_list(root: Path) -> int:
+    candidates, locale_skipped = discover(root)
+    reports = [r for p in candidates if (r := analyze(p, root))]
+    if not reports:
+        print(f"No non-English markdown found under {root}")
+        return 0
+
+    pending = [r for r in reports if not r.already]
+    done = [r for r in reports if r.already]
+    total_bytes = sum(r.bytes_ for r in pending)
+
+    print(f"Non-English markdown under {root}\n")
+    print(f"{'lines':>6}  {'size':>9}  file")
+    print(f"{'-'*6}  {'-'*9}  {'-'*40}")
+    for r in sorted(pending, key=lambda r: r.nonzh_lines, reverse=True):
+        print(f"{r.nonzh_lines:>6}  {human(r.bytes_):>9}  {r.rel}")
+
+    print(f"\n{len(pending)} file(s) to translate · {human(total_bytes)} of content")
+    if locale_skipped:
+        print(f"{len(locale_skipped)} locale variant(s) skipped "
+              f"(e.g. {locale_skipped[0].relative_to(root)})")
+    if done:
+        # Stamped but still containing CJK = partial translation (the API left
+        # script in command literals). These are skipped unless --force.
+        print(f"\n⚠  {len(done)} stamped file(s) still contain non-English script "
+              f"(partial translation — skipped unless --force):")
+        for r in sorted(done, key=lambda r: r.nonzh_lines, reverse=True)[:15]:
+            print(f"    {r.nonzh_lines:>4} line(s)  {r.rel}")
+        if len(done) > 15:
+            print(f"    ... and {len(done)-15} more")
+
+    # blast radius: fenced command-arg literals that translation will alter
+    risky = [(r.rel, r.risky_args) for r in pending if r.risky_args]
+    if risky:
+        total = sum(len(a) for _, a in risky)
+        print(f"\n⚠  {total} fenced command/string literal(s) across {len(risky)} file(s) "
+              f"will change when translated — example commands may no longer reproduce:")
+        for rel, args in risky[:25]:
+            shown = ", ".join(f'"{a}"' for a in args[:4])
+            more = f" (+{len(args)-4} more)" if len(args) > 4 else ""
+            print(f"    {rel}: {shown}{more}")
+        if len(risky) > 25:
+            print(f"    ... and {len(risky)-25} more file(s)")
+    return 0
+
+
+def cmd_dry_run(root: Path) -> int:
+    candidates, locale_skipped = discover(root)
+    reports = [r for p in candidates if (r := analyze(p, root))]
+    pending = [r for r in reports if not r.already]
+    print(f"Dry run — would translate {len(pending)} file(s):\n")
+    for r in sorted(pending, key=lambda r: r.rel):
+        print(f"  {r.nonzh_lines:>5} non-English line(s)  {r.rel}")
+    print(f"\n{len(locale_skipped)} locale variant(s) skipped · "
+          f"{len(reports)-len(pending)} already translated")
+    return 0
+
+
+def cmd_translate(root: Path, jobs: int, force: bool, quiet: bool) -> int:
+    candidates, locale_skipped = discover(root)
+    reports = [r for p in candidates if (r := analyze(p, root))]
+    pending = [r for r in reports if force or not r.already]
+    if not pending:
+        print(f"Nothing to translate under {root} "
+              f"({len(reports)} already stamped, {len(locale_skipped)} locale variants skipped).")
+        return 0
+
+    translated = errors = skipped = 0
+    bar = tqdm(total=len(pending), unit="file", disable=quiet or not HAVE_TQDM) if HAVE_TQDM else None
+    n = len(pending)
+
+    def work(r: FileReport):
+        return r, translate_file(r, force)
+
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        futures = {pool.submit(work, r): r for r in pending}
+        for i, fut in enumerate(as_completed(futures), 1):
+            r = futures[fut]
+            try:
+                _, status = fut.result()
+            except Exception as e:  # noqa: BLE001  (translate_file raises on hard failure)
+                errors += 1
+                msg = f"error  {r.rel}: {e}"
+            else:
+                if status == "translated":
+                    translated += 1
+                    msg = f"translated  {r.rel} ({human(r.bytes_)})"
+                else:  # stamped-skip
+                    skipped += 1
+                    msg = f"skip (stamped)  {r.rel}"
+            if bar:
+                bar.update(1)
+                bar.set_postfix_str(r.rel[-40:], refresh=False)
+            elif not quiet:
+                print(f"[{i:>3}/{n}] {msg}")
+    if bar:
+        bar.close()
+
+    print(f"\nDone: {translated} translated, {skipped} skipped, {errors} error(s) · "
+          f"{len(locale_skipped)} locale variants left untouched")
+    return 1 if errors else 0
+
+
+# --- entry -------------------------------------------------------------------
 
 def main() -> None:
-    skills_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd() / "skills"
+    p = argparse.ArgumentParser(prog="translate-skills", add_help=True,
+                                description="Translate non-English markdown to English in place.")
+    p.add_argument("path", nargs="?", default=".", help="directory to scan (default: .)")
+    g = p.add_mutually_exclusive_group()
+    g.add_argument("--list", action="store_true", help="report files that would be translated; write nothing")
+    g.add_argument("--dry-run", action="store_true", help="show per-file segment counts; write nothing")
+    p.add_argument("--jobs", type=int, default=4, help="concurrent files (default 4)")
+    p.add_argument("--force", action="store_true", help="re-translate even if already stamped")
+    p.add_argument("-q", "--quiet", action="store_true", help="suppress per-file progress lines")
+    args = p.parse_args()
 
-    if not skills_dir.exists():
-        print(f"Error: directory not found: {skills_dir}")
-        sys.exit(1)
+    root = Path(args.path).resolve()
+    if not root.exists():
+        sys.exit(f"Error: path not found: {root}")
+    if root.is_file():
+        root = root.parent
 
-    md_files = list(skills_dir.rglob("*.md"))
-    if not md_files:
-        print(f"No .md files found in {skills_dir}")
-        sys.exit(0)
-
-    translated = 0
-    skipped = 0
-
-    for path in sorted(md_files):
-        rel = path.relative_to(skills_dir.parent)
-        try:
-            if translate_file(path):
-                print(f"  translated  {rel}")
-                translated += 1
-            else:
-                skipped += 1
-        except Exception as e:
-            print(f"  error       {rel}: {e}")
-
-    print(f"\nDone: {translated} translated, {skipped} skipped (already English)")
+    if args.list:
+        sys.exit(cmd_list(root))
+    if args.dry_run:
+        sys.exit(cmd_dry_run(root))
+    sys.exit(cmd_translate(root, jobs=max(1, args.jobs), force=args.force, quiet=args.quiet))
 
 
 if __name__ == "__main__":

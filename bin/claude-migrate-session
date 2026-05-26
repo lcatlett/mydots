@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+# Copy a Claude Code session to the current project folder
+# Usage: claude-migrate-session --session-id <uuid>
+
+set -euo pipefail
+
+# Detect OS and set CLAUDE_DIR
+case "$(uname -s)" in
+    Linux*)  CLAUDE_DIR="$HOME/.claude" ;;
+    Darwin*) CLAUDE_DIR="$HOME/.claude" ;;
+    CYGWIN*|MINGW*|MSYS*) CLAUDE_DIR="$USERPROFILE/.claude" ;;
+    *) CLAUDE_DIR="$HOME/.claude" ;;
+esac
+
+PROJECTS_DIR="$CLAUDE_DIR/projects"
+
+SESSION_ID=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --session-id) SESSION_ID="$2"; shift 2 ;;
+        --help|-h)
+            echo "Usage: claude-migrate-session --session-id <uuid>"
+            echo ""
+            echo "Copies a session's .jsonl and subagents dir to the current project folder."
+            exit 0
+            ;;
+        *) echo "Unknown argument: $1"; exit 1 ;;
+    esac
+done
+
+if [ -z "$SESSION_ID" ]; then
+    echo "Error: --session-id is required"
+    exit 1
+fi
+
+if [ ! -d "$PROJECTS_DIR" ]; then
+    echo "Error: Claude projects directory not found at $PROJECTS_DIR"
+    exit 1
+fi
+
+# Find the source .jsonl file
+SOURCE_FILE=$(find "$PROJECTS_DIR" -name "${SESSION_ID}.jsonl" -type f 2>/dev/null | head -1)
+
+if [ -z "$SOURCE_FILE" ]; then
+    echo "Error: Session file not found: ${SESSION_ID}.jsonl"
+    exit 1
+fi
+
+SOURCE_DIR=$(dirname "$SOURCE_FILE")
+
+# Derive target project folder from pwd
+# Claude uses realpath (resolves symlinks like /tmp → /private/tmp on macOS)
+# Encoding: replace / and _ with - (e.g. /Users/jimweller/tmp/_crap → -Users-jimweller-tmp--crap)
+CURRENT_DIR=$(python3 -c "import os; print(os.path.realpath('.'))" 2>/dev/null || realpath "$(pwd)" 2>/dev/null || pwd)
+ENCODED_PATH=$(echo "$CURRENT_DIR" | sed 's|[/_]|-|g')
+TARGET_DIR="$PROJECTS_DIR/$ENCODED_PATH"
+
+# Guard: refuse if already in the target folder
+if [ "$SOURCE_DIR" = "$TARGET_DIR" ]; then
+    echo "Error: Session is already in the current project folder"
+    echo "  Source: $SOURCE_DIR"
+    echo "  Target: $TARGET_DIR"
+    exit 1
+fi
+
+mkdir -p "$TARGET_DIR"
+
+# Generate a new UUID for the destination copy
+NEW_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+
+# Copy the .jsonl file, rewriting the sessionId
+# Use perl (not sed) for portability: GNU sed and BSD sed disagree on the
+# -i suffix syntax, and the BSD-idiom `sed -i ''` breaks on a GNU-first PATH.
+perl -pe "s/\Q$SESSION_ID\E/$NEW_ID/g" "$SOURCE_FILE" > "$TARGET_DIR/${NEW_ID}.jsonl"
+echo "Copied: ${SESSION_ID}.jsonl → ${NEW_ID}.jsonl"
+echo "  From: $SOURCE_DIR"
+echo "  To:   $TARGET_DIR"
+
+# Copy subagents dir if it exists, rewriting sessionId refs
+SUBAGENTS_SOURCE="$SOURCE_DIR/$SESSION_ID"
+if [ -d "$SUBAGENTS_SOURCE" ]; then
+    cp -r "$SUBAGENTS_SOURCE" "$TARGET_DIR/$NEW_ID"
+    # perl -pi is portable in-place edit; avoids the GNU/BSD `sed -i` suffix trap.
+    find "$TARGET_DIR/$NEW_ID" -type f -name "*.jsonl" -exec perl -pi -e "s/\Q$SESSION_ID\E/$NEW_ID/g" {} +
+    echo "Copied subagents dir: $SESSION_ID/ → $NEW_ID/"
+fi
+
+echo ""
+echo "Migration complete."
+echo "  claude --resume $NEW_ID"
