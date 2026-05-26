@@ -1,0 +1,381 @@
+{
+  "version": "1.3",
+  "schemaVersion": "1.0",
+  "generatedBy": "ecc-tools",
+  "generatedAt": "2026-05-26T16:42:48.954Z",
+  "repo": "https://github.com/lcatlett/mydots",
+  "referenceSetReadiness": {
+    "score": 29,
+    "present": 2,
+    "total": 7,
+    "items": [
+      {
+        "id": "deep-analyzer-corpus",
+        "label": "Deep analyzer corpus",
+        "status": "missing",
+        "evidence": [],
+        "recommendation": "Add analyzer fixture, golden, benchmark, or reference-set files that can catch analyzer regressions."
+      },
+      {
+        "id": "rag-evaluator",
+        "label": "RAG/evaluator comparison",
+        "status": "missing",
+        "evidence": [],
+        "recommendation": "Add retrieval or evaluator reference-set comparison fixtures with expected ranking behavior."
+      },
+      {
+        "id": "pr-salvage",
+        "label": "PR salvage/review corpus",
+        "status": "missing",
+        "evidence": [],
+        "recommendation": "Add stale-PR, review-thread, reopen-flow, or salvage reference cases for queue cleanup automation."
+      },
+      {
+        "id": "discussion-triage",
+        "label": "Discussion triage corpus",
+        "status": "missing",
+        "evidence": [],
+        "recommendation": "Add public discussion triage fixtures, golden cases, or reference sets for informational, answered, and no-response classifications."
+      },
+      {
+        "id": "harness-compatibility",
+        "label": "Harness compatibility",
+        "status": "present",
+        "evidence": [
+          ".claude/commands/dotfiles-audit.md",
+          ".claude/docs/git-discipline.md",
+          ".claude/docs/reference.md"
+        ],
+        "recommendation": "Add cross-harness, adapter-compliance, or harness-audit evidence for Claude, Codex, OpenCode, Zed, dmux, and agent surfaces."
+      },
+      {
+        "id": "security-evidence",
+        "label": "Security evidence",
+        "status": "present",
+        "evidence": [
+          "AUDIT-PROCESS.md",
+          "bin/audit-system"
+        ],
+        "recommendation": "Attach security evidence such as SBOMs, SARIF, audit reports, or AgentShield evidence packs."
+      },
+      {
+        "id": "ci-failure-mode",
+        "label": "CI failure-mode evidence",
+        "status": "missing",
+        "evidence": [],
+        "recommendation": "Add captured CI failure logs, dry-run fixtures, or troubleshooting docs for common workflow failure modes."
+      }
+    ]
+  },
+  "profiles": {
+    "requested": "full",
+    "recommended": "full",
+    "effective": "research",
+    "requestedAlias": "full",
+    "recommendedAlias": "full",
+    "effectiveAlias": "research"
+  },
+  "requestedProfile": "full",
+  "profile": "research",
+  "recommendedProfile": "full",
+  "effectiveProfile": "research",
+  "tier": "pro",
+  "requestedComponents": [
+    "repo-baseline",
+    "workflow-automation",
+    "security-audits",
+    "research-tooling",
+    "team-rollout",
+    "governance-controls"
+  ],
+  "selectedComponents": [
+    "repo-baseline",
+    "workflow-automation",
+    "security-audits",
+    "research-tooling",
+    "team-rollout"
+  ],
+  "requestedAddComponents": [],
+  "requestedRemoveComponents": [],
+  "blockedRemovalComponents": [],
+  "tierFilteredComponents": [
+    "governance-controls"
+  ],
+  "requestedRootPackages": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync",
+    "enterprise-controls"
+  ],
+  "selectedRootPackages": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync"
+  ],
+  "requestedPackages": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync",
+    "enterprise-controls"
+  ],
+  "requestedAddPackages": [],
+  "requestedRemovePackages": [],
+  "selectedPackages": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync"
+  ],
+  "packages": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync"
+  ],
+  "blockedRemovalPackages": [],
+  "tierFilteredRootPackages": [
+    "enterprise-controls"
+  ],
+  "tierFilteredPackages": [
+    "enterprise-controls"
+  ],
+  "conflictingPackages": [],
+  "dependencyGraph": {
+    "runtime-core": [],
+    "workflow-pack": [
+      "runtime-core"
+    ],
+    "agentshield-pack": [
+      "workflow-pack"
+    ],
+    "research-pack": [
+      "workflow-pack"
+    ],
+    "team-config-sync": [
+      "runtime-core"
+    ]
+  },
+  "resolutionOrder": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync"
+  ],
+  "requestedModules": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync",
+    "enterprise-controls"
+  ],
+  "selectedModules": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync"
+  ],
+  "modules": [
+    "runtime-core",
+    "workflow-pack",
+    "agentshield-pack",
+    "research-pack",
+    "team-config-sync"
+  ],
+  "managedFiles": [
+    ".claude/skills/mydots/SKILL.md",
+    ".agents/skills/mydots/SKILL.md",
+    ".agents/skills/mydots/agents/openai.yaml",
+    ".claude/identity.json",
+    ".codex/config.toml",
+    ".codex/AGENTS.md",
+    ".codex/agents/explorer.toml",
+    ".codex/agents/reviewer.toml",
+    ".codex/agents/docs-researcher.toml",
+    ".claude/homunculus/instincts/inherited/mydots-instincts.yaml",
+    ".claude/rules/mydots-guardrails.md",
+    ".claude/research/mydots-research-playbook.md",
+    ".claude/team/mydots-team-config.json",
+    ".claude/commands/feature-development.md",
+    ".claude/commands/shell-function-migration-and-symlink-management.md",
+    ".claude/commands/drift-detection-validation-suite-update.md"
+  ],
+  "packageFiles": {
+    "runtime-core": [
+      ".claude/skills/mydots/SKILL.md",
+      ".agents/skills/mydots/SKILL.md",
+      ".agents/skills/mydots/agents/openai.yaml",
+      ".claude/identity.json",
+      ".codex/config.toml",
+      ".codex/AGENTS.md",
+      ".codex/agents/explorer.toml",
+      ".codex/agents/reviewer.toml",
+      ".codex/agents/docs-researcher.toml",
+      ".claude/homunculus/instincts/inherited/mydots-instincts.yaml"
+    ],
+    "agentshield-pack": [
+      ".claude/rules/mydots-guardrails.md"
+    ],
+    "research-pack": [
+      ".claude/research/mydots-research-playbook.md"
+    ],
+    "team-config-sync": [
+      ".claude/team/mydots-team-config.json"
+    ],
+    "workflow-pack": [
+      ".claude/commands/feature-development.md",
+      ".claude/commands/shell-function-migration-and-symlink-management.md",
+      ".claude/commands/drift-detection-validation-suite-update.md"
+    ]
+  },
+  "moduleFiles": {
+    "runtime-core": [
+      ".claude/skills/mydots/SKILL.md",
+      ".agents/skills/mydots/SKILL.md",
+      ".agents/skills/mydots/agents/openai.yaml",
+      ".claude/identity.json",
+      ".codex/config.toml",
+      ".codex/AGENTS.md",
+      ".codex/agents/explorer.toml",
+      ".codex/agents/reviewer.toml",
+      ".codex/agents/docs-researcher.toml",
+      ".claude/homunculus/instincts/inherited/mydots-instincts.yaml"
+    ],
+    "agentshield-pack": [
+      ".claude/rules/mydots-guardrails.md"
+    ],
+    "research-pack": [
+      ".claude/research/mydots-research-playbook.md"
+    ],
+    "team-config-sync": [
+      ".claude/team/mydots-team-config.json"
+    ],
+    "workflow-pack": [
+      ".claude/commands/feature-development.md",
+      ".claude/commands/shell-function-migration-and-symlink-management.md",
+      ".claude/commands/drift-detection-validation-suite-update.md"
+    ]
+  },
+  "files": [
+    {
+      "moduleId": "runtime-core",
+      "path": ".claude/skills/mydots/SKILL.md",
+      "description": "Repository-specific Claude Code skill generated from git history."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".agents/skills/mydots/SKILL.md",
+      "description": "Codex-facing copy of the generated repository skill."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".agents/skills/mydots/agents/openai.yaml",
+      "description": "Codex skill metadata so the repo skill appears cleanly in the skill interface."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".claude/identity.json",
+      "description": "Suggested identity.json baseline derived from repository conventions."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".codex/config.toml",
+      "description": "Repo-local Codex MCP and multi-agent baseline aligned with ECC defaults."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".codex/AGENTS.md",
+      "description": "Codex usage guide that points at the generated repo skill and workflow bundle."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".codex/agents/explorer.toml",
+      "description": "Read-only explorer role config for Codex multi-agent work."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".codex/agents/reviewer.toml",
+      "description": "Read-only reviewer role config focused on correctness and security."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".codex/agents/docs-researcher.toml",
+      "description": "Read-only docs researcher role config for API verification."
+    },
+    {
+      "moduleId": "runtime-core",
+      "path": ".claude/homunculus/instincts/inherited/mydots-instincts.yaml",
+      "description": "Continuous-learning instincts derived from repository patterns."
+    },
+    {
+      "moduleId": "agentshield-pack",
+      "path": ".claude/rules/mydots-guardrails.md",
+      "description": "Repository guardrails distilled from analysis for security and workflow review."
+    },
+    {
+      "moduleId": "research-pack",
+      "path": ".claude/research/mydots-research-playbook.md",
+      "description": "Research workflow playbook for source attribution and long-context tasks."
+    },
+    {
+      "moduleId": "team-config-sync",
+      "path": ".claude/team/mydots-team-config.json",
+      "description": "Team config scaffold that points collaborators at the shared ECC bundle."
+    },
+    {
+      "moduleId": "workflow-pack",
+      "path": ".claude/commands/feature-development.md",
+      "description": "Workflow command scaffold for feature-development."
+    },
+    {
+      "moduleId": "workflow-pack",
+      "path": ".claude/commands/shell-function-migration-and-symlink-management.md",
+      "description": "Workflow command scaffold for shell-function-migration-and-symlink-management."
+    },
+    {
+      "moduleId": "workflow-pack",
+      "path": ".claude/commands/drift-detection-validation-suite-update.md",
+      "description": "Workflow command scaffold for drift-detection-validation-suite-update."
+    }
+  ],
+  "workflows": [
+    {
+      "command": "feature-development",
+      "path": ".claude/commands/feature-development.md"
+    },
+    {
+      "command": "shell-function-migration-and-symlink-management",
+      "path": ".claude/commands/shell-function-migration-and-symlink-management.md"
+    },
+    {
+      "command": "drift-detection-validation-suite-update",
+      "path": ".claude/commands/drift-detection-validation-suite-update.md"
+    }
+  ],
+  "adapters": {
+    "claudeCode": {
+      "skillPath": ".claude/skills/mydots/SKILL.md",
+      "identityPath": ".claude/identity.json",
+      "commandPaths": [
+        ".claude/commands/feature-development.md",
+        ".claude/commands/shell-function-migration-and-symlink-management.md",
+        ".claude/commands/drift-detection-validation-suite-update.md"
+      ]
+    },
+    "codex": {
+      "configPath": ".codex/config.toml",
+      "agentsGuidePath": ".codex/AGENTS.md",
+      "skillPath": ".agents/skills/mydots/SKILL.md"
+    }
+  }
+}
