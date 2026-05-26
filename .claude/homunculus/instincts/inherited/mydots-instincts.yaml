@@ -1,0 +1,614 @@
+# Instincts generated from https://github.com/lcatlett/mydots
+# Generated: 2026-05-26T16:43:24.995Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: mydots-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat, fix, chore, docs
+
+## Evidence
+
+- 35 commits analyzed
+- Detected conventional commit pattern
+- Examples: docs: add AUDIT-PROCESS.md and /dotfiles-audit Claude Code slash command, feat(functions): complete dots/.functions migration and fix symlink gap
+
+---
+id: mydots-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Commit Length
+
+## Action
+
+Write moderate-length commit messages (~54 characters)
+
+## Evidence
+
+- Average commit message length: 54 chars
+- Based on 35 commits
+
+---
+id: mydots-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: mydots-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: mydots-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: mydots-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: mydots-workflow-feature-development
+trigger: "when implementing a new feature"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Workflow Feature Development
+
+## Action
+
+Follow the feature-development workflow:
+1. Add feature implementation
+2. Add tests for feature
+3. Update documentation
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~22x per month
+- Files: **/*.test.*
+
+---
+id: mydots-workflow-shell-function-migration-and-symlink-management
+trigger: "when doing shell function migration and symlink management"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Workflow Shell Function Migration And Symlink Management
+
+## Action
+
+Follow the shell-function-migration-and-symlink-management workflow:
+1. Move or refactor shell function files (e.g., from dots/.functions to .zsh/functions/*)
+2. Update or consolidate functions as needed, possibly retiring old ones
+3. Update install/symlinks.sh to manage new or changed symlinks
+4. Test symlink creation and function availability
+5. Remove obsolete source files
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: .zsh/functions/*.zsh, dots/.functions, install/symlinks.sh
+
+---
+id: mydots-workflow-drift-detection-validation-suite-update
+trigger: "when doing drift detection validation suite update"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Workflow Drift Detection Validation Suite Update
+
+## Action
+
+Follow the drift-detection-validation-suite-update workflow:
+1. Edit or add tests in tests/validate.sh
+2. Update documentation (CLAUDE.md, README.md) to reflect new or changed tests
+3. Optionally update related bin scripts (e.g., bin/mise-audit)
+4. Remove or add files to .gitignore if validation artifacts are generated
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: tests/validate.sh, CLAUDE.md, README.md
+
+---
+id: mydots-workflow-mise-tool-version-and-backend-update
+trigger: "when doing mise tool version and backend update"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Workflow Mise Tool Version And Backend Update
+
+## Action
+
+Follow the mise-tool-version-and-backend-update workflow:
+1. Edit mise/config.toml to update tool versions or backends
+2. Optionally update related bin scripts (e.g., bin/mise-audit)
+3. Document changes in commit message or documentation
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: mise/config.toml, bin/mise-audit
+
+---
+id: mydots-workflow-brewfile-host-split-and-cleanup
+trigger: "when doing brewfile host split and cleanup"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Workflow Brewfile Host Split And Cleanup
+
+## Action
+
+Follow the brewfile-host-split-and-cleanup workflow:
+1. Edit install/Brewfile, install/Brewfile.laptop, and/or install/Brewfile.ghost
+2. Update install/brew.sh to map hostnames to Brewfiles
+3. Update .zshrc or other shell files for host-specific logic
+4. Update documentation (CLAUDE.md, etc.)
+5. Optionally update validation scripts for new Brewfile structure
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: install/Brewfile, install/Brewfile.laptop, install/Brewfile.ghost
+
+---
+id: mydots-workflow-dotfiles-documentation-and-command-update
+trigger: "when doing dotfiles documentation and command update"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Workflow Dotfiles Documentation And Command Update
+
+## Action
+
+Follow the dotfiles-documentation-and-command-update workflow:
+1. Create or update markdown documentation (e.g., AUDIT-PROCESS.md, BOOTSTRAP.md, .claude/commands/*.md)
+2. Update .gitignore to ensure docs/commands are tracked
+3. Update main documentation files (CLAUDE.md, README.md) to reference new docs or commands
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: .claude/commands/*.md, AUDIT-PROCESS.md, BOOTSTRAP.md
+
+---
+id: mydots-workflow-shell-rc-and-aliases-update
+trigger: "when doing shell rc and aliases update"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/lcatlett/mydots
+---
+
+# Mydots Workflow Shell Rc And Aliases Update
+
+## Action
+
+Follow the shell-rc-and-aliases-update workflow:
+1. Edit relevant shell rc files (.zshrc, .zshenv, .bashrc, .aliases, .profile)
+2. Optionally update or add supporting scripts or config (e.g., symlinks.sh, install scripts)
+3. Test shell startup and new/changed aliases or variables
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: dots/.zshrc, dots/.zshenv, dots/.bashrc
+
+---
+id: mydots-naming-files-camelCase
+trigger: "When creating or renaming a file in the codebase"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Naming Files CamelCase
+
+## Action
+
+Use camelCase for file names
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.files
+- Consistent with TypeScript conventions in repo
+
+---
+id: mydots-naming-functions-camelCase
+trigger: "When defining a function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Naming Functions CamelCase
+
+## Action
+
+Use camelCase for function names
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.functions
+
+---
+id: mydots-naming-classes-PascalCase
+trigger: "When defining a class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Naming Classes PascalCase
+
+## Action
+
+Use PascalCase for class names
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.classes
+
+---
+id: mydots-naming-constants-SCREAMING_SNAKE_CASE
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Naming Constants SCREAMING_SNAKE_CASE
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names
+
+## Evidence
+
+- Pattern in codeStyle.namingConventions.constants
+
+---
+id: mydots-imports-relative
+trigger: "When importing modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Imports Relative
+
+## Action
+
+Use relative import paths
+
+## Evidence
+
+- Pattern in codeStyle.importStyle
+
+---
+id: mydots-exports-named
+trigger: "When exporting modules"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Exports Named
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in codeStyle.exportStyle
+
+---
+id: mydots-test-location-separate
+trigger: "When adding new tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Test Location Separate
+
+## Action
+
+Place test files in a separate location from source files
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+- tests/validate.sh exists separately from source
+
+---
+id: mydots-test-update-validation-suite
+trigger: "When adding or updating validation logic"
+confidence: 0.95
+domain: testing
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Test Update Validation Suite
+
+## Action
+
+Edit or add tests in tests/validate.sh and update documentation accordingly
+
+## Evidence
+
+- Commits: 'feat(tests): add drift detection and validation suite'
+- Pattern in workflow 'drift-detection-validation-suite-update'
+
+---
+id: mydots-commit-conventional-format
+trigger: "When writing a commit message"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Commit Conventional Format
+
+## Action
+
+Use conventional commit prefixes: feat, fix, chore, docs
+
+## Evidence
+
+- Pattern in commits.prefixes
+- Examples: 'feat(functions): ...', 'docs: ...'
+
+---
+id: mydots-commit-length-50plus
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Commit Length 50plus
+
+## Action
+
+Aim for commit messages around 50-60 characters in length
+
+## Evidence
+
+- commits.averageLength: 54
+
+---
+id: mydots-shell-function-migration
+trigger: "When migrating or refactoring shell functions or updating symlink scripts"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Shell Function Migration
+
+## Action
+
+Move/refactor shell function files, update install/symlinks.sh, test symlinks, and remove obsolete sources
+
+## Evidence
+
+- Workflow: shell-function-migration-and-symlink-management
+- Files: .zsh/functions/*.zsh, dots/.functions, install/symlinks.sh
+
+---
+id: mydots-drift-detection-validation-update
+trigger: "When adding drift detection logic or updating validation scripts"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Drift Detection Validation Update
+
+## Action
+
+Edit tests/validate.sh, update documentation, optionally update bin scripts and .gitignore
+
+## Evidence
+
+- Workflow: drift-detection-validation-suite-update
+- Commits: 'feat(tests): add drift detection and validation suite'
+
+---
+id: mydots-mise-tool-version-update
+trigger: "When a mise backend changes or tool version needs update"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Mise Tool Version Update
+
+## Action
+
+Edit mise/config.toml, optionally update bin/mise-audit, and document changes
+
+## Evidence
+
+- Workflow: mise-tool-version-and-backend-update
+- Files: mise/config.toml, bin/mise-audit
+
+---
+id: mydots-brewfile-host-split
+trigger: "When adding host-specific packages or restructuring Homebrew management"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Brewfile Host Split
+
+## Action
+
+Edit Brewfiles, update install/brew.sh for host mapping, update shell and docs, optionally update validation scripts
+
+## Evidence
+
+- Workflow: brewfile-host-split-and-cleanup
+- Files: install/Brewfile*, install/brew.sh, dots/.zshrc
+
+---
+id: mydots-dotfiles-docs-command-update
+trigger: "When documenting a new process or adding/updating slash commands"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Dotfiles Docs Command Update
+
+## Action
+
+Create/update markdown docs, update .gitignore to track docs, update main docs to reference new content
+
+## Evidence
+
+- Workflow: dotfiles-documentation-and-command-update
+- Files: .claude/commands/*.md, AUDIT-PROCESS.md, CLAUDE.md
+
+---
+id: mydots-shell-rc-aliases-update
+trigger: "When adding aliases, updating env vars, or fixing shell startup/config"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: lcatlett/mydots
+---
+
+# Mydots Shell Rc Aliases Update
+
+## Action
+
+Edit shell rc files, optionally update supporting scripts, test shell startup and new/changed aliases/vars
+
+## Evidence
+
+- Workflow: shell-rc-and-aliases-update
+- Files: dots/.zshrc, dots/.aliases, install/symlinks.sh
+
