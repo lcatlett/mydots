@@ -207,10 +207,15 @@ test_dotfiles_sync() {
 test_ssh_permissions() {
   local errors=()
 
+  # Portable octal-permission read: GNU coreutils stat first (this machine's
+  # PATH is GNU-first), BSD/macOS stat as fallback. The old `stat -f '%A'`
+  # idiom mixed a BSD flag with a GNU field and produced a false FAIL here.
+  _perms() { stat -c '%a' "$1" 2>/dev/null || stat -f '%OLp' "$1" 2>/dev/null; }
+
   # ~/.ssh/config must be 600
   if [[ -f "$HOME/.ssh/config" ]]; then
     local config_perms
-    config_perms=$(stat -f '%A' "$HOME/.ssh/config")
+    config_perms=$(_perms "$HOME/.ssh/config")
     if [[ "$config_perms" != "600" ]]; then
       errors+=("$HOME/.ssh/config is $config_perms (expected 600)")
     fi
@@ -219,7 +224,7 @@ test_ssh_permissions() {
   # Private keys must be 600 (skip .pub files)
   while IFS= read -r -d '' keyfile; do
     local perms
-    perms=$(stat -f '%A' "$keyfile")
+    perms=$(_perms "$keyfile")
     if [[ "$perms" != "600" ]]; then
       errors+=("$(basename "$keyfile") is $perms (expected 600)")
     fi

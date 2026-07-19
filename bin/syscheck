@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Quick system health check - diagnoses memory pressure and stuck processes
 # Usage: syscheck
 
