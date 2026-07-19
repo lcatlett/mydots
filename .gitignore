@@ -35,3 +35,6 @@ DRIFT-REPORT.md
 HANDOFF.md
 nlm-docs.md
 notes/
+
+# Audit artifacts - generated, not tracked
+dotfiles-audits/**

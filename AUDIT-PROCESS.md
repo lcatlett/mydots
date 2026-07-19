@@ -96,10 +96,10 @@ Artifacts: `audit-vN-deferred.md`, updated `AUDIT-PROCESS.md`
 All audit outputs (notes, research docs, deferred lists) go in:
 
 ```
-~/notes/ai-outputs/wip-automation/dotfile-audit-vN/
+~/dotfiles/dotfiles-audits/dotfile-audit-vN/
 ```
 
-Files in this directory are never committed to the repo. They are working notes for the audit session.
+Files in this directory are never committed to the repo (they are gitignored) They are working notes for the audit session.
 
 ---
 
