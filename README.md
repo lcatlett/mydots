@@ -79,7 +79,8 @@ services, and macOS GUI apps. The full list is in `install/Brewfile`.
 **Libraries:** openssl, gnupg + pinentry-mac, imagemagick, mysql-client, curl,
 libffi, libyaml, zlib, and build dependencies
 
-**GUI apps (casks):** iTerm2, Raycast, Sequel Ace, GPG Suite, OrbStack, ngrok
+**GUI apps (casks):** Ghostty (active terminal), iTerm2 (fallback), Raycast,
+Sequel Ace, GPG Suite, OrbStack, ngrok
 
 **Rule of thumb:** before adding to the Brewfile, check `mise ls-remote <tool>`.
 If mise has it, use mise.
