@@ -8,11 +8,36 @@ All notable changes to this dotfiles repo are documented here.
 
 - *(mise)* Track global mise config in dotfiles repo
 - *(ci)* Add shellcheck GitHub Actions workflow
+- *(changelog)* Add git-cliff config and initial CHANGELOG
+- *(functions)* Complete dots/.functions migration and fix symlink gap
+- *(tests)* Add drift detection and validation suite
+- *(tests)* Add mise-audit as 7th drift detection test
+- *(brewfile)* Split Brewfile by hostname for ghost vs laptop
+- *(ghostty)* Set Ghostty as primary terminal with SSH visual indicator
+- *(symlinks)* Add guarded ~/bin link for claude-sync (#27)
+- Enhance node and claude checks. (#29)
+- Add chrome alias for nlm.
+- Update git globals, path cleanup, mise tweaks.
+- Add date aliases.
+- Add session migration, translate, and search scrips.
+- Add session migration, translate, and search scrips.
+- Fix paths for vs code, update mise.
+- Fix bash ang gnu tool versions for AI.
+- Set default node version to 22.
 
 ### Bug Fixes
 
 - *(zshrc)* Remove redundant mise exec aliases and wrapper functions
 - *(shell)* Resolve shellcheck errors across install and macos scripts
+- *(zshrc)* Migrate atuin to mise and remove dead curl install source
+- *(tests)* Resolve shellcheck warnings in validate.sh
+- *(mise)* Pin PHP to last working releases before static-php.dev 404s
+- *(mise)* Switch PHP to lcatlett/php, unpin versions (#24)
+- *(shell)* Correct PATH, mise placement, and profile guards
+- *(ghostty)* Sync live config and themes, restore symlinks
+- *(validate)* Update validation suite for current repo state
+- *(hygiene)* Portable stat in drift suite + normalize bin shebangs
+- *(install)* Correct mise/symlink ordering in one-run bootstrap
 
 ### Other
 
@@ -147,6 +172,68 @@ brew bundle now completes cleanly: 122 dependencies, 0 failures
 - Parameterize COMPUTER_NAME in macos/defaults.sh
 - Remove outdated screenshot embed from README
 - Add updated terminal screenshot to README
+- Update packages.
+- Chore/mise studio config (#25)
+
+* chore(mise): switch PHP to github backend, remove wrangler, add arch-aware audit
+
+Switch PHP from deprecated ubi: backend to github:adwinying/php.
+Remove npm:wrangler (sharp build fails on M1). Add architecture
+reporting and missing-tool detection to mise-audit.
+
+* chore: track .claude/docs/ context files referenced by CLAUDE.md
+
+These docs are @-included in CLAUDE.md but were gitignored, causing
+them to be missing after machine migrations. Un-ignore .claude/docs/
+while keeping other .claude/ state local.
+
+* fix(mise): pin PHP to last working releases before static-php.dev 404s
+
+static-php.dev/bulk/ returns 404 since ~Feb 2026, causing adwinying/php
+GitHub releases to package HTML error pages as tarballs. Pin to last
+known good: 8.2.28, 8.3.29, 8.4.17.
+
+* fix(mise): switch PHP to lcatlett/php backend, unpin versions
+
+Replace adwinying/php (pinned to last-good releases before
+static-php.dev 404s) with lcatlett/php using minor-version specs
+(8.2, 8.3, 8.4) so each floats to latest patch release.
+- Fix/cleanup for bifrost migration prep (#26)
+
+* feat(dotfiles): track .zshenv, fix DOTFILES_DIR symlink resolution
+
+- Add dots/.zshenv and link it via install/symlinks.sh so the
+  homebrew PATH guard used at shell init is managed alongside the
+  other shell rc files.
+- Resolve symlink chains when computing DOTFILES_DIR in bin/dotfiles.
+  Previously `dotfiles symlinks` failed silently because
+  ${BASH_SOURCE[0]} was the ~/bin/dotfiles symlink, so DOTFILES_DIR
+  resolved to $HOME and the script tried to source $HOME/install/*.
+- Drop trailing slashes on ln -sfv targets in install/symlinks.sh so
+  verbose output no longer shows double slashes like ~/bin//script.
+
+* fix: migration cleanup.
+- Feat/claude sync (#28)
+
+* feat(symlinks): add guarded ~/bin link for claude-sync
+
+Links ~/projects/dev-tools/claude-sync/claude-sync into ~/bin so the tool
+is on PATH alongside the other bin entries, without vendoring its source
+into dotfiles. Guarded with -x so machines without the repo checked out
+don't end up with a dangling symlink.
+
+* chore: ensure copilot files can be committed.
+- Feat/audit enhancements (#30)
+
+* feat: enhance node and claude checks.
+
+* Use brew grep.
+
+---------
+
+Co-authored-by: copilot-swe-agent[bot] <198982749+Copilot@users.noreply.github.com>
+Co-authored-by: lcatlett <312798+lcatlett@users.noreply.github.com>
+- Updates for multi-machine setup.
 
 ### Documentation
 
@@ -154,6 +241,12 @@ brew bundle now completes cleanly: 122 dependencies, 0 failures
 - Add BOOTSTRAP.md for fresh Mac setup
 - *(readme)* Restructure for public audience
 - *(claude)* Add git discipline section
+- Add AUDIT-PROCESS.md and /dotfiles-audit Claude Code slash command
+- Add drift detection report
+- Add tests/validate.sh to CLAUDE.md and README.md
+- *(audit)* Update dotfiles-audit command and bootstrap for current state
+- Update paths for audit command.
+- *(public)* Declare eza in mise config; note Ghostty in README
 
 ### Maintenance
 
@@ -163,3 +256,11 @@ brew bundle now completes cleanly: 122 dependencies, 0 failures
 - *(brewfile)* Remove tools duplicated in mise config
 - Add MIT license and finalize .gitignore
 - *(iterm)* Add README with color theme import instructions
+- Remove DRIFT-REPORT.md from git and add to .gitignore
+- *(iterm)* Replace legacy color themes with lindsey-ghost variants
+- *(shell)* Remove dead Pilot Shell config from bash files
+- Optimize CLAUDE.md, update Brewfile, add model routing
+- Clean up Brewfiles, update mise config, enhance validation
+- *(mise)* Switch PHP to github backend, remove wrangler, add arch-aware audit
+- Track .claude/docs/ context files referenced by CLAUDE.md
+- *(mise)* Dedupe GitHub CLI declaration in mise config
