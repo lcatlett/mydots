@@ -174,3 +174,27 @@ When deferring an item to a future audit, record it in `audit-vN-deferred.md`:
 | v3 | 2025-01 | Function modularization to .zsh/functions/ | Various |
 | v4 | 2025-12 | mise-first policy, CI (shellcheck), changelog, git discipline | Various |
 | v5 | 2026-02 | Complete .functions migration, symlink gap fix, terminal research | feat/complete-functions-migration, docs/audit-process |
+| v6 | 2026-07 | Portable `stat` in drift suite, `bin/` shebang normalization, mise `gh` dedup + `eza` declared, `install.sh` mise/symlink ordering fix, public re-verify | chore/dotfiles-audit-v6 |
+
+---
+
+## Lessons from v6
+
+- **The drift suite itself can drift.** `tests/validate.sh` used the BSD `stat -f '%A'` idiom,
+  which silently false-FAILs on this GNU-first PATH (GNU `stat` reads `%A` as a filename). Audit
+  the audit tooling for BSD-vs-GNU assumptions, not just the configs it checks. Portable helper:
+  `stat -c '%a' "$f" 2>/dev/null || stat -f '%OLp' "$f"`.
+- **A green-looking config can hide orphan installs.** `eza` worked interactively (orphan shim)
+  yet was absent from the tracked `mise/config.toml`, so it would vanish on a fresh machine while
+  active aliases depended on it. Cross-check tools *used* in tracked config (aliases/functions)
+  against tools *declared* in `mise/config.toml`, not just brew↔mise overlap.
+- **Watch for duplicate mise declarations across backends.** `gh` was declared twice
+  (`gh` registry + `github:cli/cli`), installing two versions. `mise doctor` did not flag it;
+  a `which <tool>` + `mise ls | grep` check does.
+- **A repo-health test that scans outside the repo will never go green.** `bin/mise-audit`
+  (invoked by the drift suite) scans `~/.claude` and exits nonzero on external Claude Code state,
+  so the suite's "Mise audit" step fails on things the dotfiles repo doesn't own. Scope
+  repo-health checks to the repo, or make out-of-repo hits warn-only.
+- **install.sh ordering: symlinks before `mise install`, and `brew shellenv` before either.**
+  The one-run bootstrap must create the mise config (via symlinks) and put brew/mise on PATH
+  before `mise install` can do anything on a fresh machine.
