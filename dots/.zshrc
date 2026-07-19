@@ -257,9 +257,7 @@ esac
 # Run `claude-multiprofile list` to see what's configured.
 
 alias claude-akamai='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-akamai" claude'
+alias claude-governance='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-governance" claude'
 alias claude-work='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-work" claude'
 
 # <<< claude-multiprofile <<<
-
-# Continuous-Claude OPC directory (for skills to find scripts)
-export CLAUDE_OPC_DIR="/Users/lcatlett/projects/ai-utilities/Continuous-Claude-v3/opc"

@@ -231,6 +231,7 @@
 
 [init]
 	defaultBranch = main
+	templateDir = /Users/lcatlett/.git-templates
 
 [fetch]
 	prune = true
@@ -267,3 +268,9 @@
 
 [push]
 	autoSetupRemote = true
+[credential "https://github.com"]
+	helper = 
+	helper = !/Users/lcatlett/.local/share/mise/installs/github-cli-cli/latest/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/Users/lcatlett/.local/share/mise/installs/github-cli-cli/latest/bin/gh auth git-credential
