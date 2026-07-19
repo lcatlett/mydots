@@ -20,6 +20,21 @@ Before you start:
 
 ---
 
+## Automated one-run install
+
+For an unattended bring-up, after cloning you can run the full sequence in one shot:
+
+```bash
+bash install/install.sh
+```
+
+It runs, in order: Homebrew + Brewfiles → `brew shellenv` → symlinks → `mise install`
+→ macOS defaults/extended → Dock → cache clean → ssh-add. `mise install` runs *after*
+symlinks so the mise config is already in place. You still need to create `dots/.exports`
+(step 4) before opening a new shell, and the macOS/Dock steps are worth reading first
+(see the Day 2 and step 7–8 notes below). Prefer the step-by-step path on a machine you
+want to review as it comes up.
+
 ## Step-by-Step Install
 
 ### 1. Clone the repo
