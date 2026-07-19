@@ -16,9 +16,9 @@ iterm/script.py
 install/brew.bak
 
 # Local tool state — not portable
-# Ignore .claude/ contents but track slash commands (commands/ dir)
 .claude/*
-!.claude/commands/
+# But track context docs referenced by CLAUDE.md
+!.claude/docs/
 
 # Compiled binaries — platform-specific, install via brew/mise/source instead
 bin/dfc
@@ -36,5 +36,4 @@ HANDOFF.md
 nlm-docs.md
 notes/
 
-# Audit artifacts - generated, not tracked
-dotfiles-audits/**
+dotfiles-audits/*

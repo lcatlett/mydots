@@ -3,21 +3,22 @@
 
 # --- Interactive TTY safety tweaks (only when interactive) ---
 if [[ -o interactive ]] && [[ -t 0 ]]; then
-    stty -tostop 2>/dev/null    # Don't stop bg jobs on output
-    stty susp undef 2>/dev/null # Disable ^Z suspend
+  stty -tostop 2>/dev/null    # Don't stop bg jobs on output
+  stty susp undef 2>/dev/null # Disable ^Z suspend
 fi
 
 # --- Load modular config files if present ---
-# .exports is sourced from .zshenv so non-interactive shells (hooks, Remote-SSH
-# command mode, launchd) can see env vars. Aliases stay here — interactive-only.
-[[ -r ~/.aliases && -f ~/.aliases ]] && source ~/.aliases
+for file in ~/.{exports,aliases}; do
+  [[ -r "$file" && -f "$file" ]] && source "$file"
+done
+unset file
 
 # --- Load modular function files ---
 if [[ -d "$HOME/.zsh/functions" ]]; then
-    for func_file in ~/.zsh/functions/*.zsh; do
-        [[ -r "$func_file" ]] && source "$func_file"
-    done
-    unset func_file
+  for func_file in ~/.zsh/functions/*.zsh; do
+    [[ -r "$func_file" ]] && source "$func_file"
+  done
+  unset func_file
 fi
 
 # --- History Configuration ---
@@ -47,9 +48,8 @@ typeset -U path
 
 # --- Priority 1-2: Your overrides and direct installs ---
 path=(
-    "$HOME/bin"
-    "$HOME/.local/bin"
-    "$HOME/.bifrost/bin"
+  "$HOME/bin"
+  "$HOME/.local/bin"
 )
 
 # --- Priority 2.5: Mise shims (before Homebrew so mise-managed tools always win) ---
@@ -59,37 +59,32 @@ path=(
 
 # --- Priority 3: Homebrew ---
 path+=(
-    "/opt/homebrew/bin"
-    "/opt/homebrew/sbin"
-    "/usr/local/bin"
-    "/opt/homebrew/opt/curl/bin"
-    "/opt/homebrew/opt/openssl@3/bin"
-    # GNU utility overrides (makes macOS behave like Linux)
-    "/opt/homebrew/opt/coreutils/libexec/gnubin" # date, ls, cp, mv, sort, tail, etc.
-    "/opt/homebrew/opt/grep/libexec/gnubin"      # grep, egrep, fgrep
-    "/opt/homebrew/opt/gnu-sed/libexec/gnubin"   # sed
-    "/opt/homebrew/opt/findutils/libexec/gnubin" # find, xargs
-    "/opt/homebrew/opt/gawk/libexec/gnubin"      # awk
-    "/opt/homebrew/opt/make/libexec/gnubin"      # make
+  "/opt/homebrew/bin"
+  "/opt/homebrew/sbin"
+  "/usr/local/bin"
+  "/opt/homebrew/opt/curl/bin"
+  "/opt/homebrew/opt/openssl@3/bin"
+  "/opt/homebrew/opt/grep/libexec/gnubin"
 )
 
 # --- Priority 4: System paths ---
 path+=(
-    "/usr/bin"
-    "/bin"
-    "/usr/sbin"
-    "/sbin"
+  "/usr/bin"
+  "/bin"
+  "/usr/sbin"
+  "/sbin"
 )
 
 # --- Priority 5: Language-specific tools ---
 # Cargo/Rust
-[[ -d "$HOME/.cargo/bin" ]] && path+=("$HOME/.cargo/bin")
+path+=("$HOME/.cargo/bin")
 
 # Go
 export GOPATH="$HOME/go"
 path+=("$GOPATH/bin")
 
 # Composer
+export COMPOSER_MEMORY_LIMIT=-1
 # path+=("$HOME/.composer/vendor/bin")
 
 # # PHP versions
@@ -97,15 +92,15 @@ path+=("$GOPATH/bin")
 #   "/opt/homebrew/opt/php@8.1/bin"
 #   "/opt/homebrew/opt/php@8.1/sbin"
 #   "/opt/homebrew/opt/php@8.3/bin"
-#   "/opt/homebrew/opt/php@8.3/sbin"
+#   "/opt/homebrew/opt/php@8.3/sbin"o
 # )
 
 # Database clients — guard against non-existent paths
 for _mysqlv in 8.4 8.0; do
-    [[ -d "/opt/homebrew/opt/mysql@${_mysqlv}/bin" ]] &&
-        path+=("/opt/homebrew/opt/mysql@${_mysqlv}/bin")
-    [[ -d "/opt/homebrew/opt/mysql-client@${_mysqlv}/bin" ]] &&
-        path+=("/opt/homebrew/opt/mysql-client@${_mysqlv}/bin")
+  [[ -d "/opt/homebrew/opt/mysql@${_mysqlv}/bin" ]] &&
+    path+=("/opt/homebrew/opt/mysql@${_mysqlv}/bin")
+  [[ -d "/opt/homebrew/opt/mysql-client@${_mysqlv}/bin" ]] &&
+    path+=("/opt/homebrew/opt/mysql-client@${_mysqlv}/bin")
 done
 unset _mysqlv
 
@@ -113,85 +108,82 @@ unset _mysqlv
 [[ -d "$HOME/scripts/tasks/bin" ]] && path+=("$HOME/scripts/tasks/bin")
 
 if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
-    source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
+  source "$GHOSTTY_RESOURCES_DIR/shell-integration/zsh/ghostty-integration"
 fi
 
 # --- Priority 6: Package managers (LAST - cannot shadow above) ---
+# PNPM - APPENDED not prepended
+#export PNPM_HOME="$HOME/Library/pnpm"
+#path+=("$PNPM_HOME")
 
 # Bun — managed by mise; BUN_INSTALL is kept for bun's own use (completions, etc.)
 # but the binary path is NOT added to PATH — mise shims handle resolution.
 export BUN_INSTALL="$HOME/.bun"
 
-# pnpm
-export PNPM_HOME="/Users/lcatlett/Library/pnpm"
-case ":$PATH:" in
-*":$PNPM_HOME/bin:"*) ;;
-*) export PATH="$PNPM_HOME/bin:$PATH" ;;
-esac
-# pnpm end
+export PATH
 
 # --- GPG agent handling ---
 # GPG agent for commit signing only — SSH auth is handled by macOS launchd agent
 # (SSH config: UseKeychain yes + AddKeysToAgent yes handles key loading automatically)
 if command -v gpgconf >/dev/null 2>&1 && [[ -z "$SSH_CLIENT" ]]; then
-    if ! pgrep -u "$USER" gpg-agent >/dev/null; then
-        gpgconf --launch gpg-agent >/dev/null 2>&1 &
-    fi
-    export GPG_TTY=$(tty)
-    # NOTE: SSH_AUTH_SOCK intentionally NOT overridden here.
-    # Overriding it with the GPG socket breaks --apple-use-keychain and macOS Keychain integration.
+  if ! pgrep -u "$USER" gpg-agent >/dev/null; then
+    gpgconf --launch gpg-agent >/dev/null 2>&1 &
+  fi
+  export GPG_TTY=$(tty)
+  # NOTE: SSH_AUTH_SOCK intentionally NOT overridden here.
+  # Overriding it with the GPG socket breaks --apple-use-keychain and macOS Keychain integration.
 fi
 
 # --- Performance tool aliases (rg/fd/pigz wrappers) ---
 if command -v rg >/dev/null 2>&1; then
-    grep() {
-        local args=()
-        local fixed=0
-        for arg in "$@"; do
-            case "$arg" in
-            -E) ;; # rg uses extended regex by default; -E is a no-op and unsupported flag
-            -F) fixed=1 ;;
-            *) args+=("$arg") ;;
-            esac
-        done
-        if [[ $fixed -eq 1 ]]; then
-            command rg -F "${args[@]}"
-        else
-            command rg "${args[@]}"
-        fi
-    }
+  grep() {
+    local args=()
+    local fixed=0
+    for arg in "$@"; do
+      case "$arg" in
+      -E) ;; # rg uses extended regex by default; -E is a no-op and unsupported flag
+      -F) fixed=1 ;;
+      *) args+=("$arg") ;;
+      esac
+    done
+    if [[ $fixed -eq 1 ]]; then
+      command rg -F "${args[@]}"
+    else
+      command rg "${args[@]}"
+    fi
+  }
 
-    egrep() { grep -E "$@"; }
-    fgrep() { grep -F "$@"; }
+  egrep() { grep -E "$@"; }
+  fgrep() { grep -F "$@"; }
 
-    alias oldgrep='command grep'
-    alias search='rg'
-    alias search-logs='rg --type-add "log:*.log*" -t log'
-    alias search-code='rg --type-add "code:*.{js,py,sh,php,go}" -t code'
+  alias oldgrep='command grep'
+  alias search='rg'
+  alias search-logs='rg --type-add "log:*.log*" -t log'
+  alias search-code='rg --type-add "code:*.{js,py,sh,php,go}" -t code'
 fi
 
 if command -v fd >/dev/null 2>&1; then
-    alias find-files='fd --type f'
-    alias find-dirs='fd --type d'
-    alias find-logs='fd -e log'
-    alias oldfind='command find'
-    alias ff='fd --type f'
-    alias fdir='fd --type d'
+  alias find-files='fd --type f'
+  alias find-dirs='fd --type d'
+  alias find-logs='fd -e log'
+  alias oldfind='command find'
+  alias ff='fd --type f'
+  alias fdir='fd --type d'
 fi
 
 if command -v pigz >/dev/null 2>&1; then
-    gzip() { command pigz "$@"; }
-    gunzip() { command pigz -d "$@"; }
-    zcat() { command pigz -dc "$@"; }
-    alias oldgzip='command gzip'
-    alias oldzcat='command zcat'
+  gzip() { command pigz "$@"; }
+  gunzip() { command pigz -d "$@"; }
+  zcat() { command pigz -dc "$@"; }
+  alias oldgzip='command gzip'
+  alias oldzcat='command zcat'
 fi
 
 # --- Completions with cache optimization ---
 if [[ -d "$HOME/.local/share/zsh" ]]; then
-    fpath+=("$HOME/.local/share/zsh")
+  fpath+=("$HOME/.local/share/zsh")
 fi
-[[ -d "$HOME/.zsh-complete" ]] && fpath=("$HOME/.zsh-complete" $fpath)
+fpath=("$HOME/.zsh-complete" $fpath)
 
 # --- Zsh completion cache configuration ---
 export ZSH_CACHE_DIR="$HOME/.zsh/cache"
@@ -202,62 +194,56 @@ export ZSH_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
 # Rebuild cache only when dump is missing or older than 24h; otherwise use -C fast path.
 autoload -Uz compinit
 if [[ -n $ZSH_COMPDUMP(#qN.mh-24) ]]; then
-    compinit -u -C -d "$ZSH_COMPDUMP"
+  compinit -u -C -d "$ZSH_COMPDUMP"
 else
-    compinit -u -d "$ZSH_COMPDUMP"
+  compinit -u -d "$ZSH_COMPDUMP"
 fi
+
+# --- Activate mise (hook-based PATH management for all managed tools) ---
+eval "$(mise activate zsh)"
 
 # McFly initialization
 if command -v mcfly &>/dev/null; then
-    eval "$(mcfly init zsh)"
+  eval "$(mcfly init zsh)"
 fi
 
-# --- mise + zoxide (must load after compinit) ---
-eval "$(mise activate zsh)"
+# --- zoxide (must load after compinit) ---
 eval "$(zoxide init zsh)"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # --- Starship prompt ---
-export STARSHIP_CONFIG=~/.claude/starship-rtfi.toml
+export STARSHIP_CONFIG=~/.config/starship-minimal.toml
 eval "$(starship init zsh)"
 
 # Suppress punycode deprecation noise from legacy npm packages.
 # Scoped to --no-deprecation rather than blanket silencing so real warnings surface.
 # Remove once upstream packages (e.g. inflight, glob) ship Node 22-compatible versions.
 export NODE_OPTIONS="--no-deprecation"
+export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
+# Must come AFTER atuin init which clobbers zsh's paste handler
 autoload -Uz bracketed-paste-magic
 zle -N bracketed-paste bracketed-paste-magic
 
 # --- Host-specific config ---
 case "$(hostname -s)" in
 bos-mpotu)
-    # SSH to ghost with visual theme indicator (amber bg = remote session)
-    ghost() {
-        printf '\e]11;#1c1008\e\\' # bg → dark amber
-        printf '\e]10;#e0d0b8\e\\' # fg → warm cream
-        printf '\e]12;#ff8c00\e\\' # cursor → orange
-        ssh lcatlett@ghost.local "$@"
-        printf '\e]11;#0c2732\e\\' # bg → restore lindsey teal
-        printf '\e]10;#b1cbcd\e\\' # fg → restore
-        printf '\e]12;#e66c2c\e\\' # cursor → restore
-    }
-    ;;
+  # SSH to ghost with visual theme indicator (amber bg = remote session)
+  ghost() {
+    printf '\e]11;#1c1008\e\\' # bg → dark amber
+    printf '\e]10;#e0d0b8\e\\' # fg → warm cream
+    printf '\e]12;#ff8c00\e\\' # cursor → orange
+    ssh lcatlett@ghost.local "$@"
+    printf '\e]11;#0c2732\e\\' # bg → restore lindsey teal
+    printf '\e]10;#b1cbcd\e\\' # fg → restore
+    printf '\e]12;#e66c2c\e\\' # cursor → restore
+  }
+  ;;
 ghost)
-    # Ghost-specific config goes here
-    # add high contrast border to terminal window to indicate remote session
-    ;;
+  # Ghost-specific config goes here
+  # add high contrast border to terminal window to indicate remote session
+  ;;
 esac
-
-# >>> claude-multiprofile >>>
-# Managed by claude-multiprofile. Edits inside this block may be overwritten.
-# Run `claude-multiprofile list` to see what's configured.
-
-alias claude-akamai='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-akamai" claude'
-alias claude-governance='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-governance" claude'
-alias claude-work='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-work" claude'
-
-# <<< claude-multiprofile <<<

@@ -13,10 +13,11 @@ go = "latest"
 node = "22"
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
-python = "3.14.3"
+python = "3.12"
 "github:lcatlett/php" = ["8.2", "8.3", "8.4"]
 uv = "latest"
 bat = "latest"
+eza = "latest"
 fd = "latest"
 fzf = "latest"
 jq = "latest"
@@ -25,6 +26,7 @@ hyperfine = "latest"
 dust = "latest"
 duf = "latest"
 glow = "latest"
+starship = "latest"
 zoxide = "latest"
 direnv = "latest"
 act = "latest"
@@ -52,13 +54,7 @@ rclone = "latest"
 "aqua:GoogleCloudPlatform/berglas" = "latest"
 rust = "latest"
 "go:golang.org/x/tools/gopls" = "latest"
-"cargo:mcfly" = "0.9.4"
-"github:jackwener/opencli" = "latest"
-pnpm = "latest"
-"cargo:starship" = "latest"
-pandoc = "3.9.0.2"
-ast-grep = "latest"
-gcloud = "latest"
+"cargo:mcfly" = "latest"
 
 [settings]
 
@@ -67,3 +63,5 @@ compile = false
 
 [settings.pipx]
 uvx = true
+
+

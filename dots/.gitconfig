@@ -29,7 +29,7 @@
 	statusHints = false
 
 [core]
-	excludesfile = /Users/lcatlett/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	quotepath = false
 	# line endings
 	# force LF during add
@@ -183,9 +183,6 @@
 	# amend last commit without changing commit message
 	amend = commit --amend --no-edit
 
-	# amend last commit without changing commit message
-	cane = commit --amend --no-edit
-
 	# helpful merge and rebase aliases
 	mc = merge --continue
 	ri = rebase --interactive
@@ -227,11 +224,9 @@
 
 [commit]
 	verbose = true
-	template = /Users/lcatlett/.stCommitMsg
 
 [init]
 	defaultBranch = main
-	templateDir = /Users/lcatlett/.git-templates
 
 [fetch]
 	prune = true
@@ -268,9 +263,3 @@
 
 [push]
 	autoSetupRemote = true
-[credential "https://github.com"]
-	helper = 
-	helper = !/Users/lcatlett/.local/share/mise/installs/github-cli-cli/latest/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/Users/lcatlett/.local/share/mise/installs/github-cli-cli/latest/bin/gh auth git-credential

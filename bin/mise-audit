@@ -48,7 +48,6 @@ echo "=========================================="
 echo ""
 
 ISSUES_FOUND=0
-WARNINGS_FOUND=0
 
 # Check 1: Mise doctor
 echo "Checking mise health..."
@@ -75,7 +74,7 @@ if [[ -n "$OUTDATED" && "$OUTDATED" != *"All tools are up to date"* ]]; then
     log_issue "CONFIG_ISSUE" "Outdated mise tools detected" \
         "Run 'mise upgrade' to update" \
         "Tools: $(echo "$OUTDATED" | awk '{print $1}' | tr '\n' ', ')"
-    WARNINGS_FOUND=$((WARNINGS_FOUND + 1))
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
 else
     print_status ok "All tools up to date"
 fi
@@ -207,8 +206,7 @@ for dir in "${SCAN_DIRS[@]}"; do
       --include="*.yml" --include="*.sh" --include="*.zsh" \
       --include="*.bash" --include="*.env" --include="*.conf" \
       --exclude-dir=".git" --exclude-dir="node_modules" \
-      --exclude-dir="cache" --exclude-dir="shell-snapshots" \
-      --exclude-dir="checkpoints" 2>/dev/null || true)
+      --exclude-dir="cache" 2>/dev/null || true)
     if [[ -n "$results" ]]; then
       while IFS= read -r file; do
         # get the matching lines with context
@@ -244,13 +242,11 @@ fi
 
 echo ""
 echo "=========================================="
-if [[ "$ISSUES_FOUND" -eq 0 && "$WARNINGS_FOUND" -eq 0 ]]; then
+if [[ "$ISSUES_FOUND" -eq 0 ]]; then
     print_status ok "No issues found!"
     log_issue "AUDIT" "System check passed" "No issues detected"
-elif [[ "$ISSUES_FOUND" -eq 0 ]]; then
-    print_status warn "$WARNINGS_FOUND warning(s) - see $LOG"
 else
-    print_status warn "$ISSUES_FOUND error(s), $WARNINGS_FOUND warning(s) - see $LOG"
+    print_status warn "$ISSUES_FOUND issue(s) found - see $LOG"
 fi
 echo "Log: $LOG"
 echo "=========================================="

@@ -4,5 +4,8 @@ if [ -f ~/.bashrc ]; then
 fi
 
 
-[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
-[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+. "$HOME/.cargo/env"
+
+. "$HOME/.local/bin/env"
+
+. "$HOME/.atuin/bin/env"

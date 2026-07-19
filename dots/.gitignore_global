@@ -14,8 +14,6 @@
 ehthumbs.db
 Thumbs.db
 
-.session-state/tool-call-count
-
 # Editor & IDE
 ######################
 .vscode
@@ -46,7 +44,3 @@ Thumbs.db
 
 # Always track empty directories
 !.gitkeep
-
-.rtfm/
-
-**/memory/memory.db

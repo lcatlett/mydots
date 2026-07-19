@@ -52,7 +52,6 @@ for script in \
   audit-system \
   claude-safe \
   code \
-  date-dump \
   dotfiles \
   dusage \
   gcb \
@@ -63,9 +62,6 @@ for script in \
   rename-commit \
   ssh-manager \
   symlink-audit \
-  translate-skills \
-  claude-migrate-session \
-  claude-search-resume \
   syscheck; do
   ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
 done
@@ -73,5 +69,5 @@ done
 # ---------------------------------------------------------------------------
 # External tools → ~/bin/ (guarded; only linked if the target exists)
 # ---------------------------------------------------------------------------
-[[ -x "$HOME/projects/claude-sync/claude-sync" ]] &&
-  ln -sfn "$HOME/projects/claude-sync/claude-sync" "$HOME/bin/claude-sync"
+[[ -x "$HOME/projects/dev-tools/claude-sync/claude-sync" ]] &&
+  ln -sfn "$HOME/projects/dev-tools/claude-sync/claude-sync" "$HOME/bin/claude-sync"
