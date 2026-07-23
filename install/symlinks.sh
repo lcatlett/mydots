@@ -58,6 +58,7 @@ for script in \
   hurl \
   image2svg \
   kill-claude \
+  mcp-forensics \
   mise-audit \
   rename-commit \
   ssh-manager \

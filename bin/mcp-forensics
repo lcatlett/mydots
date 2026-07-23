@@ -1,0 +1,271 @@
+#!/usr/bin/env bash
+# Snapshot and triage Claude Desktop / MCP logs around a failure window.
+# Usage: mcp-forensics [--since TIME] [--until TIME] [--minutes N]
+#                     [--grep PATTERN] [--report] [--no-snapshot]
+#
+# Written after a Desktop Commander write_file + get_file_info both timed out
+# at 4min with no way to determine whether the write had landed. Snapshot runs
+# BEFORE analysis because MCP logs rotate and the evidence is the point.
+#
+# Exit codes: 0 ok, 1 bad args/deps, 2 no log sources found.
+
+set -uo pipefail
+
+OUT_ROOT="${MCP_FORENSICS_OUT:-$HOME/notes/ai-outputs/mcp-forensics}"
+
+LOG_SOURCES=(
+  "$HOME/Library/Logs/Claude"
+  "$HOME/.claude/debug"
+  "$HOME/.claude/logs"
+  "$HOME/Library/Application Support/Claude/logs"
+  "$HOME/.config/desktop-commander"
+  "$HOME/.desktop-commander"
+)
+
+PAT_FAILURE='timeout|timed out|ETIMEDOUT|EPIPE|ECONNRESET|ECONNREFUSED|ENOENT|EACCES|disconnect|crash|panic|fatal|unhandled|rejection|exit code|SIGTERM|SIGKILL|SIGSEGV|unresponsive|server (stopped|died|exited)|transport clos|stderr'
+PAT_SERVER='desktop.?commander|desktop_commander|mcp-server|mcp_server|MCP server'
+PAT_TOOLCALL='write_file|read_file|edit_block|start_process|get_file_info|list_directory|create_directory|tools/call|jsonrpc'
+PAT_LIMITS='fileWriteLineLimit|fileReadLineLimit|line limit|too large|payload|maxBuffer|chunk'
+
+SINCE=""; UNTIL=""; MINUTES=""; USER_GREP=""; WRITE_REPORT=0; DO_SNAPSHOT=1
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --since)       SINCE="${2:-}"; shift 2 ;;
+    --until)       UNTIL="${2:-}"; shift 2 ;;
+    --minutes)     MINUTES="${2:-}"; shift 2 ;;
+    --grep)        USER_GREP="${2:-}"; shift 2 ;;
+    --report)      WRITE_REPORT=1; shift ;;
+    --no-snapshot) DO_SNAPSHOT=0; shift ;;
+    -h|--help)     sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "unknown arg: $1 (try --help)" >&2; exit 1 ;;
+  esac
+done
+
+if command -v rg >/dev/null 2>&1; then
+  SEARCH="rg"
+else
+  SEARCH="grep"
+  echo "note: ripgrep not found, falling back to grep -E" >&2
+fi
+
+# BSD (macOS) and GNU date disagree on parsing; support both.
+_date_to_epoch() {
+  local s="$1"
+  if date -j >/dev/null 2>&1; then
+    if [[ "$s" =~ ^[0-9]{2}:[0-9]{2}$ ]]; then
+      date -j -f "%Y-%m-%d %H:%M" "$(date +%Y-%m-%d) $s" +%s 2>/dev/null
+    else
+      date -j -f "%Y-%m-%d %H:%M" "$s" +%s 2>/dev/null ||
+        date -j -f "%Y-%m-%d %H:%M:%S" "$s" +%s 2>/dev/null
+    fi
+  else
+    date -d "$s" +%s 2>/dev/null
+  fi
+}
+
+NOW_EPOCH=$(date +%s)
+
+if [[ -n "$MINUTES" ]]; then
+  START_EPOCH=$((NOW_EPOCH - MINUTES * 60))
+elif [[ -n "$SINCE" ]]; then
+  START_EPOCH=$(_date_to_epoch "$SINCE")
+  [[ -z "$START_EPOCH" ]] && { echo "could not parse --since '$SINCE'" >&2; exit 1; }
+else
+  START_EPOCH=$((NOW_EPOCH - 7200))
+fi
+
+if [[ -n "$UNTIL" ]]; then
+  END_EPOCH=$(_date_to_epoch "$UNTIL")
+  [[ -z "$END_EPOCH" ]] && { echo "could not parse --until '$UNTIL'" >&2; exit 1; }
+else
+  END_EPOCH=$NOW_EPOCH
+fi
+
+_fmt() {
+  if date -j >/dev/null 2>&1; then
+    date -j -f %s "$1" "+%Y-%m-%d %H:%M:%S"
+  else
+    date -d "@$1" "+%Y-%m-%d %H:%M:%S"
+  fi
+}
+START_H=$(_fmt "$START_EPOCH")
+END_H=$(_fmt "$END_EPOCH")
+
+STAMP=$(date +%Y-%m-%d-%H%M%S)
+RUN_DIR="$OUT_ROOT/$STAMP"
+
+mkdir -p "$RUN_DIR" 2>/dev/null || { echo "cannot create $RUN_DIR" >&2; exit 1; }
+FINDINGS="$RUN_DIR/findings.txt"
+exec > >(tee "$FINDINGS") 2>&1
+
+section() { printf '\n==================== %s ====================\n' "$1"; }
+
+echo "MCP forensics run"
+echo "window : $START_H  ->  $END_H"
+echo "output : $RUN_DIR"
+echo "search : $SEARCH"
+
+section "1. LOG SOURCES"
+
+FOUND_SOURCES=()
+for src in "${LOG_SOURCES[@]}"; do
+  if [[ -d "$src" ]]; then
+    n=$(find "$src" -type f 2>/dev/null | wc -l | tr -d ' ')
+    sz=$(du -sh "$src" 2>/dev/null | cut -f1)
+    echo "[FOUND]   $src  ($n files, $sz)"
+    FOUND_SOURCES+=("$src")
+  else
+    echo "[absent]  $src"
+  fi
+done
+
+if [[ ${#FOUND_SOURCES[@]} -eq 0 ]]; then
+  echo
+  echo "No log sources found. Nothing to analyze."
+  exit 2
+fi
+
+if [[ $DO_SNAPSHOT -eq 1 ]]; then
+  section "2. SNAPSHOT (before analysis - logs rotate)"
+  SNAP="$RUN_DIR/snapshot"
+  mkdir -p "$SNAP"
+  for src in "${FOUND_SOURCES[@]}"; do
+    dest="$SNAP/$(echo "${src#"$HOME"/}" | tr '/ ' '__')"
+    mkdir -p "$dest"
+    if cp -R "$src/." "$dest/" 2>/dev/null; then
+      echo "copied: $src -> $dest"
+    else
+      echo "PARTIAL/FAILED copy: $src (check permissions)"
+    fi
+  done
+  echo "snapshot size: $(du -sh "$SNAP" 2>/dev/null | cut -f1)"
+else
+  section "2. SNAPSHOT - skipped (--no-snapshot)"
+fi
+
+section "3. FILES MODIFIED IN WINDOW"
+
+TOUCHED=()
+for src in "${FOUND_SOURCES[@]}"; do
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && TOUCHED+=("$f")
+  done < <(find "$src" -type f -newermt "@$START_EPOCH" ! -newermt "@$END_EPOCH" 2>/dev/null)
+done
+
+if [[ ${#TOUCHED[@]} -eq 0 ]]; then
+  echo "No files modified in window."
+  echo "NOTE: this is itself a finding - if the client never wrote a log during"
+  echo "      a failure window, the request may not have reached the transport."
+  echo "      Widen with --minutes 240 to confirm quiet vs. absent."
+else
+  for f in "${TOUCHED[@]}"; do
+    stat -f '%Sm  %z bytes  %N' -t '%Y-%m-%d %H:%M:%S' "$f" 2>/dev/null ||
+      stat -c '%y  %s bytes  %n' "$f" 2>/dev/null
+  done
+fi
+
+section "4. TIMESTAMP FORMATS (verify before trusting any time-based grep)"
+echo "Formats vary per file - local vs UTC, ISO-T vs space."
+for f in "${TOUCHED[@]:-}"; do
+  [[ -f "$f" ]] || continue
+  echo "--- $f"
+  head -3 "$f" 2>/dev/null | cut -c1-160
+done
+
+_scan() {
+  local label="$1" pattern="$2" out hits=0
+  section "$label"
+  for src in "${FOUND_SOURCES[@]}"; do
+    if [[ "$SEARCH" == "rg" ]]; then
+      out=$(rg -i --no-heading --with-filename --line-number "$pattern" "$src" 2>/dev/null)
+    else
+      out=$(grep -rniE "$pattern" "$src" 2>/dev/null)
+    fi
+    if [[ -n "$out" ]]; then
+      echo "$out" | tail -80
+      hits=$((hits + $(echo "$out" | wc -l)))
+    fi
+  done
+  [[ $hits -eq 0 ]] && echo "(no matches)"
+  echo "-- total matching lines: $hits"
+}
+
+_scan "5. FAILURE SIGNATURES" "$PAT_FAILURE"
+_scan "6. MCP SERVER LIFECYCLE" "$PAT_SERVER"
+_scan "7. TOOL CALLS / JSON-RPC TRAFFIC" "$PAT_TOOLCALL"
+_scan "8. SIZE + LIMIT SIGNALS" "$PAT_LIMITS"
+
+if [[ -n "$USER_GREP" ]]; then
+  _scan "9. USER PATTERN: $USER_GREP" "$USER_GREP"
+fi
+
+section "10. DID THE REQUEST CROSS THE TRANSPORT?"
+cat <<'EOF'
+When a tool call hangs, the question that determines root cause is whether
+the request reached the server at all.
+
+  Tool name PRESENT in section 7  -> request crossed the transport.
+                                     Hang is server-side or filesystem-side.
+                                     The operation MAY have completed after
+                                     the client gave up. Verify target state.
+
+  Tool name ABSENT from section 7 -> request never left the client.
+                                     Different root cause. Target likely
+                                     untouched, but verify anyway.
+
+Neither case authorizes a blind retry of a write. Stat the target first.
+EOF
+
+section "11. NEXT STEPS"
+cat <<EOF
+1. Verify the target of any hung write BEFORE retrying:
+     ls -la <target>; stat <target>
+
+2. After restarting the MCP server, cross-check its own record:
+     Desktop Commander: get_recent_tool_calls, and get_config ->
+     usageStats.lastUsed (epoch ms). Shows the last call the server
+     actually processed, independent of what the client logged.
+
+3. Restart order for most transport hangs:
+     quit Claude Desktop fully -> relaunch -> confirm server connected
+     before reissuing anything.
+
+4. Large writes: chunk at <=30 lines with append mode. A single large
+   write_file is a known hang shape when fileWriteLineLimit is 50.
+
+Snapshot + findings: $RUN_DIR
+EOF
+
+if [[ $WRITE_REPORT -eq 1 ]]; then
+  REPORT="$RUN_DIR/incident-$STAMP.md"
+  {
+    echo "# MCP Incident Report - $STAMP"
+    echo
+    echo "**Window:** $START_H -> $END_H"
+    echo "**Host:** $(hostname) - $(uname -sr)"
+    echo "**Sources scanned:** ${#FOUND_SOURCES[@]}"
+    echo "**Files modified in window:** ${#TOUCHED[@]}"
+    echo "**Snapshot:** $([[ $DO_SNAPSHOT -eq 1 ]] && echo "$RUN_DIR/snapshot" || echo 'not taken')"
+    echo
+    echo "## What failed"
+    echo
+    echo "_Tool name, target path, observed error, wall-clock duration before error._"
+    echo
+    echo "## Did the request cross the transport?"
+    echo
+    echo "_See section 7 of findings.txt. State which, and the evidence line._"
+    echo
+    echo "## Target state after failure"
+    echo
+    echo "_Stat output for the target path. Landed / partial / absent._"
+    echo
+    echo "## Full findings"
+    echo
+    echo '```'
+    cat "$FINDINGS"
+    echo '```'
+  } >"$REPORT"
+  echo
+  echo "report written: $REPORT"
+fi

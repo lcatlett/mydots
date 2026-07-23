@@ -97,6 +97,9 @@
 	g = grep --break --heading --line-number
 	cp = cherry-pick
 
+	# git amend --no-edit
+	cane = commit --amend --no-edit
+
 	# get author of last commit
 	whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
 
