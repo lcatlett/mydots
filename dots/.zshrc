@@ -25,7 +25,12 @@ fi
 HISTSIZE=50000
 SAVEHIST=50000
 HISTFILE=~/.zsh_history
-setopt share_history          # share_history implies inc_append_history
+
+# Option names are case- and underscore-insensitive: SHARE_HISTORY == share_history.
+# inc_append_history is deliberately NOT set — zshoptions states it "should be turned
+# off" when share_history is in effect, which already appends incrementally.
+# hist_ignore_dups is likewise omitted: hist_ignore_all_dups below is a strict superset.
+setopt share_history          # append + import live across all tabs
 setopt extended_history       # Save timestamp + duration
 setopt hist_ignore_all_dups   # Remove older duplicate anywhere in history (not just consecutive)
 setopt hist_ignore_space      # Ignore commands starting with space
@@ -247,3 +252,5 @@ ghost)
   # add high contrast border to terminal window to indicate remote session
   ;;
 esac
+
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
