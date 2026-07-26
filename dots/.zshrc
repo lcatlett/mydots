@@ -171,7 +171,11 @@ if command -v rg >/dev/null 2>&1; then
       *) args+=("$arg") ;;
       esac
     done
-    command rg "${args[@]}"
+    # --no-ignore --hidden: rg skips .gitignore'd and dotfiles by default, so a
+    # bare `grep -r secret .` found 1 of 3 matching files and looked successful.
+    # A function named grep must not silently under-report. Use `rg`/`search`
+    # directly when the gitignore-aware behaviour is what you want.
+    command rg --no-ignore --hidden "${args[@]}"
   }
 
   egrep() { grep -E "$@"; }
