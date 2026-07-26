@@ -141,21 +141,37 @@ fi
 
 # --- Performance tool aliases (rg/fd/pigz wrappers) ---
 if command -v rg >/dev/null 2>&1; then
+  # rg is NOT a drop-in grep. Two grep short flags collide with rg flags that take
+  # a VALUE, so passing them through consumes the next argument:
+  #   grep -E     (ERE)         -> rg -E is --encoding VALUE  (rg is ERE by default)
+  #   grep -r/-R  (recursive)   -> rg -r is --replace VALUE   (rg recurses by default)
+  # -E fails loudly ("unknown encoding"); -r fails SILENTLY — `grep -r hello .`
+  # became `rg --replace hello .`, printing substituted text with exit 0.
+  # Both must also be stripped from clustered short flags (-iE, -rn, ...), which rg
+  # does split. -F needs no translation: rg supports --fixed-strings natively.
   grep() {
-    local args=()
-    local fixed=0
+    local -a args
+    local arg rest
+    local endopts=0
     for arg in "$@"; do
+      if (( endopts )); then
+        args+=("$arg")
+        continue
+      fi
       case "$arg" in
-      -E) ;; # rg uses extended regex by default; -E is a no-op and unsupported flag
-      -F) fixed=1 ;;
+      --)
+        endopts=1
+        args+=("$arg")
+        ;;
+      -E | --extended-regexp | -r | -R | --recursive) ;;
+      -[A-Za-z]*)
+        rest="${${arg#-}//[ErR]/}"
+        [[ -n "$rest" ]] && args+=("-$rest")
+        ;;
       *) args+=("$arg") ;;
       esac
     done
-    if [[ $fixed -eq 1 ]]; then
-      command rg -F "${args[@]}"
-    else
-      command rg "${args[@]}"
-    fi
+    command rg "${args[@]}"
   }
 
   egrep() { grep -E "$@"; }
@@ -229,7 +245,8 @@ export NODE_OPTIONS="--no-deprecation"
 export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
-# Must come AFTER atuin init which clobbers zsh's paste handler
+# Keep near the end — re-registers the bracketed-paste widget after the zle
+# widgets installed above (McFly binds ^R). Nothing here initializes atuin.
 autoload -Uz bracketed-paste-magic
 zle -N bracketed-paste bracketed-paste-magic
 
