@@ -228,6 +228,13 @@ fi
 eval "$(mise activate zsh)"
 
 # McFly initialization
+# MCFLY_RESULTS: default is 30. Ranking weights directory match heavily, and the
+# 5.8k commands imported during the 2026-04-28 atuin->McFly switch have dir=NULL
+# (zsh HISTFILE stores no cwd), so they score 0 on both directory features and
+# can never win a slot. Once live per-week volume roughly doubled (~2026-W28),
+# dir-matched commands filled all 30 slots and older ones stopped appearing at
+# all. 200 keeps them reachable. Not needed if the DB is ever rebuilt with dirs.
+export MCFLY_RESULTS=200
 if command -v mcfly &>/dev/null; then
   eval "$(mcfly init zsh)"
 fi
