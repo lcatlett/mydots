@@ -410,6 +410,5 @@ chrome-profile() {
     --user-data-dir="$HOME/.chrome-profiles/$1" \
     > /dev/null 2>&1 &
 }
-chrome-profile nlm     9222
-chrome-profile opencli 9223
+
 
