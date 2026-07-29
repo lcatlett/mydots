@@ -1,0 +1,56 @@
+#!/usr/bin/env zsh
+# fix-shebang — find and optionally fix #!/bin/bash shebangs
+#
+# Usage:
+#   fix-shebang <dir> [<dir>...]          list matching files (dry run)
+#   fix-shebang --fix <dir> [<dir>...]    apply fix in place
+#
+# Skips: .git, node_modules, .claude/plugins/cache (plugin-managed, read-only)
+
+set -euo pipefail
+
+fix=0
+dirs=()
+
+for arg in "$@"; do
+  case "$arg" in
+    --fix) fix=1 ;;
+    -*) print "Unknown option: $arg" >&2; exit 1 ;;
+    *) dirs+=("$arg") ;;
+  esac
+done
+
+if (( ${#dirs[@]} == 0 )); then
+  print "Usage: $(basename "$0") [--fix] <dir> [<dir>...]" >&2
+  exit 1
+fi
+
+matched=0
+
+while IFS= read -r -d '' file; do
+  first_line=$(head -1 "$file" 2>/dev/null) || continue
+  [[ "$first_line" == '#!/bin/bash' ]] || continue
+
+  (( ++matched )) || true
+
+  if (( fix )); then
+    sed -i '' '1s|#!/bin/bash|#!/usr/bin/env bash|' "$file"
+    print "fixed: $file"
+  else
+    print "$file"
+  fi
+
+done < <(find "${dirs[@]}" \
+  \( -path '*/.git' -o -path '*/node_modules' -o -path '*/.claude/plugins/cache' -o -path '*/.venv' -o -path '*/.claude/projects'\) -prune \
+  -o -type f -print0 2>/dev/null)
+
+print ""
+if (( fix )); then
+  print "${matched} file(s) fixed."
+else
+  if (( matched > 0 )); then
+    print "${matched} file(s) with #!/bin/bash — run with --fix to apply changes."
+  else
+    print "No files with #!/bin/bash found."
+  fi
+fi
