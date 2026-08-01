@@ -270,3 +270,9 @@
 
 [push]
 	autoSetupRemote = true
+[merge "all-ours"]
+	name = keep our version entirely
+	driver = true
+[merge "all-theirs"]
+	name = take their version entirely
+	driver = cp -f %B %A
