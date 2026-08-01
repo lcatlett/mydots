@@ -227,27 +227,17 @@ fi
 # --- Activate mise (hook-based PATH management for all managed tools) ---
 eval "$(mise activate zsh)"
 
-# McFly initialization
-# MCFLY_RESULTS: default is 30. Ranking weights directory match heavily, and the
-# 5.8k commands imported during the 2026-04-28 atuin->McFly switch have dir=NULL
-# (zsh HISTFILE stores no cwd), so they score 0 on both directory features and
-# can never win a slot. Once live per-week volume roughly doubled (~2026-W28),
-# dir-matched commands filled all 30 slots and older ones stopped appearing at
-# all. 200 keeps them reachable. Not needed if the DB is ever rebuilt with dirs.
-export MCFLY_RESULTS=200
-if command -v mcfly &>/dev/null; then
-  eval "$(mcfly init zsh)"
-fi
-
-# --- zoxide (must load after compinit) ---
-eval "$(zoxide init zsh)"
-
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # --- Starship prompt ---
 export STARSHIP_CONFIG=~/.config/starship-minimal.toml
 eval "$(starship init zsh)"
+
+# --- worktrunk (must load after compinit) ---
+if command -v wt >/dev/null 2>&1;
+ then eval "$(command wt config shell init zsh)";
+fi
 
 # Suppress punycode deprecation noise from legacy npm packages.
 # Scoped to --no-deprecation rather than blanket silencing so real warnings surface.
@@ -257,7 +247,7 @@ export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
 # Keep near the end — re-registers the bracketed-paste widget after the zle
-# widgets installed above (McFly binds ^R). Nothing here initializes atuin.
+# widgets installed above. atuin binds ^R in its init at the end of this file.
 autoload -Uz bracketed-paste-magic
 zle -N bracketed-paste bracketed-paste-magic
 
@@ -281,4 +271,19 @@ ghost)
   ;;
 esac
 
-if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+
+
+eval "$(COMPLETE=zsh prek)"
+
+# --- zoxide completions (must load after compinit) ---
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init zsh)"
+fi
+
+# --- atuin (shell history; binds ^R) ---
+# Guarded like the other integrations above: unguarded, a missing or broken atuin
+# prints an error on every prompt. Install is mise-managed — never via
+# setup.atuin.sh, which silently writes AI-agent hooks into ~/.claude and ~/.codex.
+if command -v atuin &>/dev/null; then
+  eval "$(atuin init zsh)"
+fi

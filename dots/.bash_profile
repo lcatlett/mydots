@@ -10,4 +10,3 @@ ssh-add -A 2>/dev/null
 source ~/.orbstack/shell/init.bash 2>/dev/null || :
 
 . "$HOME/.local/bin/env"
-
