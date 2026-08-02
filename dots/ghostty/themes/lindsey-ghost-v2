@@ -1,0 +1,36 @@
+# lindsey-ghost-v2 — SSH-into-ghost variant of lindsey-v2
+#
+# Design intent: the background hue is rotated to ~H58 (warm umber), which is
+# the near-complement of lindsey's H228 teal. Peripheral vision reads hue and
+# temperature long before it reads detail, so a warm field is an instant
+# "not my laptop" signal even when you aren't looking directly at the window.
+#
+# The 16 accent colors are deliberately IDENTICAL in hue and lightness to
+# lindsey-v2. Syntax highlighting therefore means the same thing on both
+# machines — red is still error, green is still string — so nothing has to be
+# relearned. Only the ambient surface changes. The previous version failed
+# because it was merely *darker* (bg L=9), which reads as "dim", not "different".
+#
+# Cursor is cyan here (vs orange in lindsey-v2) as a second independent cue.
+
+palette = 0=#4e3017
+palette = 1=#ed5e54
+palette = 2=#76b66f
+palette = 3=#c19925
+palette = 4=#499fe5
+palette = 5=#d569bc
+palette = 6=#49b2aa
+palette = 7=#f8e9d4
+palette = 8=#8d6d54
+palette = 9=#ff9387
+palette = 10=#90d888
+palette = 11=#e3b846
+palette = 12=#77c0ff
+palette = 13=#f68ddc
+palette = 14=#65d3ca
+palette = 15=#fff5e8
+background = #311803
+foreground = #e2d4bd
+cursor-color = #00c9d1
+selection-background = #5b3516
+selection-foreground = #f0eae2

@@ -1,0 +1,25 @@
+# lindsey-indigo — family member. Surface hue 282. Suggested use: notes / writing.
+# Accents 1-6 and 9-14 are IDENTICAL across the whole lindsey family, so syntax
+# highlighting means the same thing in every pane. Only the surface rotates.
+
+palette = 0=#313152
+palette = 1=#ec6056
+palette = 2=#77b670
+palette = 3=#c0992a
+palette = 4=#4b9fe3
+palette = 5=#d46abb
+palette = 6=#4cb1a9
+palette = 7=#f0e7d3
+palette = 8=#6e7091
+palette = 9=#ff9387
+palette = 10=#91d88a
+palette = 11=#e2b849
+palette = 12=#77c0ff
+palette = 13=#f58edb
+palette = 14=#68d3ca
+palette = 15=#fdf6e3
+background = #191934
+foreground = #d0d1e4
+cursor-color = #df9700
+selection-background = #373765
+selection-foreground = #ebe8e0

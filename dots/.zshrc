@@ -251,26 +251,6 @@ export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 autoload -Uz bracketed-paste-magic
 zle -N bracketed-paste bracketed-paste-magic
 
-# --- Host-specific config ---
-case "$(hostname -s)" in
-bos-mpotu)
-  # SSH to ghost with visual theme indicator (amber bg = remote session)
-  ghost() {
-    printf '\e]11;#1c1008\e\\' # bg → dark amber
-    printf '\e]10;#e0d0b8\e\\' # fg → warm cream
-    printf '\e]12;#ff8c00\e\\' # cursor → orange
-    ssh lcatlett@ghost.local "$@"
-    printf '\e]11;#0c2732\e\\' # bg → restore lindsey teal
-    printf '\e]10;#b1cbcd\e\\' # fg → restore
-    printf '\e]12;#e66c2c\e\\' # cursor → restore
-  }
-  ;;
-ghost)
-  # Ghost-specific config goes here
-  # add high contrast border to terminal window to indicate remote session
-  ;;
-esac
-
 
 
 eval "$(COMPLETE=zsh prek)"
@@ -287,3 +267,4 @@ fi
 if command -v atuin &>/dev/null; then
   eval "$(atuin init zsh)"
 fi
+

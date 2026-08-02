@@ -10,7 +10,7 @@
 [tools]
 bun = "latest"
 go = "latest"
-node = "22"
+node = ["18", "20", "22", "24"]
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
 python = ["3.11", "3.12", "3.13", "3.14"]
@@ -105,6 +105,7 @@ atuin = "latest"
 "npm:aislop" = "latest"
 "npm:claude-smart" = "latest"
 "go:github.com/wtfutil/wtf" = "latest"
+"npm:@agentmemory/agentmemory" = { version = "latest", trust_policy_excludes = ["agentmemory@.9.28"] }
 
 [settings]
 
@@ -113,3 +114,4 @@ compile = false
 
 [settings.pipx]
 uvx = true
+
