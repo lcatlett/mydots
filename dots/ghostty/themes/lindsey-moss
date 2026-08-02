@@ -1,0 +1,27 @@
+# lindsey-moss — family member. Surface hue 150. Suggested use: long-running jobs / builds.
+# Accents 1-6 and 9-14 are IDENTICAL across the whole lindsey family, so syntax
+# highlighting means the same thing in every pane. Only the surface rotates.
+# Note: green accents sit near this surface hue, so string literals read slightly
+# softer here than elsewhere in the family. Contrast is unaffected (5.15:1 worst).
+
+palette = 0=#223d28
+palette = 1=#ec6056
+palette = 2=#77b670
+palette = 3=#c0992a
+palette = 4=#4b9fe3
+palette = 5=#d46abb
+palette = 6=#4cb1a9
+palette = 7=#eee8d3
+palette = 8=#617b65
+palette = 9=#ff9387
+palette = 10=#91d88a
+palette = 11=#e2b849
+palette = 12=#77c0ff
+palette = 13=#f58edb
+palette = 14=#68d3ca
+palette = 15=#fcf6e3
+background = #0a2110
+foreground = #c8d7ca
+cursor-color = #f8789a
+selection-background = #20472a
+selection-foreground = #eae8e0

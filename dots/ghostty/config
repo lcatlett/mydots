@@ -15,4 +15,4 @@
    # Shell integration
    shell-integration = zsh
 
-   theme = "lindsey"
+   theme = "lindsey-v2"

@@ -1,0 +1,28 @@
+# lindsey-v2 — lightness-normalized refinement of `lindsey`
+# Method: converted to OKLCH, held each hue's original chroma ratio,
+# normalized lightness so every accent clears ~5:1 against the background.
+# Normal accents L=66.5-71.5, bright accents L=77.5-81.5.
+# Preserved: cold teal background (H228), warm cream whites (H92),
+# cool desaturated foreground, red/magenta-forward + cyan-muted chroma.
+
+palette = 0=#1e3946
+palette = 1=#ec6056
+palette = 2=#77b670
+palette = 3=#c0992a
+palette = 4=#4b9fe3
+palette = 5=#d46abb
+palette = 6=#4cb1a9
+palette = 7=#eee8d3
+palette = 8=#567786
+palette = 9=#ff9387
+palette = 10=#91d88a
+palette = 11=#e2b849
+palette = 12=#77c0ff
+palette = 13=#f58edb
+palette = 14=#68d3ca
+palette = 15=#fdf7e4
+background = #08212b
+foreground = #bed6d9
+cursor-color = #fb794a
+selection-background = #184354
+selection-foreground = #eae8e0

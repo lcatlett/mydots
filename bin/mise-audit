@@ -184,12 +184,12 @@ HARDCODED_PATTERNS=(
 
 # Config locations to scan
 SCAN_DIRS=(
-  "${HOME}/.claude"
   "${HOME}/.config"
   "${HOME}/dotfiles"
 )
 SCAN_FILES=(
   "${HOME}/.zshrc"
+  "${HOME}/.zshenv"
   "${HOME}/.zprofile"
   "${HOME}/.bashrc"
   "${HOME}/.bash_profile"

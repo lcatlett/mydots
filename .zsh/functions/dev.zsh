@@ -403,3 +403,16 @@ kill-runaway() {
   done
 }
 
+# chrome-profile: Launch Google Chrome with a specific user profile and remote debugging port
+# examples: 
+# chrome-profile nlm 9222
+# chrome-profile opencli 9223
+
+chrome-profile() {
+  /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+    --remote-debugging-port="$2" \
+    --user-data-dir="$HOME/.chrome-profiles/$1" \
+    > /dev/null 2>&1 &
+}
+
+

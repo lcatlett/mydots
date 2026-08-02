@@ -154,6 +154,8 @@
 	# Undo last commit
 	undo = reset --soft HEAD~1
 
+	stash-all = stash save --include-untracked
+
 	# View a pretty formatted git log summary
 	ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate -n 20
 
@@ -162,6 +164,8 @@
 
 	# View a pretty formatted git log and graph of all branches
 	lol = log --pretty=oneline --graph --abbrev-commit --all -n 20
+
+	glog = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
 
 	# List history in a single line
 	list = log --pretty=format:\"%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]\" --abbrev-commit
@@ -266,3 +270,9 @@
 
 [push]
 	autoSetupRemote = true
+[merge "all-ours"]
+	name = keep our version entirely
+	driver = true
+[merge "all-theirs"]
+	name = take their version entirely
+	driver = cp -f %B %A

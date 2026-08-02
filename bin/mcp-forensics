@@ -11,7 +11,7 @@
 
 set -uo pipefail
 
-OUT_ROOT="${MCP_FORENSICS_OUT:-$HOME/notes/ai-outputs/mcp-forensics}"
+OUT_ROOT="${MCP_FORENSICS_OUT:-$HOME/system-audits/mcp-forensics}"
 
 LOG_SOURCES=(
   "$HOME/Library/Logs/Claude"
