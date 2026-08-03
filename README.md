@@ -30,6 +30,7 @@ tools. See [BOOTSTRAP.md](BOOTSTRAP.md) for the full step-by-step guide
 ```
 dotfiles/
 ├── bin/          Scripts → ~/bin/ (includes the `dotfiles` CLI)
+├── codex/        Public Codex config + MCP credential policy
 ├── dots/         Config files → ~/ (symlinked)
 ├── mise/         mise global config → ~/.config/mise/ (symlinked)
 ├── install/      Bootstrap scripts (install.sh, symlinks.sh, brew.sh, Brewfile)
@@ -122,6 +123,9 @@ Startup target: under 300ms.
 | `install/Brewfile` | Homebrew packages, casks, fonts, VS Code extensions |
 | `install/symlinks.sh` | Defines every managed symlink |
 | `mise/config.toml` | Global mise tool versions |
+| `codex/config.toml` | Public canonical Codex configuration |
+| `codex/policy.toml` | Per-server MCP env and header allowlists |
+| `prek.toml` | Repository hooks for TOML, MCP policy, and Gitleaks |
 | `bin/dotfiles` | CLI entry point (`dotfiles help` for commands) |
 
 ### PATH priority
@@ -193,6 +197,20 @@ permissions, stale Brewfile entries, secrets in tracked files):
 bash tests/validate.sh
 ```
 
+**Manage Codex configuration** — the public source is validated before an
+explicit copy to the mutable live file. Codex MCP `env` values are literal;
+secret values must be inherited through `env_vars` instead of `${VAR}` or
+`$VAR` syntax.
+
+```bash
+dotfiles codex-check             # Validate tracked + live policy; report drift
+dotfiles codex-release           # Dry run only
+dotfiles codex-release --apply   # Copy to ~/.codex/config.toml with mode 0600
+```
+
+Fully quit and relaunch Codex after release. Existing MCP processes retain the
+environment captured when they started.
+
 ---
 
 ## dotfiles CLI
@@ -202,6 +220,8 @@ dotfiles help          # Show all commands
 dotfiles install       # Full bootstrap (brew, mise, symlinks, macOS defaults)
 dotfiles update        # Update OS, Homebrew, and mise tools
 dotfiles symlinks      # Re-run symlink creation
+dotfiles codex-check   # Validate tracked and live Codex configuration
+dotfiles codex-release # Dry-run Codex copy; pass --apply to write it
 dotfiles brew          # Run brew install only
 dotfiles defaults      # Apply macOS defaults
 dotfiles dock          # Configure Dock layout

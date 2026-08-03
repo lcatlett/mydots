@@ -89,7 +89,27 @@ This reads `~/.config/mise/config.toml` (symlinked in step 3) and installs all
 language runtimes and CLI tools — Node, Python, Go, PHP, Ruby, Bun, bat, eza,
 fd, fzf, ripgrep, delta, starship, zoxide, and ~40 more.
 
-### 6. Open a new shell and verify
+### 6. Deploy the reviewed Codex configuration
+
+The tracked Codex configuration is copied rather than symlinked because Codex
+writes runtime state into its live file. First validate and preview the copy:
+
+```bash
+dotfiles codex-check
+dotfiles codex-release
+```
+
+Apply it explicitly, then fully quit and relaunch Codex so MCP servers receive
+the current environment exported from Keychain-backed `~/.exports` commands:
+
+```bash
+dotfiles codex-release --apply
+```
+
+The release writes `~/.codex/config.toml` with mode `0600`. It never resolves or
+prints secret values.
+
+### 7. Open a new shell and verify
 
 ```bash
 exec zsh -l
@@ -98,7 +118,7 @@ exec zsh -l
 The shell should start cleanly with the Starship prompt. If you see errors,
 check the Troubleshooting section below.
 
-### 7. Apply macOS defaults (review first)
+### 8. Apply macOS defaults (review first)
 
 Read through `macos/defaults.sh` before running it. It changes trackpad
 behavior, Finder settings, screenshot format, Dock size, keyboard repeat,
@@ -108,7 +128,7 @@ and other system preferences. Some changes require a reboot.
 bash macos/defaults.sh
 ```
 
-### 8. Configure the Dock (review first)
+### 9. Configure the Dock (review first)
 
 Read `macos/dock.sh` — it clears the entire Dock and adds specific apps.
 Make sure those apps are installed first.
@@ -260,6 +280,18 @@ Re-run it after symlinks:
 ```bash
 mise install
 ```
+
+### Codex configuration drift or MCP authentication failures
+
+Run the value-redacted policy and drift checks:
+
+```bash
+dotfiles codex-check
+```
+
+After rotating a credential or applying `dotfiles codex-release --apply`, fully
+quit and relaunch Codex. A running MCP server retains its launch-time environment
+and does not observe the rotated value automatically.
 
 ### Starship prompt not showing
 

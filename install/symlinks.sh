@@ -52,6 +52,7 @@ for script in \
   audit-system \
   claude-safe \
   code \
+  codex-config \
   dotfiles \
   dusage \
   gcb \

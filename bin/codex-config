@@ -1,0 +1,310 @@
+#!/usr/bin/env -S mise exec --no-deps python@3.13 -- python
+"""Validate and deploy the repository-managed Codex configuration."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import sys
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import tomllib
+
+INTERPOLATION = re.compile(r"\$(?:\{[^}]+\}|[A-Za-z_][A-Za-z0-9_]*)")
+SECRET_KEY = re.compile(
+    r"(?i)(api[_-]?key|token|secret|password|authorization|credential)"
+)
+SECRET_VALUE_PATTERNS = (
+    re.compile(r"(?i)\bBearer\s+\S+"),
+    re.compile(r"sk-[A-Za-z0-9_-]{12,}"),
+    re.compile(r"AIza[A-Za-z0-9_-]{12,}"),
+    re.compile(r"gh[pousr]_[A-Za-z0-9]{12,}"),
+    re.compile(r"AKIA[0-9A-Z]{16}"),
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+)
+
+
+@dataclass(frozen=True)
+class Violation:
+    path: str
+    reason: str
+
+
+class SafeConfigError(Exception):
+    """An error whose message contains no configuration values."""
+
+
+def load_toml(path: Path) -> dict[str, Any]:
+    try:
+        with path.open("rb") as handle:
+            data = tomllib.load(handle)
+    except FileNotFoundError as error:
+        raise SafeConfigError(f"file not found: {path}") from error
+    except PermissionError as error:
+        raise SafeConfigError(f"permission denied: {path}") from error
+    except tomllib.TOMLDecodeError as error:
+        raise SafeConfigError(f"invalid TOML: {path}") from error
+    if not isinstance(data, dict):
+        raise SafeConfigError(f"TOML root must be a table: {path}")
+    return data
+
+
+def string_set(value: Any) -> set[str]:
+    if not isinstance(value, list):
+        return set()
+    return {item for item in value if isinstance(item, str)}
+
+
+def is_secret_value(value: str) -> bool:
+    return any(pattern.search(value) for pattern in SECRET_VALUE_PATTERNS)
+
+
+def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Violation]:
+    violations: list[Violation] = []
+    configured_servers = config.get("mcp_servers", {})
+    server_policies = policy.get("mcp_servers", {})
+
+    if not isinstance(configured_servers, dict):
+        return [Violation("mcp_servers", "must be a TOML table")]
+    if not isinstance(server_policies, dict):
+        return [Violation("policy.mcp_servers", "must be a TOML table")]
+
+    for server_name, server in configured_servers.items():
+        if not isinstance(server, dict):
+            violations.append(
+                Violation(f"mcp_servers.{server_name}", "must be a TOML table")
+            )
+            continue
+
+        raw_policy = server_policies.get(server_name, {})
+        server_policy = raw_policy if isinstance(raw_policy, dict) else {}
+        literal_env = string_set(server_policy.get("literal_env"))
+        inherited_env = string_set(server_policy.get("inherited_env"))
+        literal_http_headers = string_set(server_policy.get("literal_http_headers"))
+
+        env = server.get("env", {})
+        if not isinstance(env, dict):
+            violations.append(
+                Violation(f"mcp_servers.{server_name}.env", "must be a TOML table")
+            )
+        else:
+            for key, value in env.items():
+                path = f"mcp_servers.{server_name}.env.{key}"
+                if not isinstance(value, str):
+                    violations.append(Violation(path, "must be a string literal"))
+                    continue
+                if INTERPOLATION.search(value):
+                    violations.append(
+                        Violation(path, "contains unsupported interpolation syntax")
+                    )
+                if SECRET_KEY.search(key):
+                    violations.append(
+                        Violation(path, "credential-named variables cannot be literal")
+                    )
+                if is_secret_value(value):
+                    violations.append(
+                        Violation(path, "contains secret-shaped material")
+                    )
+                if key not in literal_env:
+                    violations.append(
+                        Violation(path, "is not allowlisted as a non-secret literal")
+                    )
+
+        env_vars = server.get("env_vars", [])
+        if not isinstance(env_vars, list) or not all(
+            isinstance(item, str) for item in env_vars
+        ):
+            violations.append(
+                Violation(
+                    f"mcp_servers.{server_name}.env_vars",
+                    "must be a list of variable names",
+                )
+            )
+        else:
+            for env_var in env_vars:
+                if env_var not in inherited_env:
+                    violations.append(
+                        Violation(
+                            f"mcp_servers.{server_name}.env_vars",
+                            f"variable {env_var} is not authorized for this server",
+                        )
+                    )
+
+        bearer_token_env_var = server.get("bearer_token_env_var")
+        if bearer_token_env_var is not None:
+            path = f"mcp_servers.{server_name}.bearer_token_env_var"
+            if not isinstance(bearer_token_env_var, str):
+                violations.append(Violation(path, "must name an environment variable"))
+            elif bearer_token_env_var not in inherited_env:
+                violations.append(
+                    Violation(
+                        path, "references a variable not authorized for this server"
+                    )
+                )
+
+        env_http_headers = server.get("env_http_headers", {})
+        if not isinstance(env_http_headers, dict):
+            violations.append(
+                Violation(
+                    f"mcp_servers.{server_name}.env_http_headers",
+                    "must be a TOML table",
+                )
+            )
+        else:
+            for header, env_var in env_http_headers.items():
+                path = f"mcp_servers.{server_name}.env_http_headers.{header}"
+                if not isinstance(env_var, str):
+                    violations.append(
+                        Violation(path, "must name an environment variable")
+                    )
+                elif env_var not in inherited_env:
+                    violations.append(
+                        Violation(
+                            path, "references a variable not authorized for this server"
+                        )
+                    )
+
+        http_headers = server.get("http_headers", {})
+        if not isinstance(http_headers, dict):
+            violations.append(
+                Violation(
+                    f"mcp_servers.{server_name}.http_headers",
+                    "must be a TOML table",
+                )
+            )
+        else:
+            for header, value in http_headers.items():
+                path = f"mcp_servers.{server_name}.http_headers.{header}"
+                if not isinstance(value, str):
+                    violations.append(Violation(path, "must be a string literal"))
+                    continue
+                if SECRET_KEY.search(header) or is_secret_value(value):
+                    violations.append(
+                        Violation(path, "literal credential headers are prohibited")
+                    )
+                elif header not in literal_http_headers:
+                    violations.append(
+                        Violation(
+                            path, "is not allowlisted as a non-secret literal header"
+                        )
+                    )
+
+    return violations
+
+
+def report_violations(violations: list[Violation]) -> int:
+    if not violations:
+        print("Codex MCP policy: PASS")
+        return 0
+    print("Codex MCP policy: FAIL", file=sys.stderr)
+    for violation in violations:
+        print(f"- {violation.path}: {violation.reason}", file=sys.stderr)
+    return 1
+
+
+def validate_paths(config_path: Path, policy_path: Path) -> int:
+    try:
+        config = load_toml(config_path)
+        policy = load_toml(policy_path)
+    except SafeConfigError as error:
+        print(f"Codex MCP policy: ERROR: {error}", file=sys.stderr)
+        return 2
+    if policy.get("version") != 1:
+        print("Codex MCP policy: ERROR: unsupported policy version", file=sys.stderr)
+        return 2
+    return report_violations(validate_config(config, policy))
+
+
+def command_check(args: argparse.Namespace) -> int:
+    return validate_paths(args.config, args.policy)
+
+
+def command_drift(args: argparse.Namespace) -> int:
+    try:
+        source = args.source.read_bytes()
+        live = args.live.read_bytes()
+    except (FileNotFoundError, PermissionError):
+        print("Codex config drift unavailable: source or live file is unreadable")
+        return 2
+    if source == live:
+        print("Codex config drift: clean")
+        return 0
+    print("Codex config drift detected (contents suppressed)")
+    return 1
+
+
+def command_release(args: argparse.Namespace) -> int:
+    validation = validate_paths(args.source, args.policy)
+    if validation != 0:
+        return validation
+    if not args.apply:
+        print(
+            f"Codex config release dry run: would copy {args.source} to {args.target}"
+        )
+        return 0
+
+    temporary_path: Path | None = None
+    try:
+        contents = args.source.read_bytes()
+        args.target.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            dir=args.target.parent, prefix=".config.toml.", delete=False
+        ) as handle:
+            temporary_path = Path(handle.name)
+            os.fchmod(handle.fileno(), 0o600)
+            handle.write(contents)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, args.target)
+    except (OSError, PermissionError) as error:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+        print(
+            f"Codex config release failed for target {args.target}: {type(error).__name__}",
+            file=sys.stderr,
+        )
+        return 2
+
+    print(f"Codex config released to {args.target} with mode 0600")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Validate and deploy repository-managed Codex configuration."
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    check = subparsers.add_parser("check", help="validate MCP secret policy")
+    check.add_argument("--config", type=Path, required=True)
+    check.add_argument("--policy", type=Path, required=True)
+    check.set_defaults(handler=command_check)
+
+    drift = subparsers.add_parser("drift", help="compare canonical and live bytes")
+    drift.add_argument("--source", type=Path, required=True)
+    drift.add_argument("--live", type=Path, required=True)
+    drift.set_defaults(handler=command_drift)
+
+    release = subparsers.add_parser(
+        "release", help="copy canonical config to Codex home"
+    )
+    release.add_argument("--source", type=Path, required=True)
+    release.add_argument("--policy", type=Path, required=True)
+    release.add_argument("--target", type=Path, required=True)
+    release.add_argument("--apply", action="store_true")
+    release.set_defaults(handler=command_release)
+
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    return args.handler(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

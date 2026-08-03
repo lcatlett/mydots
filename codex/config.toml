@@ -1,0 +1,115 @@
+# Public, reviewed Codex configuration.
+#
+# This file is copied to ~/.codex/config.toml by `dotfiles codex-release`.
+# Codex mutates the live copy; do not symlink it back into this repository.
+# Secrets are loaded into the Codex process by ~/.exports and inherited by
+# explicitly authorized MCP servers through `env_vars`.
+
+notify = [
+  "/Users/lcatlett/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
+  "turn-ended",
+]
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."google-calendar@openai-curated"]
+enabled = true
+
+[plugins."slack@openai-curated"]
+enabled = true
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."supergoal@supergoal"]
+enabled = true
+
+[plugins."superpowers@openai-curated"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."claude-smart@reflexioai"]
+enabled = true
+
+[features]
+js_repl = false
+memories = true
+hooks = true
+plugin_hooks = true
+web_search_request = true
+
+[mcp_servers.computer-use]
+command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
+args = ["mcp"]
+cwd = "."
+enabled = false
+
+[mcp_servers.notebooklm-mcp]
+command = "notebooklm-mcp"
+
+[mcp_servers.pal]
+command = "bash"
+args = [
+  "-c",
+  "for p in $(which uvx 2>/dev/null) $HOME/.local/bin/uvx /opt/homebrew/bin/uvx /usr/local/bin/uvx uvx; do [ -x \"$p\" ] && exec \"$p\" --from git+https://github.com/BeehiveInnovations/pal-mcp-server.git pal-mcp-server; done; echo 'uvx not found' >&2; exit 1",
+]
+tool_timeout_sec = 1200
+env_vars = ["OPENAI_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+
+[mcp_servers.pal.env]
+AZURE_OPENAI_ENDPOINT = "https://your-resource.openai.azure.com/"
+DEFAULT_MODEL = "auto"
+DEFAULT_THINKING_MODE_THINKDEEP = "high"
+CONVERSATION_TIMEOUT_HOURS = "24"
+MAX_CONVERSATION_TURNS = "40"
+LOG_LEVEL = "DEBUG"
+DISABLED_TOOLS = "testgen,secaudit,docgen"
+PAL_MCP_FORCE_ENV_OVERRIDE = "false"
+COMPOSE_PROJECT_NAME = "pal-mcp"
+TZ = "UTC"
+LOG_MAX_SIZE = "10MB"
+
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+ENABLE_PROMPT_CACHING_1H = "1"
+ENABLE_SESSION_PERSISTENCE = "1"
+ENABLE_TOOL_SEARCH = "true"
+BASH_MAX_OUTPUT_LENGTH = "50000"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+
+[desktop]
+conversationDetailMode = "STEPS_PROSE"
+ambient-suggestions-enabled = true
+show-context-window-usage = true
+followUpQueueMode = "queue"
+appshotSoundEnabled = false
+enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "ultra", "max"]
+
+[desktop.open-in-target-preferences]
+global = "zed"
+
+[memories]
+generate_memories = true
+use_memories = true
