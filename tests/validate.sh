@@ -310,6 +310,15 @@ test_mise_audit() {
 }
 
 # ---------------------------------------------------------------------------
+# Test 9: Repository-managed Codex MCP policy
+# ---------------------------------------------------------------------------
+test_codex_config_policy() {
+  "$DOTFILES_DIR/bin/codex-config" check \
+    --config "$DOTFILES_DIR/codex/config.toml" \
+    --policy "$DOTFILES_DIR/codex/policy.toml"
+}
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 echo ""
@@ -317,8 +326,14 @@ echo "${BOLD}Dotfiles Drift Detection Suite${RESET}"
 echo "${BOLD}==============================${RESET}"
 echo ""
 
+if [[ "${1:-}" == "--only" && "${2:-}" == "codex" ]]; then
+  run_test "Codex MCP config policy" test_codex_config_policy
+  exit "$FAIL"
+fi
+
 run_test "Shell startup time < 2s"         test_shell_startup
 run_test "No secrets in tracked files"     test_no_secrets
+run_test "Codex MCP config policy"          test_codex_config_policy
 
 if command -v brew &>/dev/null; then
   run_test "Brewfile consistency"          test_brewfile_consistency

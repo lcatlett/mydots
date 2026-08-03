@@ -1,0 +1,5 @@
+[mcp_servers.pal]
+command = "pal"
+
+[mcp_servers.pal.env]
+LOG_LEVEL = "${LOG_LEVEL}"
