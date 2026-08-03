@@ -416,3 +416,68 @@ chrome-profile() {
 }
 
 
+rotate_api_key() {
+  if [[ "$1" == "--help" || "$1" == "-h" || -z "$1" ]]; then
+    echo "Usage: rotate_api_key KEY_NAME [NEW_VALUE] [-- VALIDATION_COMMAND ...]"
+    echo ""
+    echo "Rotate an environment variable stored in macOS Keychain."
+    echo "Omit NEW_VALUE to enter it without saving it in shell history."
+    echo ""
+    echo "Examples:"
+    echo "  rotate_api_key OPENAI_API_KEY"
+    echo "  rotate_api_key GEMINI_API_KEY -- gemini -p test"
+    return 0
+  fi
+
+  local key_name="$1"
+  shift
+
+  if [[ ! "$key_name" =~ '^[A-Za-z_][A-Za-z0-9_]*$' ]]; then
+    echo "Error: KEY_NAME must be a valid environment variable name" >&2
+    return 1
+  fi
+
+  local new_key=""
+  if [[ "$1" == "--" || $# -eq 0 ]]; then
+    [[ "$1" == "--" ]] && shift
+    read -rs "new_key?New value for $key_name: "
+    echo ""
+  else
+    new_key="$1"
+    shift
+    [[ "$1" == "--" ]] && shift
+  fi
+
+  if [[ -z "$new_key" ]]; then
+    echo "Error: Key value cannot be empty" >&2
+    return 1
+  fi
+
+  local old_key="${(P)key_name}"
+  local was_set="${+parameters[$key_name]}"
+  export "$key_name=$new_key"
+
+  if (( $# > 0 )) && ! "$@" &>/dev/null; then
+    if (( was_set )); then
+      export "$key_name=$old_key"
+    else
+      unset "$key_name"
+    fi
+    echo "Error: Validation failed; $key_name was not rotated" >&2
+    return 1
+  fi
+
+  if ! security add-generic-password -a "$USER" -s "$key_name" -w "$new_key" -U >/dev/null; then
+    if (( was_set )); then
+      export "$key_name=$old_key"
+    else
+      unset "$key_name"
+    fi
+    echo "Error: Keychain update failed; $key_name was not rotated" >&2
+    return 1
+  fi
+
+  echo "$key_name rotated successfully."
+}
+
+
