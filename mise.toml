@@ -1,2 +1,5 @@
 [tools]
+gitleaks = "8.30.1"
 node = "22"
+prek = "0.4.11"
+python = "3.13"

@@ -1,0 +1,5 @@
+[mcp_servers.remote]
+url = "https://example.invalid/mcp"
+
+[mcp_servers.remote.http_headers]
+Authorization = "Bearer literal-secret-material"

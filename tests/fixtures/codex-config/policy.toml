@@ -1,0 +1,11 @@
+version = 1
+
+[mcp_servers.pal]
+literal_env = ["LOG_LEVEL"]
+inherited_env = ["OPENAI_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+literal_http_headers = []
+
+[mcp_servers.remote]
+literal_env = []
+inherited_env = ["REMOTE_TOKEN"]
+literal_http_headers = ["User-Agent"]

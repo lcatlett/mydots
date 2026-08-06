@@ -1,0 +1,16 @@
+[mcp_servers.pal]
+command = "pal"
+env_vars = ["OPENAI_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
+
+[mcp_servers.pal.env]
+LOG_LEVEL = "INFO"
+
+[mcp_servers.remote]
+url = "https://example.invalid/mcp"
+bearer_token_env_var = "REMOTE_TOKEN"
+
+[mcp_servers.remote.env_http_headers]
+Authorization = "REMOTE_TOKEN"
+
+[mcp_servers.remote.http_headers]
+User-Agent = "codex-config-test"

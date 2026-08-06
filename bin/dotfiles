@@ -35,6 +35,8 @@ sub_help () {
     echo "   symlinks         Run symlinks script"
     echo "   brew             Run brew script"
     echo "   hosts            Run hosts script"
+    echo "   codex-check      Validate tracked and live Codex config without printing values"
+    echo "   codex-release    Dry-run Codex config copy; pass --apply to write ~/.codex/config.toml"
     echo "   defaults         Run MacOS defaults script"
     echo "   osxextended      Run MacOS extended config script"
     echo "   dock             Run MacOS dock script"
@@ -73,6 +75,33 @@ sub_hosts () {
     echo -e "${GREEN}$ARROW Success! Hosts command finished.${NC}"
 }
 
+sub_codex-check () {
+    local checker source policy live
+    checker="$DOTFILES_DIR/bin/codex-config"
+    source="$DOTFILES_DIR/codex/config.toml"
+    policy="$DOTFILES_DIR/codex/policy.toml"
+    live="${CODEX_CONFIG_TARGET:-$HOME/.codex/config.toml}"
+
+    "$checker" check --config "$source" --policy "$policy" || return $?
+    if [[ ! -f "$live" ]]; then
+        echo "Codex live config not found at $live"
+        return 0
+    fi
+
+    "$checker" check --config "$live" --policy "$policy" || return $?
+    "$checker" drift --source "$source" --live "$live" || true
+}
+
+sub_codex-release () {
+    local target
+    target="${CODEX_CONFIG_TARGET:-$HOME/.codex/config.toml}"
+    "$DOTFILES_DIR/bin/codex-config" release \
+        --source "$DOTFILES_DIR/codex/config.toml" \
+        --policy "$DOTFILES_DIR/codex/policy.toml" \
+        --target "$target" \
+        "$@"
+}
+
 sub_defaults () {
     . "$DOTFILES_DIR/macos/defaults.sh"
     echo -e "${GREEN}$ARROW Success! MacOS defaults command finished.${NC}"
@@ -95,10 +124,13 @@ case $COMMAND_NAME in
     *)
         shift
         "sub_${COMMAND_NAME}" "$@"
-        if [ $? = 127 ]; then
+        command_status=$?
+        if [ "$command_status" = 127 ]; then
             echo -e "${RED}$ARROW Error: '$COMMAND_NAME' is not a known command or has errors.${NC}" >&2
             sub_help
             exit 1
+        elif [ "$command_status" != 0 ]; then
+            exit "$command_status"
         fi
         ;;
 esac

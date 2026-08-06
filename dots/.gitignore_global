@@ -42,5 +42,13 @@ Thumbs.db
 ######################
 **/.claude/settings.local.json
 
+# Cloned upstream repos for corpus research (CLAUDE.md - File Management)
+######################
+# Clones are read-only research material, re-cloneable from their remote.
+# Matches a directory of this name at any depth. If a project legitimately
+# tracks one, override in that repo's own .gitignore with: !repos/
+repos/
+ai-artifacts/repos/
+
 # Always track empty directories
 !.gitkeep
