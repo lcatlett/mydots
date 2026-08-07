@@ -56,6 +56,7 @@ path=(
   "$HOME/bin"
   "$HOME/.local/bin"
 )
+[[ -d "$HOME/.miseo/.bin" ]] && path+=("$HOME/.miseo/.bin")
 
 # --- Priority 2.5: Mise shims (before Homebrew so mise-managed tools always win) ---
 # Shims here cover: initial shell load before `mise activate` runs, non-interactive
@@ -268,3 +269,12 @@ if command -v atuin &>/dev/null; then
   eval "$(atuin init zsh)"
 fi
 
+# >>> claude-multiprofile >>>
+# Managed by claude-multiprofile. Edits inside this block may be overwritten.
+# Run `claude-multiprofile list` to see what's configured.
+
+alias claude-hooks='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-hooks" claude'
+
+# <<< claude-multiprofile <<<
+
+export GPG_TTY=$(tty)

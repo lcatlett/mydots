@@ -70,3 +70,14 @@ alias bat='command bat --theme auto:system --theme-dark default --theme-light Gi
 alias yolo='claude --dangerously-skip-permissions'
 
 #alias chrome-debug="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir=\"$HOME/.chrome-debug-profile\" > /dev/null 2>&1 &"
+
+# >>> claude-multiprofile >>>
+# Managed by claude-multiprofile. Edits inside this block may be overwritten.
+# Run `claude-multiprofile list` to see what's configured.
+
+alias claude-hooks='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-hooks" claude'
+
+alias claude-governance='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-governance" claude'
+
+
+# <<< claude-multiprofile <<<
