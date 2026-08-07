@@ -1,0 +1,95 @@
+#!/usr/bin/env zsh
+# Prints and / or copies your local / public IP address.
+#
+# Examples:
+#   my-ip     # Prints both your local and public IP addresses ( IPv4 and IPv6 )
+#   my-ip --local  # Prints your local IP address and copies it to your clipboard ( IPv4 and IPv6 )
+#   my-ip --public  # Prints your public IP address and copies it to your clipboard ( IPv4 and IPv6 )
+#   my-ip [bare/--local/--public] --v4 # Same options as above, filters for only the IPv4 address
+#   my-ip [bare/--local/--public] --v6 # Same options as above, filters for only the IPv6 address
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+scope=""
+address_family=""
+
+usage() {
+  echo "Usage: my-ip [--local|--public] [--v4|--v6]" >&2
+}
+
+invalid_arguments() {
+  echo "$1" >&2
+  usage
+  exit 1
+}
+
+for argument in "$@"; do
+  case "${argument}" in
+  --local | --public)
+    [[ -z "${scope}" ]] || invalid_arguments "Only one of --local or --public may be used."
+    scope="${argument#--}"
+    ;;
+  --v4 | --v6)
+    [[ -z "${address_family}" ]] || invalid_arguments "Only one of --v4 or --v6 may be used."
+    address_family="${argument#--}"
+    ;;
+  *)
+    invalid_arguments "'${argument}' is an invalid argument."
+    ;;
+  esac
+done
+
+local_ip() {
+  local family="$1"
+
+  if [[ "${OSTYPE}" == linux-* ]]; then
+    if [[ "${family}" == "v4" ]]; then
+      ip route get 1.1.1.1 | awk '{for (field = 1; field <= NF; field++) if ($field == "src") print $(field + 1)}'
+    else
+      ip -6 route get 2606:4700:4700::1111 | awk '{for (field = 1; field <= NF; field++) if ($field == "src") print $(field + 1)}'
+    fi
+  else
+    if [[ "${family}" == "v4" ]]; then
+      ipconfig getifaddr "$(route -n get 1.1.1.1 | awk '/interface:/{print $2}')"
+    else
+      ifconfig "$(route -n get -inet6 2606:4700:4700::1111 | awk '/interface:/{print $2}')" inet6 |
+        awk '$1 == "inet6" && $2 ~ /^[23]/ {print $2; exit}'
+    fi
+  fi
+}
+
+public_ip() {
+  local family="$1"
+
+  if [[ "${family}" == "v4" ]]; then
+    curl --fail --silent --show-error --ipv4 --max-time 3 https://ifconfig.me
+  else
+    curl --fail --silent --show-error --ipv6 --max-time 3 https://ifconfig.me
+  fi
+}
+
+collect_addresses() {
+  local requested_scope requested_family address
+  local -a scopes families
+
+  [[ -n "${scope}" ]] && scopes=("${scope}") || scopes=(local public)
+  [[ -n "${address_family}" ]] && families=("${address_family}") || families=(v4 v6)
+
+  for requested_scope in "${scopes[@]}"; do
+    for requested_family in "${families[@]}"; do
+      address="$("${requested_scope}_ip" "${requested_family}" 2>/dev/null)" || continue
+      [[ -n "${address}" ]] && printf '%s\n' "${address}"
+    done
+  done
+}
+
+addresses="$(collect_addresses)"
+[[ -n "${addresses}" ]] || invalid_arguments "No matching IP addresses are available."
+
+if [[ -n "${scope}" ]]; then
+  printf '%s\n' "${addresses}" | tee >(clip-copy)
+else
+  printf '%s\n' "${addresses}"
+fi
