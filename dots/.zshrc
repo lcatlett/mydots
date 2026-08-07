@@ -272,6 +272,7 @@ fi
 # >>> claude-multiprofile >>>
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
+<<<<<<< HEAD
 # updated 2026-09-21T19:44:42.739Z
 
 alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
@@ -283,3 +284,12 @@ alias claude-secondary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-secondary" cl
 export GPG_TTY=$(tty)
 
 
+||||||| parent of 03ceb14 (fix: housekeeping and alias clean up.)
+=======
+
+alias claude-hooks='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-hooks" claude'
+
+# <<< claude-multiprofile <<<
+
+export GPG_TTY=$(tty)
+>>>>>>> 03ceb14 (fix: housekeeping and alias clean up.)

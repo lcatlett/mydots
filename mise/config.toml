@@ -5,7 +5,7 @@
 [tools]
 bun = "latest"
 go = "latest"
-node = ["18", "20", "22", "24"]
+node = ["24", "22", "20", "18"]
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
 python = ["3.11", "3.12", "3.13", "3.14"]

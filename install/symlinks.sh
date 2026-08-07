@@ -48,28 +48,44 @@ done
 # ---------------------------------------------------------------------------
 mkdir -p ~/bin
 
-for script in \
-  audit-system \
-  claude-safe \
-  code \
-  codex-config \
-  dotfiles \
-  dusage \
-  gcb \
-  hurl \
-  image2svg \
-  kill-claude \
-  mcp-forensics \
-  mise-audit \
-  rename-commit \
-  ssh-manager \
-  symlink-audit \
-  syscheck; do
-  ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
+# For each valid script in DOTFILES_DIR/bin/*, create a symlink in ~/bin called  (overwriting any existing file).
+
+# Create list of all executable scripts in DOTFILES_DIR/bin/ (ignoring non-executable files and directories), and ensuring that prek checks have passed. 
+
+
+
+
+for script in "$DOTFILES_DIR/bin/"*; do
+  [[ -f "$script" && -x "$script" ]] || continue
+  ln -sfv "$script" "$HOME/bin"
 done
+
+# for script in \
+#   audit-system \
+#   claude-safe \
+#   code \
+#   codex-config \
+#   dotfiles \
+#   dusage \
+#   gcb \
+#   hurl \
+#   image2svg \
+#   kill-claude \
+#   mcp-forensics \
+#   mise-audit \
+#   rename-commit \
+#   ssh-manager \
+#   symlink-audit \
+#   syscheck; do
+#   ln -sfv "$DOTFILES_DIR/bin/$script" ~/bin
+# done
 
 # ---------------------------------------------------------------------------
 # External tools → ~/bin/ (guarded; only linked if the target exists)
 # ---------------------------------------------------------------------------
-[[ -x "$HOME/projects/dev-tools/claude-sync/claude-sync" ]] &&
-  ln -sfn "$HOME/projects/dev-tools/claude-sync/claude-sync" "$HOME/bin/claude-sync"
+[[ -x "$HOME/projects/claude-sync/claude-sync" ]] &&
+  ln -sfn "$HOME/projects/claude-sync/claude-sync" "$HOME/bin/claude-sync"
+
+
+
+
