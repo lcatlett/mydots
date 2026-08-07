@@ -49,6 +49,6 @@ Thumbs.db
 # tracks one, override in that repo's own .gitignore with: !repos/
 repos/
 ai-artifacts/repos/
-
+scratch/
 # Always track empty directories
 !.gitkeep
