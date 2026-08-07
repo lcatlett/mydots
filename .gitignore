@@ -37,5 +37,6 @@ nlm-docs.md
 notes/
 
 dotfiles-audits/*
+ai-artifacts/*
 
 .vscode/

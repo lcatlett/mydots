@@ -52,3 +52,23 @@ export COMPOSE_HTTP_TIMEOUT="120"
 # Run `bat --list-themes` to see options.
 # Required: no (bat uses a sensible default)
 export BAT_THEME=""
+
+# Work around npm install waiting for user input
+export MISE_YES=1
+
+# =============================================================================
+# Global variables for dev and AI workflows
+# =============================================================================
+# 
+# Rotate keys with rotate_api_key function
+#
+
+#export GITHUB_TOKEN="$(security find-generic-password -a "$USER" -s "GITHUB_TOKEN" -w 2>/dev/null)"
+
+#export CLAUDE_CODE_OAUTH_TOKEN="$(security find-generic-password -s 'claude-code-oauth' -a "$USER" -w 2>/dev/null)"
+
+export OPENAI_API_KEY="$(security find-generic-password -a "$USER" -s "OPENAI_API_KEY" -w 2>/dev/null)"
+
+export GEMINI_API_KEY="$(security find-generic-password -a "$USER" -s "GEMINI_API_KEY" -w 2>/dev/null)"
+
+export OPENROUTER_API_KEY="$(security find-generic-password -a "$USER" -s "OPENROUTER_API_KEY" -w 2>/dev/null)"

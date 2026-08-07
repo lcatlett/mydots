@@ -1,6 +1,7 @@
 [user]
-	name = lcatlett
+	name = Lindsey Catlett
 	email = lindsey.catlett@gmail.com
+	signingkey = 5B5CC7927E21BBBA
 
 [github]
 	# https://github.com/blog/180-local-github-config
@@ -231,6 +232,7 @@
 
 [commit]
 	verbose = true
+	gpgsign = true
 
 [init]
 	defaultBranch = main
@@ -276,3 +278,7 @@
 [merge "all-theirs"]
 	name = take their version entirely
 	driver = cp -f %B %A
+[tag]
+	gpgSign = true
+[gpg]
+	program = gpg
