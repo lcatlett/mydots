@@ -81,7 +81,7 @@ fi
 
 # Check 3: PATH conflicts for key tools
 echo "Checking for PATH conflicts..."
-TOOLS_TO_CHECK="go node python php uv bun"
+TOOLS_TO_CHECK="go node python php uv bun archon"
 
 for tool in $TOOLS_TO_CHECK; do
     TOOL_PATH=$(command -v "$tool" 2>/dev/null || echo "not found")
