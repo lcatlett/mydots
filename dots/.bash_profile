@@ -17,5 +17,9 @@ source ~/.orbstack/shell/init.bash 2>/dev/null || :
 [ -f "$HOME/.ok/env.sh" ] && . "$HOME/.ok/env.sh"
 # <<< open-knowledge cli <<<
 
+<<<<<<< HEAD
 
 
+||||||| parent of 75bb83c (fix: mise and global package clean up.)
+=======
+>>>>>>> 75bb83c (fix: mise and global package clean up.)

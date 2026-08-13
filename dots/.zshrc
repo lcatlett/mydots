@@ -287,9 +287,17 @@ export GPG_TTY=$(tty)
 ||||||| parent of 03ceb14 (fix: housekeeping and alias clean up.)
 =======
 
+alias claude-archive='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-archive" claude'
 alias claude-hooks='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-hooks" claude'
+alias claude-poc='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-poc" claude'
 
 # <<< claude-multiprofile <<<
 
 export GPG_TTY=$(tty)
+<<<<<<< HEAD
 >>>>>>> 03ceb14 (fix: housekeeping and alias clean up.)
+||||||| parent of 75bb83c (fix: mise and global package clean up.)
+=======
+
+
+>>>>>>> 75bb83c (fix: mise and global package clean up.)
