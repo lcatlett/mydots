@@ -93,13 +93,6 @@ path+=("$GOPATH/bin")
 export COMPOSER_MEMORY_LIMIT=-1
 # path+=("$HOME/.composer/vendor/bin")
 
-# # PHP versions
-# path+=(
-#   "/opt/homebrew/opt/php@8.1/bin"
-#   "/opt/homebrew/opt/php@8.1/sbin"
-#   "/opt/homebrew/opt/php@8.3/bin"
-#   "/opt/homebrew/opt/php@8.3/sbin"o
-# )
 
 # Database clients — guard against non-existent paths
 for _mysqlv in 8.4 8.0; do
@@ -118,9 +111,6 @@ if [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
 fi
 
 # --- Priority 6: Package managers (LAST - cannot shadow above) ---
-# PNPM - APPENDED not prepended
-#export PNPM_HOME="$HOME/Library/pnpm"
-#path+=("$PNPM_HOME")
 
 # Bun — managed by mise; BUN_INSTALL is kept for bun's own use (completions, etc.)
 # but the binary path is NOT added to PATH — mise shims handle resolution.
@@ -253,8 +243,11 @@ autoload -Uz bracketed-paste-magic
 zle -N bracketed-paste bracketed-paste-magic
 
 
+if command -v prek >/dev/null 2>&1; then
+  # Prek completions (must load after compinit)
+  eval "$(COMPLETE=zsh prek)"
+fi
 
-eval "$(COMPLETE=zsh prek)"
 
 # --- zoxide completions (must load after compinit) ---
 if command -v zoxide &>/dev/null; then
@@ -273,8 +266,12 @@ fi
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
 
+alias claude-archive='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-archive" claude'
 alias claude-hooks='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-hooks" claude'
+alias claude-poc='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-poc" claude'
 
 # <<< claude-multiprofile <<<
 
 export GPG_TTY=$(tty)
+
+

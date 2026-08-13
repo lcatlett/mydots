@@ -52,3 +52,4 @@ ai-artifacts/repos/
 scratch/
 # Always track empty directories
 !.gitkeep
+.rtfm/
