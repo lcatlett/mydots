@@ -89,7 +89,8 @@ addresses="$(collect_addresses)"
 [[ -n "${addresses}" ]] || invalid_arguments "No matching IP addresses are available."
 
 if [[ -n "${scope}" ]]; then
-  printf '%s\n' "${addresses}" | tee >(clip-copy)
+  printf '%s\n' "${addresses}" | pbcopy
+  printf 'Copied %s IP address to clipboard.\n' "${scope}"
 else
   printf '%s\n' "${addresses}"
 fi
