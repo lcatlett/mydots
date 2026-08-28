@@ -223,7 +223,10 @@ eval "$(mise activate zsh)"
 
 # --- Starship prompt ---
 export STARSHIP_CONFIG=~/.config/starship-minimal.toml
-eval "$(starship init zsh)"
+
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
 # --- worktrunk (must load after compinit) ---
 if command -v wt >/dev/null 2>&1;
@@ -266,12 +269,13 @@ fi
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
 
-alias claude-archive='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-archive" claude'
-alias claude-hooks='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-hooks" claude'
-alias claude-poc='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-poc" claude'
+alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
+alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
 
 # <<< claude-multiprofile <<<
 
 export GPG_TTY=$(tty)
 
 
+
+source /Users/lcatlett/.config/broot/launcher/bash/br
