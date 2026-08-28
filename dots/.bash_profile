@@ -18,8 +18,14 @@ source ~/.orbstack/shell/init.bash 2>/dev/null || :
 # <<< open-knowledge cli <<<
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 ||||||| parent of 75bb83c (fix: mise and global package clean up.)
 =======
 >>>>>>> 75bb83c (fix: mise and global package clean up.)
+||||||| parent of 61bc4e2 (wip housekeeping.)
+=======
+
+source /Users/lcatlett/.config/broot/launcher/bash/br
+>>>>>>> 61bc4e2 (wip housekeeping.)

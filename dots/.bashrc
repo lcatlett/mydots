@@ -18,4 +18,9 @@ fi
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init bash)"; fi
 eval "$(COMPLETE=bash prek)"
 
+<<<<<<< HEAD
 
+||||||| parent of 61bc4e2 (wip housekeeping.)
+=======
+source /Users/lcatlett/.config/broot/launcher/bash/br
+>>>>>>> 61bc4e2 (wip housekeeping.)

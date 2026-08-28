@@ -223,7 +223,14 @@ eval "$(mise activate zsh)"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # --- Starship prompt ---
+<<<<<<< HEAD
 export STARSHIP_CONFIG=~/.config/starship.toml
+||||||| parent of 61bc4e2 (wip housekeeping.)
+export STARSHIP_CONFIG=~/.config/starship-minimal.toml
+eval "$(starship init zsh)"
+=======
+export STARSHIP_CONFIG=~/.config/starship-minimal.toml
+>>>>>>> 61bc4e2 (wip housekeeping.)
 
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
@@ -287,9 +294,8 @@ export GPG_TTY=$(tty)
 ||||||| parent of 03ceb14 (fix: housekeeping and alias clean up.)
 =======
 
-alias claude-archive='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-archive" claude'
-alias claude-hooks='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-hooks" claude'
-alias claude-poc='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-poc" claude'
+alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
+alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
 
 # <<< claude-multiprofile <<<
 
@@ -300,4 +306,10 @@ export GPG_TTY=$(tty)
 =======
 
 
+<<<<<<< HEAD
 >>>>>>> 75bb83c (fix: mise and global package clean up.)
+||||||| parent of 61bc4e2 (wip housekeeping.)
+=======
+
+source /Users/lcatlett/.config/broot/launcher/bash/br
+>>>>>>> 61bc4e2 (wip housekeeping.)
