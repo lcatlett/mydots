@@ -17,5 +17,3 @@ source ~/.orbstack/shell/init.bash 2>/dev/null || :
 [ -f "$HOME/.ok/env.sh" ] && . "$HOME/.ok/env.sh"
 # <<< open-knowledge cli <<<
 
-
-source /Users/lcatlett/.config/broot/launcher/bash/br

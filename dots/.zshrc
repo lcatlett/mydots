@@ -276,5 +276,3 @@ alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
 export GPG_TTY=$(tty)
 
 
-
-source /Users/lcatlett/.config/broot/launcher/bash/br
