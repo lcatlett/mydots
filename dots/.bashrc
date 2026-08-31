@@ -17,3 +17,5 @@ fi
 
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init bash)"; fi
 eval "$(COMPLETE=bash prek)"
+
+source /Users/lcatlett/.config/broot/launcher/bash/br

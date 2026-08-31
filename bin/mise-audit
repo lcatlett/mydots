@@ -240,6 +240,32 @@ else
   print_status ok "No hardcoded runtime paths found in config files"
 fi
 
+# Check 9: Dangling aube-backend symlinks (npm-backend tool trees + internal aube toolchain caches)
+echo "Checking for dangling aube symlinks..."
+DANGLING=""
+DANGLING_COUNT=0
+while IFS= read -r link; do
+    [[ -z "$link" ]] && continue
+    if [[ ! -e "$link" ]]; then
+        DANGLING_COUNT=$((DANGLING_COUNT + 1))
+        DANGLING+="  ${link} -> $(readlink "$link")\n"
+    fi
+done < <(find "${HOME}/.local/share/mise/installs" "${HOME}/.cache/aube/tools" \
+    -path "*/node_modules/.mise/*" -type l 2>/dev/null)
+
+if [[ "$DANGLING_COUNT" -gt 0 ]]; then
+    print_status error "$DANGLING_COUNT dangling aube symlink(s) found"
+    echo -e "$DANGLING"
+    log_issue "AUBE_DANGLING_SYMLINK" "Dangling symlinks into aube's npm-backend cache/store" \
+        "Count: $DANGLING_COUNT" \
+        "Fix for a declared npm: tool: mise install --force npm:<tool>" \
+        "Fix for an internal aube toolchain dir (e.g. node-gyp): rm -rf ~/.cache/aube/tools/<tool>, then retry the mise install/up that needs it" \
+        "NEVER delete the shared store (~/.cache/aube/virtual-store or ~/Library/Caches/mise/npm/aube/{cache,store}) to fix this - it breaks every tool referencing it, not just the target (2026-08-04 incident: 395 symlinks broke across 12 unrelated tools)"
+    ISSUES_FOUND=$((ISSUES_FOUND + 1))
+else
+    print_status ok "No dangling aube symlinks found"
+fi
+
 echo ""
 echo "=========================================="
 if [[ "$ISSUES_FOUND" -eq 0 ]]; then

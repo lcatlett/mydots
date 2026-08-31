@@ -1,11 +1,6 @@
 # mise global tool configuration
 # Managed by dotfiles — do not edit ~/.config/mise/config.toml directly.
 # Edit ~/dotfiles/mise/config.toml instead.
-#
-# Version pinning policy: tools use "latest" intentionally.
-# This dotfiles repo prioritizes current tools over reproducibility.
-# Reproducible pinned environments are managed per-project via
-# .mise.toml files in project roots (mybox will formalize this).
 
 [tools]
 bun = "latest"
@@ -17,9 +12,7 @@ python = ["3.11", "3.12", "3.13", "3.14"]
 "github:lcatlett/php" = ["8.2", "8.3", "8.4"]
 uv = "latest"
 bat = "latest"
-eza = "latest"
-fd = "latest"
-fzf = "latest"
+"cargo:eza" = "latest"
 jq = "latest"
 delta = "latest"
 hyperfine = "latest"
@@ -36,11 +29,10 @@ shellcheck = "latest"
 hadolint = "latest"
 tmux = "latest"
 gum = "latest"
-cmake = "latest"
+"github:Kitware/CMake" = "latest"
 yq = "latest"
 "github:BurntSushi/ripgrep" = "latest"
 gemini-cli = "latest"
-"github:Canop/broot" = "latest"
 "github:fletcher/MultiMarkdown-6" = "latest"
 markdownlint-cli2 = "latest"
 mkcert = "latest"
@@ -49,8 +41,8 @@ tflint = "latest"
 usage = "latest"
 ruby = "latest"
 rclone = "latest"
-"aqua:simeji/jid" = "latest"
-"aqua:GoogleCloudPlatform/berglas" = "latest"
+"github:simeji/jid" = "latest"
+"github:GoogleCloudPlatform/berglas" = "latest"
 rust = "latest"
 "go:golang.org/x/tools/gopls" = "latest"
 "cargo:mcfly" = "latest"
@@ -66,17 +58,13 @@ rust = "latest"
 "npm:claudecto" = "latest"
 "npm:claudepluginhub" = "latest"
 "npm:claudish" = "latest"
-"npm:okfy-ai" = "latest"
 "npm:pnpm" = "latest"
 "npm:prettier" = "latest"
 "npm:pyright" = "latest"
 "npm:typescript" = "latest"
 "npm:@agentclientprotocol/claude-agent-acp" = "latest"
 "npm:@code-insights/cli" = "latest"
-"npm:@jackwener/opencli" = "latest"
 "npm:@playwright/cli" = "latest"
-
-"pipx:aider-chat" = { version = "latest", uvx_args = "--with pip" }
 "pipx:basedpyright" = "latest"
 "pipx:claude-code-transcripts" = "latest"
 "pipx:claude-file-recovery" = "latest"
@@ -91,27 +79,36 @@ rust = "latest"
 "pipx:notebooklm-mcp-cli" = { version = "latest", minimum_release_age = "0d" }
 "pipx:ruff" = "latest"
 "pipx:shot-scraper" = "latest"
-"pipx:spec-kitty-cli" = "latest"
-"pipx:spec-kitty-orchestrator" = "latest"
 "npm:tsup" = "latest"
 prek = "latest"
-atuin = "latest"
 "go:github.com/wtfutil/wtf" = "latest"
 "npm:claude-multiprofile" = { version = "latest", minimum_release_age = "0d" } 
 "cargo:miseo" = "latest"
-"npm:@agentmemory/agentmemory" = "latest"
 pipx = "latest"
 "npm:explainmyrepo" = "latest"
-"github:coleam00/Archon" = "latest"
+"github:coleam00/Archon" = { version = "latest", minimum_release_age = "0d" } 
 "github:anthropics/claude-code" = { version = "latest", minimum_release_age = "0d" }
 "npm:@roomi-fields/notebooklm-mcp" = { version = "latest", minimum_release_age = "0d" } 
-"pipx:rtfm-ai" = "latest"
+"pipx:rtfm-ai" = { version = "latest", minimum_release_age = "0d" }
 "npm:wcmd" = "latest"
-"npm:@firecrawl/anydoc" = "latest"
-"npm:@opengsd/gsd-core" = "latest"
+"npm:@opengsd/gsd-core" = { version = "latest", minimum_release_age = "0d" } 
 "pipx:skilllint" = "latest"
 "npm:@lancedb/lancedb" = "latest"
-
+"npm:jsonrepair" = "latest"
+"npm:tsx" = "latest"
+"cargo:starship" = "latest"
+"github:sharkdp/bat" = "latest"
+"github:ajeetdsouza/zoxide" = "latest"
+"github:atuinsh/atuin" = "latest"
+"npm:skills" = "latest"
+"cargo:broot" = "latest"
+"npm:@mvanhorn/printing-press-library" = "latest"
+"go:github.com/mvanhorn/cli-printing-press/cmd/printing-press" = "latest"
+"npm:@google/gemini-cli" = "latest"
+"go:github.com/afadesigns/zshellcheck/cmd/zshellcheck" = "latest"
+"pipx:claude-conversation-extractor" = "latest"
+"pipx:detect-secrets" = "latest"
+"pipx:mcp-scan" = "latest"
 
 [env]
 UV_PYTHON_PREFERENCE = "only-system"
@@ -119,10 +116,9 @@ UV_PYTHON_DOWNLOADS  = "never"
 
 [settings]
 python.uv_venv_auto = "source"
-# or, to create if missing
-# python.uv_venv_auto = "create|source"
 experimental = true
 lockfile = false
+
 
 [settings.ruby]
 compile = false
@@ -130,15 +126,10 @@ compile = false
 [settings.pipx]
 uvx = true
 
-[settings.npm]
-
-
 [bootstrap.brew.taps]
 "agent-ecosystem/tap" = "https://github.com/agent-ecosystem/homebrew-tap.git"
-"coleam00/archon" = "https://github.com/coleam00/homebrew-archon.git"
 "gentleman-programming/tap" = "https://github.com/gentleman-programming/homebrew-tap.git"
 "multica-ai/tap" = "https://github.com/multica-ai/homebrew-tap.git"
-"surrealdb/tap" = "https://github.com/surrealdb/homebrew-tap.git"
 "timrogers/tap" = "https://github.com/timrogers/homebrew-tap.git"
 "tsonglew/dutis" = "https://github.com/tsonglew/homebrew-dutis.git"
 "waydabber/betterdisplay" = "https://github.com/waydabber/homebrew-betterdisplay.git"
@@ -146,7 +137,6 @@ uvx = true
 [bootstrap.packages]
 "brew:apfel" = "latest"
 "brew:apr-util" = "latest"
-"brew:coleam00/archon/archon" = "latest"
 "brew:autoconf" = "latest"
 "brew:automake" = "latest"
 "brew:bash" = "latest"
@@ -250,8 +240,6 @@ uvx = true
 "brew:shfmt" = "latest"
 "brew:agent-ecosystem/tap/skill-validator" = "latest"
 "brew:srt" = "latest"
-"brew:surrealdb/tap/surreal" = "latest"
-"brew:tag" = "latest"
 "brew:tesseract" = "latest"
 "brew:tree" = "latest"
 "brew:unbound" = "latest"
@@ -267,11 +255,6 @@ uvx = true
 "brew:zsh-syntax-highlighting" = "latest"
 "brew:zstd" = "latest"
 
-
-
 [settings.github]
 use_git_credentials = true
 credential_command = 'gh auth token --hostname "$MISE_CREDENTIAL_HOST"'
-
-
-

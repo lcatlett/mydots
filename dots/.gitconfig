@@ -282,3 +282,10 @@
 	gpgSign = true
 [gpg]
 	program = gpg
+[maintenance]
+	repo = /Users/lcatlett/scripts/tools/AI-fundamentals
+	repo = /Users/lcatlett/.claude-akamai
+	repo = /Users/lcatlett/projects/recovery/dock/notes/brain/ps-framework/demo/output/csmedia-audit-workspace/csmediad8
+	repo = /Users/lcatlett/projects/meta-lindsey
+	repo = /Users/lcatlett/.claude-v3.archived.20260522-112329
+	repo = /Users/lcatlett/.claude/plugins/marketplaces/autoharness
