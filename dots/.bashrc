@@ -19,3 +19,7 @@ if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init bash
 eval "$(COMPLETE=bash prek)"
 
 source /Users/lcatlett/.config/broot/launcher/bash/br
+
+# >>> contextlattice tools >>>
+export PATH="$HOME/.contextlattice/bin:$PATH"
+# <<< contextlattice tools <<<

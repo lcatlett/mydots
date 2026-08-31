@@ -116,7 +116,6 @@ fi
 # but the binary path is NOT added to PATH — mise shims handle resolution.
 export BUN_INSTALL="$HOME/.bun"
 
-export PATH
 
 # --- GPG agent handling ---
 # GPG agent for commit signing only — SSH auth is handled by macOS launchd agent
@@ -233,6 +232,11 @@ if command -v wt >/dev/null 2>&1;
  then eval "$(command wt config shell init zsh)";
 fi
 
+# --- broot integration ---
+if command -v broot >/dev/null 2>&1; then
+  source /Users/lcatlett/.config/broot/launcher/bash/br
+fi
+
 # Suppress punycode deprecation noise from legacy npm packages.
 # Scoped to --no-deprecation rather than blanket silencing so real warnings surface.
 # Remove once upstream packages (e.g. inflight, glob) ship Node 22-compatible versions.
@@ -257,6 +261,7 @@ if command -v zoxide &>/dev/null; then
   eval "$(zoxide init zsh)"
 fi
 
+
 # --- atuin (shell history; binds ^R) ---
 # Guarded like the other integrations above: unguarded, a missing or broken atuin
 # prints an error on every prompt. Install is mise-managed — never via
@@ -277,4 +282,4 @@ export GPG_TTY=$(tty)
 
 
 
-source /Users/lcatlett/.config/broot/launcher/bash/br
+
