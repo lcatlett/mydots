@@ -223,14 +223,7 @@ eval "$(mise activate zsh)"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # --- Starship prompt ---
-<<<<<<< HEAD
 export STARSHIP_CONFIG=~/.config/starship.toml
-||||||| parent of 61bc4e2 (wip housekeeping.)
-export STARSHIP_CONFIG=~/.config/starship-minimal.toml
-eval "$(starship init zsh)"
-=======
-export STARSHIP_CONFIG=~/.config/starship-minimal.toml
->>>>>>> 61bc4e2 (wip housekeeping.)
 
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
@@ -240,7 +233,6 @@ fi
 if command -v wt >/dev/null 2>&1;
  then eval "$(command wt config shell init zsh)";
 fi
-
 
 
 # Suppress punycode deprecation noise from legacy npm packages.
@@ -279,36 +271,15 @@ fi
 # >>> claude-multiprofile >>>
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
-<<<<<<< HEAD
+
 # updated 2026-09-21T19:44:42.739Z
 
 alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
 alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
 alias claude-secondary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-secondary" claude'
 
-# <<< claude-multiprofile <<<
 
 export GPG_TTY=$(tty)
 
 
-||||||| parent of 03ceb14 (fix: housekeeping and alias clean up.)
-=======
 
-alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
-
-# <<< claude-multiprofile <<<
-
-export GPG_TTY=$(tty)
-<<<<<<< HEAD
->>>>>>> 03ceb14 (fix: housekeeping and alias clean up.)
-||||||| parent of 75bb83c (fix: mise and global package clean up.)
-=======
-
-
-<<<<<<< HEAD
->>>>>>> 75bb83c (fix: mise and global package clean up.)
-||||||| parent of 61bc4e2 (wip housekeeping.)
-=======
-
-source /Users/lcatlett/.config/broot/launcher/bash/br
->>>>>>> 61bc4e2 (wip housekeeping.)
