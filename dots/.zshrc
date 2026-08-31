@@ -295,7 +295,6 @@ export GPG_TTY=$(tty)
 =======
 
 alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
-alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
 
 # <<< claude-multiprofile <<<
 
