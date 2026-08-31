@@ -1,7 +1,7 @@
    # Ghostty config
    # Docs: ghostty +show-config --default --docs
 
-   font-family = "FiraCode Nerd Font"
+   font-family = "Maple Mono NF Regular"
    font-size = 14
 
    # tmux compatibility

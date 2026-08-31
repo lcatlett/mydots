@@ -108,6 +108,10 @@ pipx = "latest"
 "npm:@mvanhorn/printing-press-library" = "latest"
 "go:github.com/mvanhorn/cli-printing-press/cmd/printing-press" = "latest"
 "npm:@google/gemini-cli" = "latest"
+"go:github.com/afadesigns/zshellcheck/cmd/zshellcheck" = "latest"
+"pipx:claude-conversation-extractor" = "latest"
+"pipx:detect-secrets" = "latest"
+"pipx:mcp-scan" = "latest"
 
 [env]
 UV_PYTHON_PREFERENCE = "only-system"

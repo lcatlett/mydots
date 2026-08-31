@@ -40,3 +40,4 @@ dotfiles-audits/*
 ai-artifacts/*
 
 .vscode/
+repos/

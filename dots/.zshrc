@@ -270,7 +270,6 @@ fi
 # Run `claude-multiprofile list` to see what's configured.
 
 alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
-alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
 
 # <<< claude-multiprofile <<<
 
