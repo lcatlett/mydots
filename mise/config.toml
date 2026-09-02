@@ -53,7 +53,7 @@ rust = "latest"
 "npm:ccusage" = "latest"
 "npm:chrome-devtools-mcp" = "latest"
 "npm:claude-code-analytics" = "latest"
-"npm:claude-code-ultimate-guide-mcp" = "latest"
+"npm:claude-code-ultimate-guide-mcp" =  { version = "latest", minimum_release_age = "0d" }
 "npm:claude-replay" = "latest"
 "npm:claudecto" = "latest"
 "npm:claudepluginhub" = "latest"
@@ -113,6 +113,7 @@ pipx = "latest"
 [env]
 UV_PYTHON_PREFERENCE = "only-system"
 UV_PYTHON_DOWNLOADS  = "never"
+MISE_NPM_PACKAGE_MANAGER = "npm"
 
 [settings]
 python.uv_venv_auto = "source"
