@@ -18,4 +18,4 @@ source ~/.orbstack/shell/init.bash 2>/dev/null || :
 # <<< open-knowledge cli <<<
 
 
-source /Users/lcatlett/.config/broot/launcher/bash/br
+
