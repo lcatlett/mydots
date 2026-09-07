@@ -86,7 +86,6 @@ prek = "latest"
 "cargo:miseo" = "latest"
 pipx = "latest"
 "npm:explainmyrepo" = "latest"
-"github:coleam00/Archon" = { version = "latest", minimum_release_age = "0d" } 
 "github:anthropics/claude-code" = { version = "latest", minimum_release_age = "0d" }
 "npm:@roomi-fields/notebooklm-mcp" = { version = "latest", minimum_release_age = "0d" } 
 "pipx:rtfm-ai" = { version = "latest", minimum_release_age = "0d" }
@@ -101,7 +100,6 @@ pipx = "latest"
 "github:ajeetdsouza/zoxide" = "latest"
 "github:atuinsh/atuin" = "latest"
 "npm:skills" = "latest"
-"cargo:broot" = "latest"
 "npm:@mvanhorn/printing-press-library" = "latest"
 "go:github.com/mvanhorn/cli-printing-press/cmd/printing-press" = "latest"
 "npm:@google/gemini-cli" = "latest"
@@ -109,6 +107,9 @@ pipx = "latest"
 "pipx:claude-conversation-extractor" = "latest"
 "pipx:detect-secrets" = "latest"
 "pipx:mcp-scan" = "latest"
+"npm:openwiki" = "latest"
+hunk = "latest"
+"npm:git-file-history" = "latest"
 
 [env]
 UV_PYTHON_PREFERENCE = "only-system"

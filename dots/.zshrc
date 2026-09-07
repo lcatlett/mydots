@@ -232,10 +232,7 @@ if command -v wt >/dev/null 2>&1;
  then eval "$(command wt config shell init zsh)";
 fi
 
-# --- broot integration ---
-if command -v broot >/dev/null 2>&1; then
-  source /Users/lcatlett/.config/broot/launcher/bash/br
-fi
+
 
 # Suppress punycode deprecation noise from legacy npm packages.
 # Scoped to --no-deprecation rather than blanket silencing so real warnings surface.

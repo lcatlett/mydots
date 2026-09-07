@@ -41,7 +41,7 @@
 	# prevent crlf (then you will have to deal with the problem -- dos2unix, etc)
 	#safecrlf = true
 	editor = vim
-	pager = delta
+	pager = hunk pager
 	packedGitLimit = 1024m
 	packedGitWindowSize = 512m
 	compression = 1
