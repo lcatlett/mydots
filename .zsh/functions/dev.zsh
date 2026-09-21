@@ -70,6 +70,20 @@ git_exclude() {
   echo "Added '$1' to $exclude_file"
 }
 
+git_ignore() {
+  if [ -z "$1" ]; then
+    echo "Please specify a file or pattern."
+    return 1
+  fi
+
+  if ! grep -Fxq "$1" .gitignore 2>/dev/null; then
+    echo "$1" >> .gitignore
+    echo "Added '$1' to .gitignore"
+  else
+    echo "'$1' is already in .gitignore"
+  fi
+}
+
 # gde: git diff exclude files or folders
 gde() {
   if [[ -z "$1" ]]; then
@@ -404,7 +418,7 @@ kill-runaway() {
 }
 
 # chrome-profile: Launch Google Chrome with a specific user profile and remote debugging port
-# examples: 
+# examples:
 # chrome-profile nlm 9222
 # chrome-profile opencli 9223
 
@@ -479,5 +493,3 @@ rotate_api_key() {
 
   echo "$key_name rotated successfully."
 }
-
-

@@ -217,11 +217,13 @@ fi
 # --- Activate mise (hook-based PATH management for all managed tools) ---
 eval "$(mise activate zsh)"
 
+
+
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # --- Starship prompt ---
-export STARSHIP_CONFIG=~/.config/starship-minimal.toml
+export STARSHIP_CONFIG=~/.config/starship.toml
 
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
@@ -270,13 +272,14 @@ fi
 # >>> claude-multiprofile >>>
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
+# updated 2026-09-21T19:44:42.739Z
 
 alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
+alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
+alias claude-secondary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-secondary" claude'
 
 # <<< claude-multiprofile <<<
 
 export GPG_TTY=$(tty)
-
-
 
 
