@@ -217,11 +217,13 @@ fi
 # --- Activate mise (hook-based PATH management for all managed tools) ---
 eval "$(mise activate zsh)"
 
+
+
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # --- Starship prompt ---
-export STARSHIP_CONFIG=~/.config/starship-minimal.toml
+export STARSHIP_CONFIG=~/.config/starship.toml
 
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
@@ -233,12 +235,11 @@ if command -v wt >/dev/null 2>&1;
 fi
 
 
-
 # Suppress punycode deprecation noise from legacy npm packages.
 # Scoped to --no-deprecation rather than blanket silencing so real warnings surface.
 # Remove once upstream packages (e.g. inflight, glob) ship Node 22-compatible versions.
 export NODE_OPTIONS="--no-deprecation"
-export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+#export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
 # Keep near the end — re-registers the bracketed-paste widget after the zle
@@ -271,12 +272,14 @@ fi
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
 
-alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
+# updated 2026-09-21T19:44:42.739Z
 
-# <<< claude-multiprofile <<<
+alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
+alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
+alias claude-secondary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-secondary" claude'
+
 
 export GPG_TTY=$(tty)
-
 
 
 

@@ -3,3 +3,6 @@
 [[ -d "$HOME/.local/share/mise/shims" ]] && export PATH="$HOME/.local/share/mise/shims:$PATH"
 [[ -d /opt/homebrew/bin ]] && export PATH="/opt/homebrew/bin:$PATH"
 export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
+
+
+export MEM0_API_KEY="$(security find-generic-password -a "$USER" -s "MEM0_API_KEY" -w 2>/dev/null)"

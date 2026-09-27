@@ -81,7 +81,6 @@ rust = "latest"
 "pipx:shot-scraper" = "latest"
 "npm:tsup" = "latest"
 prek = "latest"
-"go:github.com/wtfutil/wtf" = "latest"
 "npm:claude-multiprofile" = { version = "latest", minimum_release_age = "0d" } 
 "cargo:miseo" = "latest"
 pipx = "latest"
@@ -90,7 +89,6 @@ pipx = "latest"
 "npm:@roomi-fields/notebooklm-mcp" = { version = "latest", minimum_release_age = "0d" } 
 "pipx:rtfm-ai" = { version = "latest", minimum_release_age = "0d" }
 "npm:wcmd" = "latest"
-"npm:@opengsd/gsd-core" = { version = "latest", minimum_release_age = "0d" } 
 "pipx:skilllint" = "latest"
 "npm:@lancedb/lancedb" = "latest"
 "npm:jsonrepair" = "latest"
@@ -110,11 +108,21 @@ pipx = "latest"
 "npm:openwiki" = "latest"
 hunk = "latest"
 "npm:git-file-history" = "latest"
+"cargo:tre-command" = "latest"
+"pipx:copier" = "latest"
+"pipx:linode-cli" = "latest"
+kind = "latest"
+"pipx:claude-ctx" = "latest"
+"gem:okf" = "latest"
+"npm:shardmind" = "latest"
 
 [env]
 UV_PYTHON_PREFERENCE = "only-system"
 UV_PYTHON_DOWNLOADS  = "never"
 MISE_NPM_PACKAGE_MANAGER = "npm"
+
+[env._]
+path = '["/Users/lcatlett/scripts/tools/archon/bin"]'
 
 [settings]
 python.uv_venv_auto = "source"
