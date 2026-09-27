@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# rmdup — find duplicate files using SHA-256 (macOS & Linux compatible)
+set -euo pipefail
+
+DIR="${1:-.}"
+DELETE="${2:-}"
+
+echo "Scanning for duplicates in: $DIR"
+echo ""
+
+TMP_INDEX="$(mktemp /tmp/rmdup.XXXXXX)"
+trap 'rm -f "$TMP_INDEX"' EXIT
+
+find "$DIR" -maxdepth 1 -type f -exec shasum -a 256 {} + 2>/dev/null | sort > "$TMP_INDEX"
+
+DUPES=()
+PREV_HASH=""
+PREV_FILE=""
+
+while read -r hash file; do
+    if [[ "$hash" == "$PREV_HASH" ]]; then
+        DUPES+=("$file")
+        echo "  DUP  $file"
+        echo "  OF   $PREV_FILE"
+        echo ""
+    else
+        PREV_HASH="$hash"
+        PREV_FILE="$file"
+    fi
+done < "$TMP_INDEX"
+
+if [[ ${#DUPES[@]} -eq 0 ]]; then
+    echo "No duplicates found."
+    exit 0
+fi
+
+echo "Found ${#DUPES[@]} duplicate(s)."
+if [[ "$DELETE" == "--delete" ]]; then
+    for f in "${DUPES[@]}"; do
+        rm -v "$f"
+    done
+    echo "Deleted ${#DUPES[@]} duplicate(s)."
+else
+    echo "Run with --delete to remove duplicates."
+fi

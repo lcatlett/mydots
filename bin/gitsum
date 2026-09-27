@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# gitsum — git repo status summary
+set -euo pipefail
+
+BOLD='\033[1m'
+CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
+GREEN='\033[0;32m'
+RESET='\033[0m'
+if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    echo "Not inside a git repository." >&2
+    exit 1
+fi
+ROOT=$(git rev-parse --show-toplevel)
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)
+REMOTE=$(git remote 2>/dev/null | head -1)
+echo -e "${BOLD}Repository:${RESET} $(basename "$ROOT")"
+echo -e "${BOLD}Branch:${RESET}     ${CYAN}${BRANCH}${RESET}"
+# Ahead/behind tracking
+if [[ -n "$REMOTE" ]]; then
+    TRACKING=$(git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref HEAD 2>/dev/null)" 2>/dev/null)
+    if [[ -n "$TRACKING" ]]; then
+        AHEAD=$(git rev-list "${TRACKING}..HEAD" --count 2>/dev/null || echo 0)
+        BEHIND=$(git rev-list "HEAD..${TRACKING}" --count 2>/dev/null || echo 0)
+        echo -e "${BOLD}Remote:${RESET}     ${REMOTE} (↑${AHEAD} ↓${BEHIND})"
+    fi
+fi
+echo ""
+echo -e "${BOLD}Working tree:${RESET}"
+STATUS=$(git status --short)
+if [[ -z "$STATUS" ]]; then
+    echo -e "  ${GREEN}Clean${RESET}"
+else
+    echo "$STATUS" | sed 's/^/  /'
+fi
+echo ""
+echo -e "${BOLD}Recent commits:${RESET}"
+git log --oneline --graph --decorate -8
+echo ""
+echo -e "${BOLD}Stash:${RESET} $(git stash list 2>/dev/null | wc -l) entries"

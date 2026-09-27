@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# portcheck — show listening ports with owning process via lsof (macOS)
+set -euo pipefail
+
+if [[ $# -eq 1 ]]; then
+    echo "Inspecting port $1:"
+    lsof -nP -iTCP:"$1" -sTCP:LISTEN 2>/dev/null || echo "No process listening on port $1"
+else
+    echo "All listening TCP ports:"
+    echo ""
+    lsof -nP -iTCP -sTCP:LISTEN
+fi

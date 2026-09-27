@@ -88,3 +88,12 @@ ramsi() {
   fi
   sed -i '' -E "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" "$1"
 }
+
+# Create directory and enter it
+mkcd() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: mkcd <directory_path>" >&2
+        return 1
+    fi
+    mkdir -p -- "$1" && cd -- "$1"
+}

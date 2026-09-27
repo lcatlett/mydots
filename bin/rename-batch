@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# rename-batch — bulk rename files using find-and-replace on filenames
+# Usage: rename-batch <find> <replace> [directory]
+set -euo pipefail
+
+FIND="${1:-}"
+REPLACE="${2:-}"
+DIR="${3:-.}"
+if [[ -z "$FIND" || -z "$REPLACE" ]]; then
+    echo "Usage: rename-batch <find> <replace> [directory]" >&2
+    echo "  Replaces all occurrences of <find> in filenames under [directory]" >&2
+    echo "  Example: rename-batch ' ' '_' ./downloads" >&2
+    exit 1
+fi
+COUNT=0
+while IFS= read -r -d '' file; do
+    dir=$(dirname "$file")
+    base=$(basename "$file")
+    newbase="${base//"$FIND"/"$REPLACE"}"
+    if [[ "$base" != "$newbase" ]]; then
+        mv -- "$file" "$dir/$newbase"
+        echo "  $base  →  $newbase"
+        (( COUNT++ ))
+    fi
+done < <(find "$DIR" -maxdepth 1 -type f -print0 | sort -z)
+echo ""
+echo "Renamed $COUNT file(s)."
