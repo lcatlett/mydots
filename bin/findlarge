@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# findlarge — find largest files under a path (macOS & Linux compatible)
+set -euo pipefail
+
+DIR="${1:-.}"
+MIN_MB="${2:-100}"
+COUNT="${3:-20}"
+
+echo "Finding files larger than ${MIN_MB}MB under ${DIR}..."
+echo ""
+
+find "$DIR" -type f -size +"${MIN_MB}M" -exec du -m {} + 2>/dev/null \
+    | sort -rn \
+    | head -n "$COUNT" \
+    | awk '{
+        size=$1
+        path=$2
+        if (size >= 1024)
+            printf "  %7.2f GB  %s\n", size/1024, path
+        else
+            printf "  %7.2f MB  %s\n", size, path
+    }'
