@@ -240,7 +240,7 @@ fi
 # Scoped to --no-deprecation rather than blanket silencing so real warnings surface.
 # Remove once upstream packages (e.g. inflight, glob) ship Node 22-compatible versions.
 export NODE_OPTIONS="--no-deprecation"
-export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
+#export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
 # Keep near the end — re-registers the bracketed-paste widget after the zle
