@@ -54,3 +54,5 @@ scratch/
 !.gitkeep
 .rtfm/
 .claude/autoharness/
+
+**/.claude/.cc-writes/

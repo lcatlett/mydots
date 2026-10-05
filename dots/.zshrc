@@ -271,15 +271,16 @@ fi
 # >>> claude-multiprofile >>>
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
+# updated 2026-09-29T17:57:07.723Z
 
-# updated 2026-09-21T19:44:42.739Z
-
+alias claude-blank='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-blank" claude'
 alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
 alias claude-primary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-primary" claude'
 alias claude-secondary='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-secondary" claude'
+alias claude-ship-it='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-ship-it" claude'
+
+# <<< claude-multiprofile <<<
 
 
-export GPG_TTY=$(tty)
-
-
-
+# Claudia shell helpers (`claudia` from anywhere; `claudia codex|claude|grok|voice` selects a surface)
+[ -f "$HOME/.claudia/shell-init.sh" ] && source "$HOME/.claudia/shell-init.sh"

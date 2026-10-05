@@ -9,7 +9,13 @@
 #     even though the API key itself is exported shell-wide by ~/.exports.
 #   - CLAUDE_CONFIG_DIR is inherited, not overridden: both accounts share the same
 #     plugins, skills, hooks, settings and history. Profile switching is independent.
-#   - NODE_EXTRA_CA_CERTS is scoped to the one process, not every Node app on the box.
+#   - NODE_EXTRA_CA_CERTS is scoped to the one process, not every Node app on the box,
+#     and only set when the file exists: the native binary already trusts the macOS
+#     store (CLAUDE_CODE_CERT_STORE defaults to bundled,system), so the file is a
+#     fallback for npm installs on Node < 22.15. Verified 2026-09-30.
+#
+# Shareable general-user version (setup, VS Code, IT-script cleanup):
+#   ../akamai-claude-setup/, published at git.source.akamai.com ~lcatlett/toolbox.
 #
 # SECRETS: keychain-backed, matching the existing ~/.exports pattern — the secret value
 # lives only in the macOS Keychain; the dotfile holds a lookup, never a value.
@@ -32,14 +38,16 @@
 # ---- configuration -----------------------------------------------------------
 : ${AKAMAI_CLAUDE_CA_FILE:="$HOME/certs/trusted_certs.pem"}
 : ${AKAMAI_CLAUDE_BASE_URL:="https://claude-llm.dash.akamai.com/apim/claude"}
-# Gateway deployment name. EMPTY BY DEFAULT — no --model flag is passed, so the gateway
-# serves its own default. Set this once you know a valid deployment name:
-#   export AKAMAI_CLAUDE_MODEL="<name>"      (in ~/.exports, or per-invocation)
-#
-# Note: the IT setup script hardcodes "claude-sonnet-4-6", which is not a valid Claude
-# model id in any provider — current models are the Claude 5 family (claude-opus-5,
-# claude-sonnet-5) and claude-haiku-4-5-20251001. Do not copy that value.
+# Starting model. EMPTY BY DEFAULT: no --model flag, so Claude Code picks (the opus
+# alias in the CLI, sonnet in VS Code). Set e.g. AKAMAI_CLAUDE_MODEL=sonnet to override.
 : ${AKAMAI_CLAUDE_MODEL:=""}
+# What the opus/sonnet/haiku aliases resolve to. Without these pins Claude Code uses
+# its built-in Foundry defaults, and `opus` means claude-opus-4-6. Gateway deployments
+# verified 2026-09-30: claude-opus-{5-5,5,4-8,4-7,4-6,4-5},
+# claude-sonnet-{5-5,5,4-6,4-5}, claude-haiku-4-5 (the dated -20251001 id 404s).
+: ${AKAMAI_CLAUDE_OPUS_MODEL:="claude-opus-5-5"}
+: ${AKAMAI_CLAUDE_SONNET_MODEL:="claude-sonnet-5-5"}
+: ${AKAMAI_CLAUDE_HAIKU_MODEL:="claude-haiku-4-5"}
 
 # ---- Akamai / Foundry --------------------------------------------------------
 claude-akamai() {
@@ -66,26 +74,31 @@ claude-akamai() {
     return 1
   fi
 
-  if [[ ! -r "$AKAMAI_CLAUDE_CA_FILE" ]]; then
-    print -ru2 -- "claude-akamai: CA bundle not readable at $AKAMAI_CLAUDE_CA_FILE"
-    print -ru2 -- "  Node ignores the macOS keychain, so the corporate CA must be passed explicitly."
-    print -ru2 -- "  Override with: AKAMAI_CLAUDE_CA_FILE=/path/to/bundle claude-akamai"
-    return 1
-  fi
+  local -a ca=()
+  [[ -r "$AKAMAI_CLAUDE_CA_FILE" ]] && ca=(NODE_EXTRA_CA_CERTS="$AKAMAI_CLAUDE_CA_FILE")
 
   # CLAUDE_CONFIG_DIR is deliberately NOT set — inherited from the shell, so account
   # switching and config-dir switching stay independent. Both accounts share whatever
   # config dir is active: same plugins, skills, hooks, settings and history.
   #
-  # Everything set here dies with the process.
-  env -u CLAUDE_CODE_OAUTH_TOKEN CLAUDE_CODE_USE_FOUNDRY=1 \
+  # Also cleared: ANTHROPIC_FOUNDRY_AUTH_TOKEN outranks the API key, and the other
+  # provider selectors would compete with Foundry. Everything set here dies with the
+  # process.
+  env -u CLAUDE_CODE_OAUTH_TOKEN -u ANTHROPIC_FOUNDRY_AUTH_TOKEN \
+      -u ANTHROPIC_FOUNDRY_RESOURCE -u CLAUDE_CODE_SKIP_FOUNDRY_AUTH \
+      -u CLAUDE_CODE_USE_BEDROCK -u CLAUDE_CODE_USE_VERTEX -u CLAUDE_CODE_USE_MANTLE \
+      -u CLAUDE_CODE_USE_ANTHROPIC_AWS -u ANTHROPIC_LOG \
+      CLAUDE_CODE_USE_FOUNDRY=1 \
       ANTHROPIC_FOUNDRY_API_KEY="$key" \
       ANTHROPIC_FOUNDRY_BASE_URL="$AKAMAI_CLAUDE_BASE_URL" \
       ANTHROPIC_CUSTOM_HEADERS="user-id: ${AKAMAI_CLAUDE_USER_ID}" \
-      NODE_EXTRA_CA_CERTS="$AKAMAI_CLAUDE_CA_FILE" \
+      ANTHROPIC_DEFAULT_OPUS_MODEL="$AKAMAI_CLAUDE_OPUS_MODEL" \
+      ANTHROPIC_DEFAULT_SONNET_MODEL="$AKAMAI_CLAUDE_SONNET_MODEL" \
+      ANTHROPIC_DEFAULT_HAIKU_MODEL="$AKAMAI_CLAUDE_HAIKU_MODEL" \
+      "${ca[@]}" \
       CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING=1 \
       ${AKAMAI_CLAUDE_DEBUG:+ANTHROPIC_LOG=debug} \
-      command claude ${AKAMAI_CLAUDE_MODEL:+--model "$AKAMAI_CLAUDE_MODEL"} "$@"
+      command claude ${AKAMAI_CLAUDE_MODEL:+--model} ${AKAMAI_CLAUDE_MODEL:+"$AKAMAI_CLAUDE_MODEL"} "$@"
 }
 
 # ---- personal Max / OAuth ----------------------------------------------------
@@ -102,6 +115,7 @@ claude-akamai() {
 claude-max() {
   emulate -L zsh
   env -u CLAUDE_CODE_USE_FOUNDRY -u ANTHROPIC_FOUNDRY_API_KEY \
+      -u ANTHROPIC_FOUNDRY_AUTH_TOKEN -u CLAUDE_CODE_SKIP_FOUNDRY_AUTH \
       -u ANTHROPIC_FOUNDRY_BASE_URL -u ANTHROPIC_FOUNDRY_RESOURCE \
       -u ANTHROPIC_CUSTOM_HEADERS -u NODE_EXTRA_CA_CERTS \
       -u ANTHROPIC_LOG -u CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING \
@@ -141,7 +155,8 @@ claude-whoami() {
     || print -r -- "  user-id:     MISSING — add AKAMAI_CLAUDE_USER_ID to ~/.exports"
   [[ -r "$AKAMAI_CLAUDE_CA_FILE" ]] \
     && print -r -- "  CA bundle:   $AKAMAI_CLAUDE_CA_FILE" \
-    || print -r -- "  CA bundle:   MISSING ($AKAMAI_CLAUDE_CA_FILE)"
+    || print -r -- "  CA bundle:   not found ($AKAMAI_CLAUDE_CA_FILE); OK, macOS store is used"
   print -r -- "  config dir:  ${CLAUDE_CONFIG_DIR:-~/.claude (inherited)}"
-  print -r -- "  model:       ${AKAMAI_CLAUDE_MODEL:-<gateway default>}"
+  print -r -- "  model:       ${AKAMAI_CLAUDE_MODEL:-<Claude Code default>}"
+  print -r -- "  aliases:     opus=$AKAMAI_CLAUDE_OPUS_MODEL sonnet=$AKAMAI_CLAUDE_SONNET_MODEL haiku=$AKAMAI_CLAUDE_HAIKU_MODEL"
 }
