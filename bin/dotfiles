@@ -36,7 +36,9 @@ sub_help () {
     echo "   brew             Run brew script"
     echo "   hosts            Run hosts script"
     echo "   codex-check      Validate tracked and live Codex config without printing values"
+    echo "   codex-preflight  List MCP key and variable names the release would drop; fails on unaccepted drops"
     echo "   codex-release    Dry-run Codex config copy; pass --apply to write ~/.codex/config.toml"
+    echo "   codex-redact     Copy stdin to stdout with secret-shaped material replaced"
     echo "   defaults         Run MacOS defaults script"
     echo "   osxextended      Run MacOS extended config script"
     echo "   dock             Run MacOS dock script"
@@ -92,6 +94,13 @@ sub_codex-check () {
     "$checker" drift --source "$source" --live "$live" || true
 }
 
+sub_codex-preflight () {
+    "$DOTFILES_DIR/bin/codex-config" preflight \
+        --live "${CODEX_CONFIG_TARGET:-$HOME/.codex/config.toml}" \
+        --source "$DOTFILES_DIR/codex/config.toml" \
+        "$@"
+}
+
 sub_codex-release () {
     local target
     target="${CODEX_CONFIG_TARGET:-$HOME/.codex/config.toml}"
@@ -100,6 +109,10 @@ sub_codex-release () {
         --policy "$DOTFILES_DIR/codex/policy.toml" \
         --target "$target" \
         "$@"
+}
+
+sub_codex-redact () {
+    "$DOTFILES_DIR/bin/codex-config" redact
 }
 
 sub_defaults () {

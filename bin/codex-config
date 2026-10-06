@@ -4,10 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import itertools
+import math
 import os
 import re
 import sys
 import tempfile
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -19,13 +22,41 @@ SECRET_KEY = re.compile(
     r"(?i)(api[_-]?key|token|secret|password|authorization|credential)"
 )
 SECRET_VALUE_PATTERNS = (
-    re.compile(r"(?i)\bBearer\s+\S+"),
+    # Eight characters, so Codex's own "Bearer token" auth status is not a hit.
+    re.compile(r"(?i)\bBearer\s+\S{8,}"),
     re.compile(r"sk-[A-Za-z0-9_-]{12,}"),
     re.compile(r"AIza[A-Za-z0-9_-]{12,}"),
     re.compile(r"gh[pousr]_[A-Za-z0-9]{12,}"),
-    re.compile(r"AKIA[0-9A-Z]{16}"),
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+    re.compile(r"github_pat_[A-Za-z0-9_]{22,}"),
+    re.compile(r"xox[abeoprs]-[A-Za-z0-9-]{10,}"),
+    re.compile(r"xapp-[A-Za-z0-9-]{10,}"),
+    re.compile(
+        r"(?:https?://)?hooks\.slack\.com/(?:services|workflows|triggers)/[A-Za-z0-9/_+-]+"
+    ),
+    re.compile(r"(?:A3T[A-Z0-9]|AKIA|ASIA|ABIA|ACCA)[A-Z0-9]{16}"),
+    re.compile(r"\bey[A-Za-z0-9_-]{10,}\.ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]*"),
 )
+# Multi-line secrets, replaced whole from first line to last: a body line can
+# be too short to look random. Lazy .* also spans JSON-escaped "\n", and a
+# block whose last line never comes runs to the end of the text.
+SECRET_BLOCKS = (
+    # PEM private keys of every type (RSA, EC, DSA, OPENSSH, ENCRYPTED, PKCS8)
+    # and armored PGP private keys.
+    re.compile(
+        r"-----BEGIN (?P<label>[A-Z0-9 ]*PRIVATE KEY(?: BLOCK)?)-----"
+        r".*?(?:-----END (?P=label)-----|\Z)",
+        re.DOTALL,
+    ),
+    # PuTTY .ppk files, through the MAC line (Private-Hash in version 1).
+    re.compile(
+        r"PuTTY-User-Key-File-\d+:.*?(?:Private-(?:MAC|Hash): *[0-9A-Fa-f]*|\Z)",
+        re.DOTALL,
+    ),
+)
+# Credentials with no known prefix: a base64-alphabet run that looks random.
+RANDOM_TOKEN_CANDIDATE = re.compile(r"[A-Za-z0-9+/=_-]{20,}")
+SECRET_PLACEHOLDER = "<redacted>"
+VARIABLE_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
 @dataclass(frozen=True)
@@ -59,8 +90,50 @@ def string_set(value: Any) -> set[str]:
     return {item for item in value if isinstance(item, str)}
 
 
+def looks_random(token: str) -> bool:
+    # Mixed case plus digits, switching often: mixed-case API keys and AWS
+    # secret keys match; UPPER_SNAKE names, camelCase words, paths such as
+    # macOS temp dirs (one uppercase letter) and hex digests (Codex writes
+    # SHA-256 literals into MCP env) do not.
+    classes = [
+        "upper" if char.isupper() else "lower" if char.islower() else "digit"
+        for char in token
+        if char.isalnum()
+    ]
+    if (
+        min(classes.count("upper"), classes.count("lower")) < 2
+        or "digit" not in classes
+    ):
+        return False
+    switches = sum(a != b for a, b in itertools.pairwise(classes))
+    counts = Counter(token).values()
+    entropy = -sum(n / len(token) * math.log2(n / len(token)) for n in counts)
+    return entropy >= 3.5 and switches / (len(classes) - 1) >= 0.3
+
+
+def redact(text: str) -> str:
+    """Replace every secret-shaped run in text with a placeholder."""
+    for pattern in (*SECRET_BLOCKS, *SECRET_VALUE_PATTERNS):
+        text = pattern.sub(SECRET_PLACEHOLDER, text)
+    return RANDOM_TOKEN_CANDIDATE.sub(
+        lambda match: SECRET_PLACEHOLDER if looks_random(match[0]) else match[0],
+        text,
+    )
+
+
 def is_secret_value(value: str) -> bool:
-    return any(pattern.search(value) for pattern in SECRET_VALUE_PATTERNS)
+    return redact(value) != value
+
+
+def shown(field: str) -> str:
+    """A configuration field as output may show it."""
+    return SECRET_PLACEHOLDER if is_secret_value(field) else field
+
+
+def say(message: str, *, error: bool = False) -> None:
+    # Every line leaves through redact(), so a field that reaches output
+    # without passing through shown() is still masked.
+    print(redact(message), file=sys.stderr if error else sys.stdout)
 
 
 def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Violation]:
@@ -74,10 +147,9 @@ def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Viol
         return [Violation("policy.mcp_servers", "must be a TOML table")]
 
     for server_name, server in configured_servers.items():
+        server_path = f"mcp_servers.{shown(server_name)}"
         if not isinstance(server, dict):
-            violations.append(
-                Violation(f"mcp_servers.{server_name}", "must be a TOML table")
-            )
+            violations.append(Violation(server_path, "must be a TOML table"))
             continue
 
         raw_policy = server_policies.get(server_name, {})
@@ -88,12 +160,10 @@ def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Viol
 
         env = server.get("env", {})
         if not isinstance(env, dict):
-            violations.append(
-                Violation(f"mcp_servers.{server_name}.env", "must be a TOML table")
-            )
+            violations.append(Violation(f"{server_path}.env", "must be a TOML table"))
         else:
             for key, value in env.items():
-                path = f"mcp_servers.{server_name}.env.{key}"
+                path = f"{server_path}.env.{shown(key)}"
                 if not isinstance(value, str):
                     violations.append(Violation(path, "must be a string literal"))
                     continue
@@ -120,7 +190,7 @@ def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Viol
         ):
             violations.append(
                 Violation(
-                    f"mcp_servers.{server_name}.env_vars",
+                    f"{server_path}.env_vars",
                     "must be a list of variable names",
                 )
             )
@@ -129,14 +199,14 @@ def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Viol
                 if env_var not in inherited_env:
                     violations.append(
                         Violation(
-                            f"mcp_servers.{server_name}.env_vars",
-                            f"variable {env_var} is not authorized for this server",
+                            f"{server_path}.env_vars",
+                            f"variable {shown(env_var)} is not authorized for this server",
                         )
                     )
 
         bearer_token_env_var = server.get("bearer_token_env_var")
         if bearer_token_env_var is not None:
-            path = f"mcp_servers.{server_name}.bearer_token_env_var"
+            path = f"{server_path}.bearer_token_env_var"
             if not isinstance(bearer_token_env_var, str):
                 violations.append(Violation(path, "must name an environment variable"))
             elif bearer_token_env_var not in inherited_env:
@@ -150,13 +220,13 @@ def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Viol
         if not isinstance(env_http_headers, dict):
             violations.append(
                 Violation(
-                    f"mcp_servers.{server_name}.env_http_headers",
+                    f"{server_path}.env_http_headers",
                     "must be a TOML table",
                 )
             )
         else:
             for header, env_var in env_http_headers.items():
-                path = f"mcp_servers.{server_name}.env_http_headers.{header}"
+                path = f"{server_path}.env_http_headers.{shown(header)}"
                 if not isinstance(env_var, str):
                     violations.append(
                         Violation(path, "must name an environment variable")
@@ -172,13 +242,13 @@ def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Viol
         if not isinstance(http_headers, dict):
             violations.append(
                 Violation(
-                    f"mcp_servers.{server_name}.http_headers",
+                    f"{server_path}.http_headers",
                     "must be a TOML table",
                 )
             )
         else:
             for header, value in http_headers.items():
-                path = f"mcp_servers.{server_name}.http_headers.{header}"
+                path = f"{server_path}.http_headers.{shown(header)}"
                 if not isinstance(value, str):
                     violations.append(Violation(path, "must be a string literal"))
                     continue
@@ -198,11 +268,11 @@ def validate_config(config: dict[str, Any], policy: dict[str, Any]) -> list[Viol
 
 def report_violations(violations: list[Violation]) -> int:
     if not violations:
-        print("Codex MCP policy: PASS")
+        say("Codex MCP policy: PASS")
         return 0
-    print("Codex MCP policy: FAIL", file=sys.stderr)
+    say("Codex MCP policy: FAIL", error=True)
     for violation in violations:
-        print(f"- {violation.path}: {violation.reason}", file=sys.stderr)
+        say(f"- {violation.path}: {violation.reason}", error=True)
     return 1
 
 
@@ -211,10 +281,10 @@ def validate_paths(config_path: Path, policy_path: Path) -> int:
         config = load_toml(config_path)
         policy = load_toml(policy_path)
     except SafeConfigError as error:
-        print(f"Codex MCP policy: ERROR: {error}", file=sys.stderr)
+        say(f"Codex MCP policy: ERROR: {error}", error=True)
         return 2
     if policy.get("version") != 1:
-        print("Codex MCP policy: ERROR: unsupported policy version", file=sys.stderr)
+        say("Codex MCP policy: ERROR: unsupported policy version", error=True)
         return 2
     return report_violations(validate_config(config, policy))
 
@@ -228,13 +298,129 @@ def command_drift(args: argparse.Namespace) -> int:
         source = args.source.read_bytes()
         live = args.live.read_bytes()
     except (FileNotFoundError, PermissionError):
-        print("Codex config drift unavailable: source or live file is unreadable")
+        say("Codex config drift unavailable: source or live file is unreadable")
         return 2
     if source == live:
-        print("Codex config drift: clean")
+        say("Codex config drift: clean")
         return 0
-    print("Codex config drift detected (contents suppressed)")
+    say("Codex config drift detected (contents suppressed)")
     return 1
+
+
+def entry_name(value: str, path: str) -> str:
+    # Entry ids are printed and typed back as --accept-drop arguments, so a
+    # credential pasted where a name belongs is refused, never echoed.
+    if is_secret_value(value):
+        raise SafeConfigError(f"{path} holds secret-shaped material")
+    return value
+
+
+def variable_name(value: Any, path: str) -> str:
+    # These fields name an environment variable. Anything else may be a pasted
+    # credential, so it is rejected without being echoed.
+    if isinstance(value, str) and VARIABLE_NAME.fullmatch(entry_name(value, path)):
+        return value
+    raise SafeConfigError(f"{path} holds something other than a variable name")
+
+
+def server_entries(server: Any, path: str) -> set[str]:
+    """Name what a server receives (keys and variable names, never values)."""
+    if not isinstance(server, dict):
+        raise SafeConfigError(f"{path} must be a TOML table")
+    entries = {key for key in ("command", "url") if key in server}
+
+    for table in ("env", "http_headers"):
+        literals = server.get(table, {})
+        if not isinstance(literals, dict):
+            raise SafeConfigError(f"{path}.{table} must be a TOML table")
+        entries.update(
+            f"{table}.{entry_name(key, f'{path}.{table}')}" for key in literals
+        )
+
+    env_vars = server.get("env_vars", [])
+    if not isinstance(env_vars, list):
+        raise SafeConfigError(f"{path}.env_vars must be a list")
+    for item in env_vars:
+        # Codex accepts both "NAME" and { name = "NAME", source = "..." }.
+        name = item.get("name") if isinstance(item, dict) else item
+        entries.add(f"env_vars.{variable_name(name, f'{path}.env_vars')}")
+
+    if "bearer_token_env_var" in server:
+        name = variable_name(
+            server["bearer_token_env_var"], f"{path}.bearer_token_env_var"
+        )
+        entries.add(f"bearer_token_env_var.{name}")
+
+    env_http_headers = server.get("env_http_headers", {})
+    if not isinstance(env_http_headers, dict):
+        raise SafeConfigError(f"{path}.env_http_headers must be a TOML table")
+    for header, name in env_http_headers.items():
+        header = entry_name(header, f"{path}.env_http_headers")
+        header_path = f"{path}.env_http_headers.{header}"
+        entries.add(f"env_http_headers.{header}.{variable_name(name, header_path)}")
+
+    return entries
+
+
+def config_servers(config_path: Path) -> dict[str, set[str]]:
+    servers = load_toml(config_path).get("mcp_servers", {})
+    if not isinstance(servers, dict):
+        raise SafeConfigError(f"{config_path}: mcp_servers must be a TOML table")
+    entries: dict[str, set[str]] = {}
+    for name, server in servers.items():
+        name = entry_name(name, f"{config_path}: mcp_servers")
+        entries[name] = server_entries(server, f"{config_path}: mcp_servers.{name}")
+    return entries
+
+
+def command_preflight(args: argparse.Namespace) -> int:
+    try:
+        live = config_servers(args.live)
+        release = config_servers(args.source)
+    except SafeConfigError as error:
+        say(f"Codex config preflight: ERROR: {error}", error=True)
+        return 2
+
+    accepted = set(args.accept_drop)
+    differences = 0
+    unaccepted_drops = 0
+    for server in sorted(live.keys() | release.keys()):
+        server_dropped = server not in release
+        if server_dropped:
+            say(f"[{server}] live only")
+            drops = [server] + [f"{server}.{entry}" for entry in sorted(live[server])]
+            additions: list[str] = []
+        else:
+            say(f"[{server}] {'both' if server in live else 'release only'}")
+            live_entries, release_entries = live.get(server, set()), release[server]
+            drops = [
+                f"{server}.{entry}" for entry in sorted(live_entries - release_entries)
+            ]
+            additions = [
+                f"{server}.{entry}" for entry in sorted(release_entries - live_entries)
+            ]
+        for entry_id in drops:
+            # Accepting a dropped server accepts everything it held; on a kept
+            # server each dropped entry has to be accepted by its own id.
+            if entry_id in accepted or (server_dropped and server in accepted):
+                say(f"  {entry_id}: live only, dropped by release (accepted)")
+            else:
+                say(f"  {entry_id}: live only, dropped by release")
+                unaccepted_drops += 1
+        for entry_id in additions:
+            say(f"  {entry_id}: release only, added")
+        differences += len(drops) + len(additions)
+
+    if unaccepted_drops:
+        say(
+            f"Codex config preflight: FAIL: unaccepted drops: {unaccepted_drops}; "
+            "migrate them into the reviewed config, or pass --accept-drop <id> "
+            "for each one you mean to drop",
+            error=True,
+        )
+        return 1
+    say("Codex config preflight: " + ("PASS" if differences else "clean"))
+    return 0
 
 
 def command_release(args: argparse.Namespace) -> int:
@@ -242,9 +428,7 @@ def command_release(args: argparse.Namespace) -> int:
     if validation != 0:
         return validation
     if not args.apply:
-        print(
-            f"Codex config release dry run: would copy {args.source} to {args.target}"
-        )
+        say(f"Codex config release dry run: would copy {args.source} to {args.target}")
         return 0
 
     temporary_path: Path | None = None
@@ -263,13 +447,20 @@ def command_release(args: argparse.Namespace) -> int:
     except (OSError, PermissionError) as error:
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
-        print(
+        say(
             f"Codex config release failed for target {args.target}: {type(error).__name__}",
-            file=sys.stderr,
+            error=True,
         )
         return 2
 
-    print(f"Codex config released to {args.target} with mode 0600")
+    say(f"Codex config released to {args.target} with mode 0600")
+    return 0
+
+
+def command_redact(args: argparse.Namespace) -> int:
+    # Whole input at once: a private key spans lines, and one with no last
+    # line is suppressed through the end of input.
+    sys.stdout.write(redact(sys.stdin.read()))
     return 0
 
 
@@ -289,6 +480,21 @@ def build_parser() -> argparse.ArgumentParser:
     drift.add_argument("--live", type=Path, required=True)
     drift.set_defaults(handler=command_drift)
 
+    preflight = subparsers.add_parser(
+        "preflight",
+        help="list MCP keys and variable names the release would drop or add",
+    )
+    preflight.add_argument("--live", type=Path, required=True)
+    preflight.add_argument("--source", type=Path, required=True)
+    preflight.add_argument(
+        "--accept-drop",
+        action="append",
+        default=[],
+        metavar="ID",
+        help="a reported server or entry id the release may drop",
+    )
+    preflight.set_defaults(handler=command_preflight)
+
     release = subparsers.add_parser(
         "release", help="copy canonical config to Codex home"
     )
@@ -297,6 +503,11 @@ def build_parser() -> argparse.ArgumentParser:
     release.add_argument("--target", type=Path, required=True)
     release.add_argument("--apply", action="store_true")
     release.set_defaults(handler=command_release)
+
+    redact_stdin = subparsers.add_parser(
+        "redact", help="copy stdin to stdout with secret-shaped material replaced"
+    )
+    redact_stdin.set_defaults(handler=command_redact)
 
     return parser
 

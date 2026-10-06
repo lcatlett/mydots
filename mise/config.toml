@@ -86,6 +86,8 @@ prek = "latest"
 pipx = "latest"
 "npm:explainmyrepo" = "latest"
 "github:anthropics/claude-code" = { version = "latest", minimum_release_age = "0d" }
+# Exact pin: mise is codex's only install channel and its self-updater is off.
+"aqua:openai/codex" = "0.160.0"
 "npm:@roomi-fields/notebooklm-mcp" = { version = "latest", minimum_release_age = "0d" } 
 "pipx:rtfm-ai" = { version = "latest", minimum_release_age = "0d" }
 "npm:wcmd" = "latest"

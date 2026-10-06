@@ -278,8 +278,6 @@ cask "caezium/tap/burrow", trusted: true
 cask "jhlee0409/tap/claude-code-history-viewer", trusted: true
 # Command-line interface for CleanMyMac
 cask "macpaw/taps/cleanmymac-cli", trusted: true
-# OpenAI's coding agent that runs in your terminal
-cask "codex"
 cask "font-0xproto-nerd-font"
 cask "font-fira-code-nerd-font"
 cask "font-fira-mono-nerd-font"

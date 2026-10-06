@@ -204,8 +204,10 @@ secret values must be inherited through `env_vars` instead of `${VAR}` or
 
 ```bash
 dotfiles codex-check             # Validate tracked + live policy; report drift
+dotfiles codex-preflight         # Names of live MCP keys/variables the release drops; fails until migrated or accepted
 dotfiles codex-release           # Dry run only
 dotfiles codex-release --apply   # Copy to ~/.codex/config.toml with mode 0600
+codex mcp list | dotfiles codex-redact   # Mask secret-shaped material in any output
 ```
 
 Fully quit and relaunch Codex after release. Existing MCP processes retain the
@@ -221,7 +223,9 @@ dotfiles install       # Full bootstrap (brew, mise, symlinks, macOS defaults)
 dotfiles update        # Update OS, Homebrew, and mise tools
 dotfiles symlinks      # Re-run symlink creation
 dotfiles codex-check   # Validate tracked and live Codex configuration
+dotfiles codex-preflight # List MCP settings the Codex release would drop
 dotfiles codex-release # Dry-run Codex copy; pass --apply to write it
+dotfiles codex-redact  # Copy stdin to stdout with secret-shaped material masked
 dotfiles brew          # Run brew install only
 dotfiles defaults      # Apply macOS defaults
 dotfiles dock          # Configure Dock layout

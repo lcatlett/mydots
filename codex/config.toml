@@ -9,8 +9,10 @@ notify = [
   "/Users/lcatlett/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient",
   "turn-ended",
 ]
-model = "gpt-5.6-sol"
+model = "gpt-6-astra"
 model_reasoning_effort = "high"
+# Codex is upgraded only by bumping its exact pin in mise/config.toml.
+check_for_update_on_startup = false
 
 [plugins."visualize@openai-bundled"]
 enabled = true

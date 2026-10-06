@@ -99,6 +99,11 @@ dotfiles codex-check
 dotfiles codex-release
 ```
 
+If `~/.codex/config.toml` already exists, the release replaces it without
+merging. Run `dotfiles codex-preflight` first and follow
+[`docs/codex-mise-live-apply.md`](docs/codex-mise-live-apply.md) step 0 until it
+exits 0.
+
 Apply it explicitly, then fully quit and relaunch Codex so MCP servers receive
 the current environment exported from Keychain-backed `~/.exports` commands:
 
