@@ -1,176 +1,420 @@
-# =============================================================================
-# Brewfile.laptop — Laptop-specific packages
-# =============================================================================
-# GUI apps, VS Code extensions, dev tooling.
-# Generated from: brew bundle dump + code --list-extensions
-
-# --- Taps ---
-tap "buildpacks/tap"
-tap "ddev/ddev"
-tap "entireio/tap"
-tap "hashicorp/tap"
-tap "koekeishiya/formulae"
-tap "microsoft/git"
-tap "milisp/mcp-linker"
-tap "minio/stable"
-tap "oldjii/tap"
-tap "oven-sh/bun"
-tap "surrealdb/tap"
-tap "timrogers/tap"
-tap "tomyan/tap"
-tap "waydabber/betterdisplay"
-
-# --- Database clients ---
+tap "agent-ecosystem/tap", trusted: true
+tap "arthur-ficial/tap", "https://github.com/Arthur-Ficial/homebrew-tap"
+tap "asymptote-labs/tap", trusted: true
+tap "beadbox/cask"
+tap "buildpacks/tap", trusted: true
+tap "caezium/tap"
+tap "canyonroad/tap", trusted: true
+tap "coleam00/archon", trusted: true
+tap "darrylmorley/whatcable", trusted: true
+tap "es617/tap"
+tap "gentleman-programming/tap", trusted: true
+tap "hashicorp/tap", trusted: true
+tap "jhlee0409/tap", trusted: true
+tap "luum-home/tap", "https://github.com/Luum-Home/homebrew-tap", trusted: true
+tap "macpaw/taps"
+tap "marcus/tap"
+tap "microsoft/git", trusted: true
+tap "multica-ai/tap", trusted: true
+tap "omnigent-ai/tap", trusted: { formulae: ["omnigent"] }
+tap "timrogers/tap", trusted: true
+tap "tsonglew/dutis"
+tap "waydabber/betterdisplay", trusted: true
+# Asciicast to GIF converter
+brew "agg"
+# Cryptography and SSL/TLS Toolkit
+brew "openssl@3"
+# Companion library to apr, the Apache Portable Runtime library
 brew "apr-util"
-brew "freetds"
-brew "mysql-client"
-brew "mysql-client@8.4"
-brew "mysqltuner"
-brew "mydumper"
-brew "dumpling"
-brew "percona-toolkit"
-brew "redis", restart_service: :changed
-
-# --- Web ---
-brew "httpd", restart_service: :changed
-
-# --- Monitoring ---
-brew "grafana"
-brew "goaccess"
-brew "mole"
-
-# --- Language servers / dev tools ---
-brew "bash-language-server"
-brew "llvm"
-brew "lld"
-
-# --- AI / ML ---
-brew "ollama"
-
-# --- Utilities ---
+# Record and share terminal sessions
+brew "asciinema"
+# Automatic configure script builder
+brew "autoconf"
+# Tool for generating GNU Standards-compliant Makefiles
+brew "automake"
+# GNU internationalization (i18n) and localization (l10n) library
+brew "gettext"
+# Library for command-line editing
+brew "readline"
+# Bourne-Again SHell, a UNIX command interpreter
+brew "bash"
+# C/C++ and Java libraries for Unicode and globalization
+brew "icu4c@78"
+# Memory upgrade for your coding agent
+brew "beads"
+# Parser generator
+brew "bison"
+# Freely available high-quality data compressor
+brew "bzip2"
+# Library for manipulating PNG images
+brew "libpng"
+# Software library to render fonts
+brew "freetype"
+# Core application library for C
+brew "glib"
+# Vector graphics library with cross-device output support
+brew "cairo"
+# Cloudflare Tunnel client (formerly Argo Tunnel)
+brew "cloudflared"
+# Command-line tool to manage cert-manager
 brew "cmctl"
+# GNU multiple precision arithmetic library
+brew "gmp"
+# GNU File, Shell, and Text utilities
+brew "coreutils"
+# C library implementing the SSH2 protocol
+brew "libssh2"
+# General-purpose data compression with high compression ratio
+brew "xz"
+# Zstandard is a real-time compression algorithm
+brew "zstd"
+# Get a file from an HTTP, HTTPS or FTP server
+brew "curl"
+# Tools to manipulate dates with a focus on financial data
+brew "dateutils"
+# Display graphs and colors of file system space/usage
+brew "dfc"
+# Convert text between DOS, UNIX, and Mac formats
 brew "dos2unix"
+# Creating SQL dump from a MySQL-compatible database
+brew "dumpling"
+# Play, record, convert, and stream select audio and video codecs
+brew "ffmpeg"
+# Collection of GNU find, xargs, and locate
+brew "findutils"
+# Sorts file trees and packs them into bags
+brew "fpart"
+# Libraries to talk to Microsoft SQL Server and Sybase databases
+brew "freetds"
+# GNU awk utility
+brew "gawk"
+# GNU compiler collection
+brew "gcc"
+# Image format providing lossless and lossy compression for web images
+brew "webp"
+# Graphics library to dynamically manipulate images
+brew "gd"
+# OpenType text shaping engine
+brew "harfbuzz"
+# Image processing and image analysis library
+brew "leptonica"
+# Multi-format archive and compression library
+brew "libarchive"
+# Framework for layout and rendering of i18n text
+brew "pango"
+# OCR (Optical Character Recognition) engine
+brew "tesseract"
+# Interpreter for PostScript and PDF
+brew "ghostscript"
+# Distributed revision control system
+brew "git"
+# Quickly rewrite git repository history
+brew "git-filter-repo"
+# Compute various size metrics for a Git repository
+brew "git-sizer"
+# Audit git repos for secrets
+brew "gitleaks"
+# GNU implementation of the famous stream editor
+brew "gnu-sed"
+# GNU Transport Layer Security (TLS) Library
+brew "gnutls"
+# Cryptographic library based on the code from GnuPG
+brew "libgcrypt"
+# GNU Privacy Guard (OpenPGP)
+brew "gnupg"
+# Log analyzer and interactive viewer for the Apache Webserver
+brew "goaccess"
+# CLI for Drive, Gmail, Calendar, Sheets, Docs, Chat, Admin, and more
+brew "googleworkspace-cli"
+# Apply a diff file to an original
+brew "gpatch"
+# GNU grep, egrep and fgrep
+brew "grep"
+# Package compiler and linker metadata toolkit
+brew "pkgconf"
+# GNU Ubiquitous Intelligent Language for Extensions
+brew "guile"
+# Kubernetes package manager
+brew "helm"
+# Command-line tools for OpenPGP-related operations
 brew "hopenpgp-tools"
+# Improved top (interactive process viewer)
+brew "htop"
+# ISO/IEC 23008-12:2017 HEIF file format decoder and encoder
+brew "libheif"
+# Tools and libraries to manipulate images in select formats
+brew "imagemagick"
+# Image manipulation library
+brew "jpeg"
+# Network authentication protocol
+brew "krb5"
+# Simple terminal UI for git commands
+brew "lazygit"
+# Subtitle renderer for the ASS/SSA subtitle format
+brew "libass"
+# BSD-style licensed readline alternative
+brew "libedit"
+# Portable Foreign Function Interface library
+brew "libffi"
+# Conversion library
+brew "libiconv"
+# Library for reading RAW files from digital photo cameras
+brew "libraw"
+# Library to render SVG files using Cairo
+brew "librsvg"
+# NaCl networking and cryptography library
+brew "libsodium"
+# GNOME XML library
+brew "libxml2"
+# XML security library
+brew "libxmlsec1"
+# YAML Parser
+brew "libyaml"
+# C library for reading, creating, and modifying zip archives
+brew "libzip"
+# Control Logitech Litra lights from the command-line
 brew "litra"
-brew "rtk"
-
-# --- Custom tap formulae ---
-brew "surrealdb/tap/surreal"
-brew "timrogers/tap/litra-autotoggle"
-brew "tomyan/tap/hubcap"
+# Utility for directing compilation
+brew "make"
+# Polyglot runtime manager (asdf rust clone)
+brew "mise"
+# Deep clean and optimize your Mac
+brew "mole"
+# MySQL logical backup tool
+brew "mydumper"
+# HTTP/2 C Library
+brew "nghttp2"
+# Optimized BLAS library
+brew "openblas"
+# Package for scientific computing with Python
+brew "numpy"
+# Regular expressions library
+brew "oniguruma"
+# Provides a software solution to manage, store, and distribute sensitive data
+brew "openbao", restart_service: :changed
+# Open source suite of directory software
+brew "openldap"
+# Drop-in replacement for Terraform. Infrastructure as Code Tool
+brew "opentofu"
+# Shell command parallelization utility
+brew "parallel"
+# Perl compatible regular expressions library
+brew "pcre"
+# Parallel gzip
+brew "pigz"
+# Pinentry for GPG on Mac
+brew "pinentry-mac"
+# PDF rendering library (based on the xpdf-3.0 code base)
+brew "poppler"
+# Python 3 bindings for the Cairo graphics library
+brew "py3cairo"
+# Python interface to Tcl/Tk
+brew "python-tk@3.13"
+# Generate C-based recognizers from regular expressions
+brew "re2c"
+# Persistent key-value database, with built-in net interface
+brew "redis"
+# Utility that provides fast incremental file transfer
+brew "rsync"
+# Tool for downloading RTMP streaming media
+brew "rtmpdump"
+# Easily detect and prevent bugs and anti-patterns in your codebase
+brew "semgrep"
+# Static analysis and lint tool, for (ba)sh scripts
+brew "shellcheck"
+# Autoformat shell script source code
+brew "shfmt"
+# Secure Reliable Transport
+brew "srt"
+# Manipulate and query tags on macOS files
+brew "tag"
+# Display directories as trees (with optional color/HTML output)
+brew "tree"
+# Validating, recursive, caching DNS resolver
+brew "unbound"
+# Convert HTML to PDF
+brew "weasyprint"
+# Internet file retriever
+brew "wget"
+# Why is this running?
+brew "witr"
+# CLI for Git worktree management, designed for parallel AI agent workflows
+brew "worktrunk"
+# General-purpose lossless data-compression library
+brew "zlib"
+# Fish shell like syntax highlighting for zsh
+brew "zsh-syntax-highlighting"
+# CLI tool that validates and scores Agent Skill packages
+brew "agent-ecosystem/tap/skill-validator"
+# On-device Apple Translation CLI plus drop-in HTTP server for DeepL, LibreTranslate, and Google v2
+brew "arthur-ficial/tap/translate", trusted: true
+# Open-source endpoint agent for local AI runtime telemetry
+brew "asymptote-labs/tap/beacon"
+# Remote agentic coding platform - control AI assistants from anywhere
+brew "coleam00/archon/archon", trusted: true
+# On-device shell command generator using Apple's 3B model with tldr-based few-shot retrieval
+brew "es617/tap/hunch", trusted: true
+# A TUI dashboard for AI coding agents
+brew "marcus/tap/sidecar", trusted: true
+# Automatically turn your Logitech Litra device on when your webcam turns on, and off when your webcam turns off.
+brew "timrogers/tap/litra-autotoggle", trusted: true
+# A cmd util to manage default app on macOS, inspired by duti
+brew "tsonglew/dutis/dutis", trusted: true
+# BetterDisplay CLI proxy
 brew "waydabber/betterdisplay/betterdisplaycli"
-
-# --- GUI apps ---
+# Temporary notes with calculations and extensible features
+cask "antinote"
+# Desktop app for the beads issue tracker
+cask "beadbox/cask/beadbox", trusted: true
+# Display management tool
+cask "betterdisplay"
+# File manager
 cask "bloom"
-cask "claude-code"
-cask "entireio/tap/entire"
-cask "ghostty"
-cask "gpg-suite"
-cask "iterm2"
-cask "maccy"
-cask "milisp/mcp-linker/mcp-linker"
-cask "ngrok"
-cask "orbstack"
-cask "pearcleaner"
-cask "qlmarkdown"
-cask "raycast"
-cask "sequel-ace"
-cask "visual-studio-code"
-
-# --- Nerd fonts (beyond hack/jetbrains/meslo in common Brewfile) ---
+# Scriptable scratchpad for developers
+cask "boop"
+# Free, open-source native GUI for the Mole CLI
+cask "caezium/tap/burrow", trusted: true
+# Browse and analyze Claude Code conversation history offline
+cask "jhlee0409/tap/claude-code-history-viewer", trusted: true
+# Command-line interface for CleanMyMac
+cask "macpaw/taps/cleanmymac-cli", trusted: true
+# OpenAI's coding agent that runs in your terminal
+cask "codex"
 cask "font-0xproto-nerd-font"
-cask "font-3270-nerd-font"
-cask "font-adwaita-mono-nerd-font"
-cask "font-agave-nerd-font"
-cask "font-anonymice-nerd-font"
-cask "font-arimo-nerd-font"
-cask "font-atkynson-mono-nerd-font"
-cask "font-aurulent-sans-mono-nerd-font"
-cask "font-bigblue-terminal-nerd-font"
-cask "font-bitstream-vera-sans-mono-nerd-font"
-cask "font-blex-mono-nerd-font"
-cask "font-caskaydia-cove-nerd-font"
-cask "font-caskaydia-mono-nerd-font"
-cask "font-code-new-roman-nerd-font"
-cask "font-comic-shanns-mono-nerd-font"
-cask "font-commit-mono-nerd-font"
-cask "font-cousine-nerd-font"
-cask "font-d2coding-nerd-font"
-cask "font-daddy-time-mono-nerd-font"
-cask "font-dejavu-sans-mono-nerd-font"
-cask "font-departure-mono-nerd-font"
-cask "font-droid-sans-mono-nerd-font"
-cask "font-envy-code-r-nerd-font"
-cask "font-fantasque-sans-mono-nerd-font"
 cask "font-fira-code-nerd-font"
 cask "font-fira-mono-nerd-font"
 cask "font-geist-mono-nerd-font"
-cask "font-go-mono-nerd-font"
-cask "font-gohufont-nerd-font"
-cask "font-hasklug-nerd-font"
-cask "font-heavy-data-nerd-font"
-cask "font-hurmit-nerd-font"
-cask "font-im-writing-nerd-font"
-cask "font-inconsolata-go-nerd-font"
-cask "font-inconsolata-lgc-nerd-font"
-cask "font-inconsolata-nerd-font"
-cask "font-intone-mono-nerd-font"
-
-# --- VS Code extensions ---
+cask "font-hack-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-maple-mono-nf"
+cask "font-meslo-lg-nerd-font"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty"
+# Web browser
+cask "google-chrome"
+# Native desktop AI assistant from Google
+cask "google-gemini"
+# Tools to protect your emails and files
+cask "gpg-suite"
+# Open-source desktop AI agent
+cask "hermes-desktop"
+# Homebrew's official GUI
+cask "homebrew-app"
+# Terminal emulator as alternative to Apple's Terminal app
+cask "iterm2"
+# Clipboard manager
+cask "maccy"
+# AI agent for automating local computer workflows
+cask "manus"
+# CSV editor
+cask "modern-csv"
+# AI voice dictation that adapts to your writing style
+cask "monologue"
+# Reverse proxy, secure introspectable tunnels to localhost
+cask "ngrok"
+# Knowledge base that works on top of a local folder of plain text Markdown files
+cask "obsidian"
+# Verify system files structure, run miscellaneous maintenance and more
+cask "onyx"
+# Replacement for Docker Desktop
+cask "orbstack"
+# Utility to uninstall apps and remove leftover files from old/uninstalled apps
+cask "pearcleaner"
+# Command-line shell and scripting language
+cask "powershell@preview"
+# Scientific and technical publishing system built on Pandoc
+cask "quarto"
+# Control your tools with a few keystrokes
+cask "raycast"
+# Open-source code editor
+cask "visual-studio-code"
+# Menu bar app for USB-C cable diagnostics
+cask "whatcable"
+# Multiplayer code editor
+cask "zed@preview"
+vscode "agnislav.claude-code-config-manager"
 vscode "agsoft.claude-history-viewer"
+vscode "akamai.papi"
 vscode "anthropic.claude-code"
+vscode "augieecredit.auggie-promptenhancer"
 vscode "augment.vscode-augment"
-vscode "biati.ddev-manager"
-vscode "charliermarsh.ruff"
-vscode "christian-kohler.npm-intellisense"
+vscode "benjaminbenais.copilot-theme"
+vscode "bierner.markdown-mermaid"
+vscode "blackblackcat.dracula-pure"
+vscode "byeful.workspace-color"
 vscode "codeviz.codeviz"
+vscode "codevizai.codevizai"
 vscode "dandric.vscode-jq"
 vscode "davidanson.vscode-markdownlint"
-vscode "dbaeumer.vscode-eslint"
-vscode "detachhead.basedpyright"
-vscode "drewipson.claude-code-config"
-vscode "dustypomerleau.rust-syntax"
+vscode "daylerees.rainglow"
+vscode "donjayamanne.githistory"
+vscode "eamodio.gitlens"
 vscode "esbenp.prettier-vscode"
+vscode "felixwieland.sodaflx"
 vscode "foxundermoon.shell-format"
-vscode "github.copilot-chat"
+vscode "funkyremi.vscode-google-translate"
+vscode "fuzionix.file-tree-extractor"
+vscode "george-alisson.html-preview-vscode"
 vscode "github.github-vscode-theme"
+vscode "github.remotehub"
 vscode "github.vscode-github-actions"
-vscode "golang.go"
-vscode "hverlin.mise-vscode"
-vscode "ikappas.composer"
-vscode "joelalejandro.nrql-language"
+vscode "github.vscode-pull-request-github"
+vscode "hs7.git-diff"
+vscode "huizhou.githd"
+vscode "iliazeus.vscode-ansi"
 vscode "johnpapa.vscode-peacock"
+vscode "jpegg-dev.claude-code-settings-helper"
 vscode "jq-syntax-highlighting.jq-syntax-highlighting"
-vscode "kaleidoscope-app.vscode-ksdiff"
-vscode "kilocode.kilo-code"
+vscode "kingleo.unzip"
+vscode "linda-cheung.content-menu-item-refresh"
+vscode "local.lindsey"
+vscode "local.lindsey-ghost"
+vscode "lumirelle.shell-format-rev"
 vscode "mbehr1.vsc-lfs"
 vscode "mechatroner.rainbow-csv"
 vscode "mehyaa.workspace-storage-cleanup"
+vscode "memorylovers.sortable-explorer"
 vscode "mermaidchart.vscode-mermaid-chart"
-vscode "ms-python.debugpy"
-vscode "ms-python.python"
-vscode "ms-python.vscode-pylance"
-vscode "ms-python.vscode-python-envs"
+vscode "mhutchie.git-graph"
+vscode "ms-vscode-remote.remote-containers"
 vscode "ms-vscode-remote.remote-ssh"
 vscode "ms-vscode-remote.remote-ssh-edit"
+vscode "ms-vscode.live-server"
 vscode "ms-vscode.remote-explorer"
+vscode "ms-vscode.remote-repositories"
+vscode "ms-vscode.vscode-chat-customizations-evaluations"
 vscode "ms-vscode.vscode-websearchforcopilot"
-vscode "mtxr.sqltools"
 vscode "patbenatar.advanced-new-file"
+vscode "phoihos.csv-to-md-table"
 vscode "pkief.material-icon-theme"
-vscode "redhat.vscode-xml"
+vscode "pombadev.pbbs"
+vscode "pomber.git-file-history"
+vscode "ranathedev.smart-index-updater"
 vscode "redhat.vscode-yaml"
-vscode "rust-lang.rust-analyzer"
-vscode "samuelcolvin.jinjahtml"
+vscode "skezu.ai-rules-converter"
 vscode "sleistner.vscode-fileutils"
-vscode "stanislav.vscode-drupal"
+vscode "stumpworks.claude-restarter"
 vscode "tamasfe.even-better-toml"
 vscode "thomas-baumgaertner.vcl"
-vscode "timonwong.shellcheck"
-vscode "vexp.vexp-vscode"
+vscode "tomsaunders.vscode-workspace-explorer"
+vscode "vsls-contrib.gistfs"
+vscode "vstirbu.vscode-mermaid-preview"
+vscode "vxplain.vxplain"
 vscode "waderyan.gitblame"
-vscode "xdebug.php-debug"
-vscode "xdebug.php-pack"
 vscode "yzhang.markdown-all-in-one"
-vscode "zainchen.json"
-vscode "zobo.php-intellisense"
+vscode "zaaack.markdown-editor"
+vscode "zencoderai.zencoder"
+vscode "ziyasal.vscode-open-in-github"
+go "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
+cargo "okf-cli", source: "https://github.com/jyjeanne/okf-rs.git"
+uv "a0", source: "https://github.com/agent0ai/a0-connector/archive/refs/tags/v2.12.zip"
+uv "browser-use"
+uv "conductor-cli[tui]", source: "git+https://github.com/microsoft/conductor.git@v0.1.37"
+uv "context-tracker"
+uv "mfs-server"
+uv "obsidian-wiki"
+uv "omnigent"
+uv "skilllint"
+npm "claude-multiprofile"
+npm "claudish"
+npm "corepack"

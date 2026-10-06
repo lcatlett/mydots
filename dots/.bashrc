@@ -18,3 +18,6 @@ fi
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init bash)"; fi
 eval "$(COMPLETE=bash prek)"
 
+
+# Claudia shell helpers (`claudia` from anywhere; `claudia codex|claude|grok|voice` selects a surface)
+[ -f "$HOME/.claudia/shell-init.sh" ] && source "$HOME/.claudia/shell-init.sh"

@@ -9,7 +9,7 @@ trash() {
 }
 
 # zipf: Function to create a ZIP archive of a folder
-zipf() { 
+zipdir() { 
   zip -r "$1".zip "$1"
 }
 
@@ -96,4 +96,19 @@ mkcd() {
         return 1
     fi
     mkdir -p -- "$1" && cd -- "$1"
+}
+
+# Climb up <n> levels
+up() {
+  local d=""
+  for ((i=1;i<=$1;i++)); do
+    d+="../"
+  done
+  cd "$d"
+}
+
+
+# find file quickly by name (case-insensitive)
+ff() {
+  find . -type f -iname "*$1*"
 }
