@@ -13,30 +13,6 @@ zipdir() {
   zip -r "$1".zip "$1"
 }
 
-# extract: Extract various archive formats
-extract () {
-    if [ -f "$1" ]; then
-        case "$1" in
-            *.tar.bz2)  tar -jxvf "$1"                        ;;
-            *.tar.gz)   tar -zxvf "$1"                        ;;
-            *.bz2)      bunzip2 "$1"                          ;;
-            *.dmg)      hdiutil mount "$1"                    ;;
-            *.gz)       gunzip "$1"                           ;;
-            *.tar)      tar -xvf "$1"                         ;;
-            *.tbz2)     tar -jxvf "$1"                        ;;
-            *.tgz)      tar -zxvf "$1"                        ;;
-            *.zip)      unzip "$1"                            ;;
-            *.ZIP)      unzip "$1"                            ;;
-            *.pax)      pax -r < "$1"                       ;;
-            *.pax.Z)    uncompress "$1" --stdout | pax -r     ;;
-            *.rar)      unrar x "$1"                          ;;
-            *.Z)        uncompress "$1"                       ;;
-            *)          echo -e "${RED}Error: '$1' cannot be extracted/mounted via extract()${NC}" ;;
-        esac
-    else
-        echo "${RED}Error: '$1' is not a valid file${NC}"
-    fi
-}
 
 # Show how much RAM application uses
 # $ ram safari
@@ -107,8 +83,33 @@ up() {
   cd "$d"
 }
 
+# fix_claude_permissions: restore owner-write on Claude Code session transcripts.
+# Fixes "Transcript writes are failing (permission denied — EACCES)".
+# Cause: mode bits stripped (dr-x------ / -r--------), e.g. by a forensic copy
+# that set its output read-only. Not caused by com.apple.provenance: that xattr
+# is kernel-protected (xattr -d exits 0 but it stays) and does not block writes.
+# Usage: fix_claude_permissions [claude_root]   (default: $CLAUDE_CONFIG_DIR, then ~/.claude)
+fix_claude_permissions() {
+    local claude_root="${1:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}}"
+    local projects_dir="$claude_root/projects"
 
-# find file quickly by name (case-insensitive)
-ff() {
-  find . -type f -iname "*$1*"
+    if [[ ! -d "$projects_dir" ]]; then
+        echo "Error: projects directory not found: $projects_dir" >&2
+        return 1
+    fi
+
+    local before after
+    before=$(command find "$projects_dir" ! -perm -u+w | wc -l | tr -d ' ')
+    if (( before == 0 )); then
+        echo "No read-only session paths in: $projects_dir"
+        return 0
+    fi
+
+    echo "Read-only paths (top-level project dirs):"
+    command find "$projects_dir" -mindepth 1 -maxdepth 1 -type d ! -perm -u+w | sed 's/^/  /'
+    command chmod -R u+w "$projects_dir"
+
+    after=$(command find "$projects_dir" ! -perm -u+w | wc -l | tr -d ' ')
+    echo "Restored owner-write: $before read-only path(s) before, $after after, in: $projects_dir"
+    (( after == 0 ))
 }

@@ -186,6 +186,18 @@ if command -v fd >/dev/null 2>&1; then
   alias fdir='fd --type d'
 fi
 
+# FZF Configuration (Configured to use fd as its engine)
+if command -v fzf &> /dev/null; then
+    # Load default FZF keybindings and completions
+    source <(fzf --zsh)
+
+    # Use fd for fzf search (excludes hidden files and .git by default)
+    if command -v fd &> /dev/null; then
+        export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
+        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    fi
+fi
+
 if command -v pigz >/dev/null 2>&1; then
   gzip() { command pigz "$@"; }
   gunzip() { command pigz -d "$@"; }
@@ -244,8 +256,8 @@ export NODE_OPTIONS="--no-deprecation"
 # Fix Ghostty bracketed paste: prevents ~ delay and M-on-Enter
 # Keep near the end — re-registers the bracketed-paste widget after the zle
 # widgets installed above. atuin binds ^R in its init at the end of this file.
-autoload -Uz bracketed-paste-magic
-zle -N bracketed-paste bracketed-paste-magic
+#autoload -Uz bracketed-paste-magic
+#zle -N bracketed-paste bracketed-paste-magic
 
 
 if command -v prek >/dev/null 2>&1; then
@@ -259,26 +271,27 @@ if command -v zoxide &>/dev/null; then
   eval "$(zoxide init zsh)"
 fi
 
-
-# --- atuin (shell history; binds ^R) ---
-# Guarded like the other integrations above: unguarded, a missing or broken atuin
-# prints an error on every prompt. Install is mise-managed — never via
-# setup.atuin.sh, which silently writes AI-agent hooks into ~/.claude and ~/.codex.
-if command -v atuin &>/dev/null; then
-  eval "$(atuin init zsh)"
+if command -v mcfly &> /dev/null; then
+    # Visual options optimal for modern GPU terminal emulators like Ghostty
+    export MCFLY_INTERFACE_VIEW=BOTTOM    # Keeps the UI near your prompt
+    export MCFLY_RESULTS=25                # Number of history results to display
+    export MCFLY_FUZZY=true                # Enable fuzzy search algorithm
+    
+    # Initialize the shell hook (replaces Ctrl+R)
+    eval "$(mcfly init zsh)"
 fi
+
 
 # >>> claude-multiprofile >>>
 # Managed by claude-multiprofile. Edits inside this block may be overwritten.
 # Run `claude-multiprofile list` to see what's configured.
-# updated 2026-10-21T03:36:28.485Z
+# updated 2026-10-29T19:18:02.085Z
 
 alias claude-brain='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-brain" claude'
+alias claude-clean='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-clean" claude'
+alias claude-tainted='CLAUDE_CONFIG_DIR="/Users/lcatlett/.claude-tainted" claude'
 
 # <<< claude-multiprofile <<<
-
-# Claudia shell helpers (`claudia` from anywhere; `claudia codex|claude|grok|voice` selects a surface)
-[ -f "$HOME/.claudia/shell-init.sh" ] && source "$HOME/.claudia/shell-init.sh"
 
 # dcg: warn if hook was silently removed from Claude Code settings
 if command -v dcg &>/dev/null && command -v jq &>/dev/null; then
@@ -288,3 +301,6 @@ if command -v dcg &>/dev/null && command -v jq &>/dev/null; then
     printf '\033[1;33m[dcg] Hook missing from ~/.claude/settings.json — run: dcg install\033[0m\n'
   fi
 fi
+
+# Entire CLI shell completion
+autoload -Uz compinit && compinit && source <(entire completion zsh)
