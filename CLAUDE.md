@@ -89,3 +89,8 @@ Test before committing: `zsh -n` for shell files, `bash -n` for install scripts.
 - Don't source blocking commands in `.zshrc` (gpg, ssh-add are already async)
 - Don't commit secrets — `dots/.gitconfig` had a token removed from history via `git filter-repo`
 - Don't create new files for one-off scripts — add to an existing `bin/` script or function file
+
+<!-- entire-agent:begin -->
+Read .entire/agent-guide.md for this repository's workflow, source inspection, and verification guidance.
+@.entire/agent-guide.md
+<!-- entire-agent:end -->

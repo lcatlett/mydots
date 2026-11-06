@@ -208,10 +208,10 @@ kill-code() {
   fi
 }
 
-# killproc: Kill all instances of a process (renamed from killall to avoid shadowing)
-killproc() {
+# kill-proc: Kill all instances of a process (renamed from killall to avoid shadowing)
+kill-proc() {
   if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-    echo "Usage: killproc <process-name> [OPTIONS]"
+    echo "Usage: kill-proc <process-name> [OPTIONS]"
     echo ""
     echo "Kill all instances of a process by name"
     echo ""
@@ -479,5 +479,31 @@ rotate_api_key() {
 
   echo "$key_name rotated successfully."
 }
+
+
+# mpy: Convert a cloned or new  python project to use mise
+# Usage: mpy <folder-name> <packages...>
+# Example: mpy research-harness agent-collab-harness==0.4.0 research-hub-pipeline==1.2.0
+# Todo: Default to cwd, explicitly add git repo clone support, auto-detect required python version
+# Todo: Add mise convert helper docs / skill / cli
+mpy() {
+  local dir="$1"
+  shift
+  mkdir -p "$dir" && cd "$dir" || return
+  mise use uv@latest
+  uv init --pin-python --bare
+  cat << 'EOF' >> mise.toml
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+EOF
+  mise trust && mise install
+  if [ "$#" -gt 0 ]; then
+    uv add "$@"
+  fi
+}
+
+
+
 
 

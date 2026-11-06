@@ -8,7 +8,7 @@ go = "latest"
 node = ["24", "22", "20", "18"]
 "npm:@mermaid-js/mermaid-cli" = "latest"
 "npm:@mermaidchart/cli" = "latest"
-python = ["3.11", "3.12", "3.13", "3.14"]
+python = ["3.12", "3.11", "3.13", "3.14", "3.15"]
 "github:lcatlett/php" = ["8.2", "8.3", "8.4"]
 uv = "latest"
 bat = "latest"
@@ -20,7 +20,6 @@ dust = "latest"
 duf = "latest"
 glow = "latest"
 starship = "latest"
-zoxide = "latest"
 direnv = "latest"
 act = "latest"
 "github:cli/cli" = "latest"
@@ -44,11 +43,9 @@ rclone = "latest"
 "github:GoogleCloudPlatform/berglas" = "latest"
 rust = "latest"
 "go:golang.org/x/tools/gopls" = "latest"
-"cargo:mcfly" = "latest"
 "npm:@googleworkspace/cli" = "latest"
 "npm:@augmentcode/auggie" = "latest"
 "npm:@github/copilot" = "latest"
-"npm:adhd-agent" = "latest"
 "npm:ccusage" = "latest"
 "npm:chrome-devtools-mcp" = "latest"
 "npm:claude-code-analytics" = "latest"
@@ -72,7 +69,6 @@ rust = "latest"
 "pipx:document-folder-structure" = "latest"
 "pipx:httpie" = { version = "latest", uvx_args = "--with httpie-edgegrid" }
 "pipx:hypothesis" = { version = "latest", minimum_release_age = "0d" }
-"pipx:llm-tldr" = "latest"
 "pipx:markitdown" = "latest"
 "pipx:notebooklm-mcp-cli" = { version = "latest", minimum_release_age = "0d" }
 "pipx:ruff" = "latest"
@@ -85,7 +81,7 @@ pipx = "latest"
 "npm:explainmyrepo" = "latest"
 "github:anthropics/claude-code" = { version = "latest", minimum_release_age = "0d" }
 "npm:@roomi-fields/notebooklm-mcp" = { version = "latest", minimum_release_age = "0d" } 
-"pipx:rtfm-ai" = { version = "latest", minimum_release_age = "0d" }
+"pipx:rtfm-ai" = { version = "latest", minimum_release_age = "0d", extras = "embeddings" }
 "npm:wcmd" = "latest"
 "pipx:skilllint" = "latest"
 "npm:@lancedb/lancedb" = "latest"
@@ -94,22 +90,18 @@ pipx = "latest"
 "cargo:starship" = "latest"
 "github:sharkdp/bat" = "latest"
 "github:ajeetdsouza/zoxide" = "latest"
-"github:atuinsh/atuin" = "latest"
 "npm:skills" = "latest"
 "go:github.com/afadesigns/zshellcheck/cmd/zshellcheck" = "latest"
 "pipx:claude-conversation-extractor" = "latest"
 "pipx:detect-secrets" = "latest"
 "pipx:mcp-scan" = "latest"
 "npm:openwiki" = "latest"
-hunk = "latest"
 "npm:git-file-history" = "latest"
 "cargo:tre-command" = "latest"
 "pipx:copier" = "latest"
 "pipx:linode-cli" = "latest"
 kind = "latest"
 "pipx:claude-ctx" = "latest"
-"gem:okf" = "latest"
-"cargo:jev-scout" = "latest"
 "npm:claude-code-templates" = "latest"
 "npm:@anthropic-ai/sandbox-runtime" = "latest"
 "npm:agnix" = "latest"
@@ -125,14 +117,29 @@ fd = "latest"
 "npm:@openai/codex" = "latest"
 "npm:@jackwener/opencli" = { version = "latest", minimum_release_age = "0d" }
 "pipx:pyragify" = "latest"
-"npm:@tech-leads-club/agent-skills" = "latest"
 "pipx:gac" = "latest"
-"npm:@opengsd/gsd-path" = "latest"
-"pipx:mneme-hq" = "latest"
+"npm:@opengsd/gsd-path" = { version = "latest", minimum_release_age = "0d" }
 "npm:claude-code-exporter" = "latest"
 "npm:@yawlabs/ctxlint" = "latest"
 "npm:compound-agent" = "latest"
-"npm:@kontourai/ferry" = "latest"
+"npm:vibe-log-cli" = "latest"
+"go:github.com/context-dot-dev/context-dev-cli/cmd/context-dev" = "latest"
+"cargo:mcfly" = "latest"
+"pipx:xklb" = "latest"
+"npm:@lossless-claude/lcm" = "latest"
+"pypi:hyperresearch" = { version = "latest", extras = "all", expose = "crawl4ai" }
+fzf = "latest"
+"pypi:library" = { version = "latest", extras = "deluxe" }
+"npm:ccrecall" = "latest"
+"go:github.com/mvanhorn/cli-printing-press/v4/cmd/cli-printing-press" = { version = "latest", minimum_release_age = "0d" }
+"pypi:deep-translator" = "latest"
+gdu = "latest"
+hunk = "0.24.1"
+"npm:@inkeep/open-knowledge" = "latest"
+"pypi:claude-ctx" = "latest"
+"npm:md4x" = "latest"
+"npm:remend" = "latest"
+"npm:mindbase-app" = "latest"
 
 [env]
 UV_PYTHON_PREFERENCE = "only-system"
@@ -147,6 +154,8 @@ python.uv_venv_auto = "source"
 experimental = true
 lockfile = false
 
+[deps.uv]
+auto = true
 
 [settings.ruby]
 compile = false
