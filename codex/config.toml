@@ -100,6 +100,20 @@ ENABLE_SESSION_PERSISTENCE = "1"
 ENABLE_TOOL_SEARCH = "true"
 BASH_MAX_OUTPUT_LENGTH = "50000"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+# Agent commits and tags sign with the agent SSH key, not the operator's GPG key.
+# Mirrors LLM_AGENT_SIGNING_CONFIG in .zsh/functions/llm-agent-signing.zsh;
+# tests/validate.sh fails if they differ.
+GIT_CONFIG_COUNT = "5"
+GIT_CONFIG_KEY_0 = "gpg.format"
+GIT_CONFIG_VALUE_0 = "ssh"
+GIT_CONFIG_KEY_1 = "user.signingkey"
+GIT_CONFIG_VALUE_1 = "/Users/lcatlett/.ssh/llm_agents_signing.pub"
+GIT_CONFIG_KEY_2 = "commit.gpgsign"
+GIT_CONFIG_VALUE_2 = "true"
+GIT_CONFIG_KEY_3 = "tag.gpgsign"
+GIT_CONFIG_VALUE_3 = "true"
+GIT_CONFIG_KEY_4 = "gpg.ssh.allowedSignersFile"
+GIT_CONFIG_VALUE_4 = "/Users/lcatlett/.config/llm-agents/allowed_signers"
 
 [desktop]
 conversationDetailMode = "STEPS_PROSE"

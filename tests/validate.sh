@@ -319,6 +319,48 @@ test_codex_config_policy() {
 }
 
 # ---------------------------------------------------------------------------
+# Test 10: LLM agent commit signing (.zsh/functions/llm-agent-signing.zsh)
+# ---------------------------------------------------------------------------
+# The zsh wrappers and Codex's [shell_environment_policy.set] must carry the same
+# GIT_CONFIG_* entries; the wrapper must keep inherited entries, append its own and
+# not append twice when one agent starts another.
+test_llm_agent_signing() {
+  local fn="$DOTFILES_DIR/.zsh/functions/llm-agent-signing.zsh"
+  local zsh_pairs toml_pairs out expected
+  zsh_pairs=$(zsh -f -c 'source "$1"; for k v in "${LLM_AGENT_SIGNING_CONFIG[@]}"; do print -r -- "$k=$v"; done' _ "$fn") || return 1
+  toml_pairs=$(mise exec --no-deps python@3.13 -- python -c '
+import sys, tomllib
+with open(sys.argv[1], "rb") as f:
+    s = tomllib.load(f)["shell_environment_policy"]["set"]
+for i in range(int(s["GIT_CONFIG_COUNT"])):
+    print(s[f"GIT_CONFIG_KEY_{i}"] + "=" + s[f"GIT_CONFIG_VALUE_{i}"])
+' "$DOTFILES_DIR/codex/config.toml") || return 1
+  if [[ "$zsh_pairs" != "$toml_pairs" ]]; then
+    echo "codex/config.toml GIT_CONFIG_* differ from LLM_AGENT_SIGNING_CONFIG:"
+    diff <(echo "$zsh_pairs") <(echo "$toml_pairs")
+    return 1
+  fi
+
+  if [[ ! -r "$HOME/.ssh/llm_agents_signing.pub" ]]; then
+    echo "agent key absent: parity checked, wrapper behaviour not checked"
+    return 0
+  fi
+  # One inherited entry (as Copilot CLI adds), then a nested wrapper call.
+  local probe='echo $GIT_CONFIG_COUNT $GIT_CONFIG_KEY_0 $GIT_CONFIG_KEY_1; git config --get user.signingkey'
+  out=$(GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.fsmonitor GIT_CONFIG_VALUE_0=false \
+    FN="$fn" PROBE="$probe" zsh -f -c '
+      source "$FN"
+      _llm_agent_signing_exec zsh -f -c '\''source "$FN"; _llm_agent_signing_exec sh -c "$PROBE"'\''
+    ')
+  expected="6 core.fsmonitor gpg.format
+$HOME/.ssh/llm_agents_signing.pub"
+  if [[ "$out" != "$expected" ]]; then
+    printf 'wrapper output:\n%s\nexpected:\n%s\n' "$out" "$expected"
+    return 1
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 echo ""
@@ -334,6 +376,7 @@ fi
 run_test "Shell startup time < 2s"         test_shell_startup
 run_test "No secrets in tracked files"     test_no_secrets
 run_test "Codex MCP config policy"          test_codex_config_policy
+run_test "LLM agent commit signing"        test_llm_agent_signing
 
 if command -v brew &>/dev/null; then
   run_test "Brewfile consistency"          test_brewfile_consistency
