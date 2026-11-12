@@ -142,9 +142,10 @@ hunk = "0.24.1"
 "npm:@plannotator/tot" = "latest"
 "npm:@i-xor/lwc" = "latest"
 "npm:@djolex999/vir-cli" = "latest"
-"npm:claude-mem" = { version = "latest", minimum_release_age = "0d" }
 "npm:@opengsd/gsd-graph" = "latest"
 "npm:@tobilu/qmd" = "latest"
+"pypi:semantica" = "latest"
+"pipx:gemini-pro-mcp" = "latest"
 
 [env]
 UV_PYTHON_PREFERENCE = "only-system"
