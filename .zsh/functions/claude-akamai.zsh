@@ -77,6 +77,10 @@ claude-akamai() {
   local -a ca=()
   [[ -r "$AKAMAI_CLAUDE_CA_FILE" ]] && ca=(NODE_EXTRA_CA_CERTS="$AKAMAI_CLAUDE_CA_FILE")
 
+  # Agent commits sign with the agent key (llm-agent-signing.zsh), when that file is loaded.
+  local -a sign=()
+  (( $+functions[_llm_agent_signing_exec] )) && sign=(_llm_agent_signing_exec)
+
   # CLAUDE_CONFIG_DIR is deliberately NOT set — inherited from the shell, so account
   # switching and config-dir switching stay independent. Both accounts share whatever
   # config dir is active: same plugins, skills, hooks, settings and history.
@@ -84,7 +88,7 @@ claude-akamai() {
   # Also cleared: ANTHROPIC_FOUNDRY_AUTH_TOKEN outranks the API key, and the other
   # provider selectors would compete with Foundry. Everything set here dies with the
   # process.
-  env -u CLAUDE_CODE_OAUTH_TOKEN -u ANTHROPIC_FOUNDRY_AUTH_TOKEN \
+  "${sign[@]}" env -u CLAUDE_CODE_OAUTH_TOKEN -u ANTHROPIC_FOUNDRY_AUTH_TOKEN \
       -u ANTHROPIC_FOUNDRY_RESOURCE -u CLAUDE_CODE_SKIP_FOUNDRY_AUTH \
       -u CLAUDE_CODE_USE_BEDROCK -u CLAUDE_CODE_USE_VERTEX -u CLAUDE_CODE_USE_MANTLE \
       -u CLAUDE_CODE_USE_ANTHROPIC_AWS -u ANTHROPIC_LOG \
@@ -114,7 +118,9 @@ claude-akamai() {
 #   CLAUDE_CONFIG_DIR    (profile selection)
 claude-max() {
   emulate -L zsh
-  env -u CLAUDE_CODE_USE_FOUNDRY -u ANTHROPIC_FOUNDRY_API_KEY \
+  local -a sign=()
+  (( $+functions[_llm_agent_signing_exec] )) && sign=(_llm_agent_signing_exec)
+  "${sign[@]}" env -u CLAUDE_CODE_USE_FOUNDRY -u ANTHROPIC_FOUNDRY_API_KEY \
       -u ANTHROPIC_FOUNDRY_AUTH_TOKEN -u CLAUDE_CODE_SKIP_FOUNDRY_AUTH \
       -u ANTHROPIC_FOUNDRY_BASE_URL -u ANTHROPIC_FOUNDRY_RESOURCE \
       -u ANTHROPIC_CUSTOM_HEADERS -u NODE_EXTRA_CA_CERTS \

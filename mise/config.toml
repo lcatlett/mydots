@@ -139,7 +139,12 @@ hunk = "0.24.1"
 "pypi:claude-ctx" = "latest"
 "npm:md4x" = "latest"
 "npm:remend" = "latest"
-"npm:mindbase-app" = "latest"
+"npm:@plannotator/tot" = "latest"
+"npm:@i-xor/lwc" = "latest"
+"npm:@djolex999/vir-cli" = "latest"
+"npm:claude-mem" = { version = "latest", minimum_release_age = "0d" }
+"npm:@opengsd/gsd-graph" = "latest"
+"npm:@tobilu/qmd" = "latest"
 
 [env]
 UV_PYTHON_PREFERENCE = "only-system"
@@ -147,7 +152,7 @@ UV_PYTHON_DOWNLOADS  = "never"
 MISE_NPM_PACKAGE_MANAGER = "npm"
 
 [env._]
-path = '["/Users/lcatlett/.local/bin/agentsview"]'
+path = "/Users/lcatlett/.local/bin/agentsview"
 
 [settings]
 python.uv_venv_auto = "source"
@@ -163,6 +168,8 @@ compile = false
 [settings.pipx]
 uvx = true
 
+[bootstrap.brew]
+adopt = true
 
 [bootstrap.brew.taps]
 "agent-ecosystem/tap" = "https://github.com/agent-ecosystem/homebrew-tap.git"
