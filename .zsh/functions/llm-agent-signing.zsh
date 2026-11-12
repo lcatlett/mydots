@@ -14,7 +14,7 @@
 #
 # Coverage per CLI (verified 2026-11-11):
 #   claude   wrapper below; claude-akamai and claude-max in claude-akamai.zsh call
-#            through _llm_agent_signing_exec. The claude-multiprofile aliases in .zshrc
+#            through llm-agent-signing-exec. The claude-multiprofile aliases in .zshrc
 #            expand to `claude`, so they use the wrapper.
 #   codex    wrapper below, plus [shell_environment_policy.set] in codex/config.toml,
 #            which also covers Codex started outside this shell (desktop app).
@@ -32,20 +32,33 @@
 #
 # Check the active state: llm-agent-signing-status
 
-# Key/value pairs, in order. Mirrored in codex/config.toml [shell_environment_policy.set].
-typeset -ga LLM_AGENT_SIGNING_CONFIG=(
-  gpg.format                 ssh
-  user.signingkey            "$HOME/.ssh/llm_agents_signing.pub"
-  commit.gpgsign             true
-  tag.gpgsign                true
-  gpg.ssh.allowedSignersFile "$HOME/.config/llm-agents/allowed_signers"
-)
+# Agent shells: Claude Code runs commands in a shell rebuilt from a snapshot that keeps
+# functions only. It drops variables such as arrays, and functions whose name starts
+# with a single underscore. So the config lives in a function, and no name here starts
+# with "_" (tests/validate.sh "Functions work in agent shells" enforces the latter).
+
+# Key/value pairs, in order, in $reply. Mirrored in codex/config.toml
+# [shell_environment_policy.set].
+llm-agent-signing-config() {
+  reply=(
+    gpg.format                 ssh
+    user.signingkey            "$HOME/.ssh/llm_agents_signing.pub"
+    commit.gpgsign             true
+    tag.gpgsign                true
+    gpg.ssh.allowedSignersFile "$HOME/.config/llm-agents/allowed_signers"
+  )
+}
+llm-agent-signing-config
+typeset -ga LLM_AGENT_SIGNING_CONFIG=("${reply[@]}")
 
 # Run "$@" with the agent signing config appended to GIT_CONFIG_*. The variables are
 # function-local exports: they reach the child process and vanish when it exits.
-_llm_agent_signing_exec() {
+llm-agent-signing-exec() {
   emulate -L zsh
-  local pub=${LLM_AGENT_SIGNING_CONFIG[4]}
+  local -a reply config
+  llm-agent-signing-config
+  config=("${reply[@]}")
+  local pub=${config[4]}
   if [[ ! -r $pub || ! -e ${pub%.pub} ]]; then
     print -ru2 -- "llm-agent-signing: $pub or its private key is missing;" \
       "$1 starts with your default git signing."
@@ -74,7 +87,7 @@ _llm_agent_signing_exec() {
   done
 
   local key value
-  for key value in "${LLM_AGENT_SIGNING_CONFIG[@]}"; do
+  for key value in "${config[@]}"; do
     local -x "GIT_CONFIG_KEY_$n=$key" "GIT_CONFIG_VALUE_$n=$value"
     (( n++ ))
   done
@@ -82,10 +95,10 @@ _llm_agent_signing_exec() {
   command "$@"
 }
 
-claude()  { _llm_agent_signing_exec claude "$@"; }
-codex()   { _llm_agent_signing_exec codex "$@"; }
-agy()     { _llm_agent_signing_exec agy "$@"; }
-copilot() { _llm_agent_signing_exec copilot "$@"; }
+claude()  { llm-agent-signing-exec claude "$@"; }
+codex()   { llm-agent-signing-exec codex "$@"; }
+agy()     { llm-agent-signing-exec agy "$@"; }
+copilot() { llm-agent-signing-exec copilot "$@"; }
 
 # Print the signing config a git command would use here, and what an agent launched
 # from here would get.
@@ -95,6 +108,6 @@ llm-agent-signing-status() {
     "user.signingkey=$(git config --get user.signingkey)" \
     "commit.gpgsign=$(git config --get commit.gpgsign)" \
     "tag.gpgsign=$(git config --get tag.gpgsign)"
-  print -r -- "agent launched: gpg.format=$(_llm_agent_signing_exec git config --get gpg.format)" \
-    "user.signingkey=$(_llm_agent_signing_exec git config --get user.signingkey)"
+  print -r -- "agent launched: gpg.format=$(llm-agent-signing-exec git config --get gpg.format)" \
+    "user.signingkey=$(llm-agent-signing-exec git config --get user.signingkey)"
 }
