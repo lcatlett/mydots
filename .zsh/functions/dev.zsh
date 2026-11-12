@@ -2,13 +2,13 @@
 # Source: Modularized from ~/.functions
 
 # Helper: Check if dry-run flag is present and remove it from args
-# Usage: if _is_dry_run "$@"; then shift; fi
-_is_dry_run() {
+# Usage: if is-dry-run "$@"; then shift; fi
+is-dry-run() {
   [[ "$1" == "--dry-run" ]] || [[ "$1" == "-n" ]]
 }
 
 # Helper: Show usage for kill functions
-_kill_usage() {
+kill-usage() {
   local cmd="$1"
   local desc="$2"
   echo "Usage: $cmd [OPTIONS]"
@@ -149,7 +149,7 @@ killport() {
 # killmysql: Kill all MySQL processes
 killmysql() {
   if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-    _kill_usage "killmysql" "Kill all MySQL processes"
+    kill-usage "killmysql" "Kill all MySQL processes"
     return 0
   fi
 
@@ -180,7 +180,7 @@ killmysql() {
 # kill-code: Kill all VS Code processes
 kill-code() {
   if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-    _kill_usage "kill-code" "Kill all Visual Studio Code processes"
+    kill-usage "kill-code" "Kill all Visual Studio Code processes"
     return 0
   fi
 

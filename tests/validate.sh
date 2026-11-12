@@ -350,7 +350,7 @@ for i in range(int(s["GIT_CONFIG_COUNT"])):
   out=$(GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.fsmonitor GIT_CONFIG_VALUE_0=false \
     FN="$fn" PROBE="$probe" zsh -f -c '
       source "$FN"
-      _llm_agent_signing_exec zsh -f -c '\''source "$FN"; _llm_agent_signing_exec sh -c "$PROBE"'\''
+      llm-agent-signing-exec zsh -f -c '\''source "$FN"; llm-agent-signing-exec sh -c "$PROBE"'\''
     ')
   expected="6 core.fsmonitor gpg.format
 $HOME/.ssh/llm_agents_signing.pub"
@@ -358,6 +358,40 @@ $HOME/.ssh/llm_agents_signing.pub"
     printf 'wrapper output:\n%s\nexpected:\n%s\n' "$out" "$expected"
     return 1
   fi
+}
+
+# ---------------------------------------------------------------------------
+# Test 11: Functions work in agent shells (no single-underscore helpers)
+# ---------------------------------------------------------------------------
+# Claude Code runs commands in a shell rebuilt from a snapshot of your functions, and
+# the snapshot leaves out every function whose name starts with a single underscore
+# (it keeps __-prefixed ones). A function in .zsh/functions that calls such a helper is
+# captured without the helper and fails there with "command not found". This is how
+# `claude` broke in agent shells after llm-agent-signing.zsh added
+# _llm_agent_signing_exec: the test above runs under `zsh -f`, where the helper exists.
+# Completion functions registered with `compdef` are exempt.
+test_agent_shell_helpers() {
+  local dir="$DOTFILES_DIR/.zsh/functions" helper hits bad=0
+  local -a helpers
+  while IFS= read -r helper; do
+    [[ -n "$helper" ]] && helpers+=("$helper")
+  done < <(grep -hoE '^[[:space:]]*(function[[:space:]]+)?_[A-Za-z][A-Za-z0-9_-]*[[:space:]]*\(\)' "$dir"/*.zsh \
+             | sed -E 's/^[[:space:]]*(function[[:space:]]+)?//; s/[[:space:]]*\(\)$//' | sort -u)
+  for helper in "${helpers[@]+"${helpers[@]}"}"; do
+    if grep -qE "^[[:space:]]*compdef([[:space:]].*)?[[:space:]]$helper([[:space:]]|$)" "$dir"/*.zsh; then
+      continue
+    fi
+    # Every non-comment reference other than the definition itself.
+    hits=$(grep -nE "(^|[^A-Za-z0-9_-])$helper([^A-Za-z0-9_-]|$)" "$dir"/*.zsh \
+             | grep -vE "^[^:]+:[0-9]+:[[:space:]]*#" \
+             | grep -vE "^[^:]+:[0-9]+:[[:space:]]*(function[[:space:]]+)?$helper[[:space:]]*\(\)")
+    if [[ -n "$hits" ]]; then
+      echo "$helper is dropped from Claude Code's shell snapshot but is used by:"
+      echo "${hits//$DOTFILES_DIR\//}" | sed 's/^/  /'
+      bad=1
+    fi
+  done
+  return "$bad"
 }
 
 # ---------------------------------------------------------------------------
@@ -373,10 +407,16 @@ if [[ "${1:-}" == "--only" && "${2:-}" == "codex" ]]; then
   exit "$FAIL"
 fi
 
+if [[ "${1:-}" == "--only" && "${2:-}" == "agent-shell" ]]; then
+  run_test "Functions work in agent shells"  test_agent_shell_helpers
+  exit "$FAIL"
+fi
+
 run_test "Shell startup time < 2s"         test_shell_startup
 run_test "No secrets in tracked files"     test_no_secrets
 run_test "Codex MCP config policy"          test_codex_config_policy
 run_test "LLM agent commit signing"        test_llm_agent_signing
+run_test "Functions work in agent shells"  test_agent_shell_helpers
 
 if command -v brew &>/dev/null; then
   run_test "Brewfile consistency"          test_brewfile_consistency

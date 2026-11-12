@@ -79,7 +79,7 @@ claude-akamai() {
 
   # Agent commits sign with the agent key (llm-agent-signing.zsh), when that file is loaded.
   local -a sign=()
-  (( $+functions[_llm_agent_signing_exec] )) && sign=(_llm_agent_signing_exec)
+  (( $+functions[llm-agent-signing-exec] )) && sign=(llm-agent-signing-exec)
 
   # CLAUDE_CONFIG_DIR is deliberately NOT set — inherited from the shell, so account
   # switching and config-dir switching stay independent. Both accounts share whatever
@@ -119,7 +119,7 @@ claude-akamai() {
 claude-max() {
   emulate -L zsh
   local -a sign=()
-  (( $+functions[_llm_agent_signing_exec] )) && sign=(_llm_agent_signing_exec)
+  (( $+functions[llm-agent-signing-exec] )) && sign=(llm-agent-signing-exec)
   "${sign[@]}" env -u CLAUDE_CODE_USE_FOUNDRY -u ANTHROPIC_FOUNDRY_API_KEY \
       -u ANTHROPIC_FOUNDRY_AUTH_TOKEN -u CLAUDE_CODE_SKIP_FOUNDRY_AUTH \
       -u ANTHROPIC_FOUNDRY_BASE_URL -u ANTHROPIC_FOUNDRY_RESOURCE \
